@@ -1398,3 +1398,4 @@ Ficha Skaven-Viento-Envenenado-7.png
 Ficha Skaven-Viento-Envenenado-8.png
 Ficha Skaven-Viento-Envenenado-9.png
 Ficha Skaven-Viento-Envenenado-10.png
+Marcador Orbe Chispeante.png
