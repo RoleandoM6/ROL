@@ -6,8 +6,62 @@ Majunji
 OST
 X. Fondo
 4. Hojas PJ
+
 Plantilla de Fuego.png
 Marcador Orbe Chispeante.png
+
+PJ Sir Dydimus y Ri'Alturk Ficha.png
+PJ Gnomo Sir Dydimus Ficha.png
+PJ Pavo Real Ri'Alturk Ficha.png
+
+PNJ Belloto Ficha.png
+PNJ Enano Estatua de Maestro Cervecero Bugman Ficha.png
+PNJ Enano Gromnir Partemontañas Ficha.png
+PNJ Enano Herrero Frik El Yunke Ficha.png
+PNJ Enano Matagigantes Gunnar Runa del Trueno Ficha.png
+PNJ Enano Paladín de Lábirra Gungar El Ebrio Ficha.png
+PNJ Enano Rey de Karak Gor Ficha.png
+PNJ Enano Tabernero Flint Piedradura Ficha.png
+PNJ Errado Gustave du Grenouille Ficha.png
+PNJ Fey Vidente del Pantano Ficha.png
+PNJ Gnomo Brujo de Mycetos Fung Espora Vengativa Ficha.png
+PNJ Gnomo Pipamante David Ficha.png
+PNJ Humana Bruja de los Cuervos Errante Ficha.png
+PNJ Humano Bárbaro Olaf Ordrog Ficha.png
+PNJ Humano Caballero Sir Augustus El Certero Ficha.png
+PNJ Humano Campeón Duelista Ficha.png
+PNJ Humano Campeón Paladín Solar Lord Abelard von Valancius Ficha.png
+PNJ Humano Capitán Zweihander Ficha.png
+PNJ Humano Clérigo Fray Roberto El Beodo Ficha.png
+PNJ Humano Druida Ficha.png
+PNJ Humano Nigromante Nalgash El Grimoso Ficha.png
+PNJ Humano Paria Carey Lider de La Raíz Ficha.png
+PNJ Los Fungis Ficha.png
+PNJ Mediano Vendedor Ambulante Mike El Sonriente Ficha.png
+PNJ Musaraña Baby Grogu Ficha.png
+PNJ No Muerto Amon-Tep de la Arena Muerta Ficha.png
+PNJ No Muerto ArchLiche Ficha.png
+PNJ No Muerto Comandante Liche Ficha.png
+PNJ No Muerto Demiliche Ficha.png
+PNJ No Muerto Hechicero Ficha.png
+PNJ No Muerto Heraldo del Hundido Ficha.png
+PNJ No Muerto Horda de Esqueletos Ficha.png
+PNJ No Muerto Jinete Sin Cabeza Con Cabeza Ficha.png
+PNJ No Muerto Liche Ficha.png
+PNJ No Muerto Liche Nalgash Ascendido Ficha.png
+PNJ No Muerto Vampiro X Ficha.png
+PNJ Osombre Druida Cambiapieles Ficha.png
+PNJ Ratolinius Ficha.png
+PNJ Semielfo Bardo Lombardina Olor de Fresa Ficha.png
+PNJ Semigigante Braum Ficha.png
+PNJ Semigigante Bron Nacido del Trueno Ficha.png
+PNJ Semigigante Knut Ficha.png
+PNJ Semignomo Hechicero Excéntrico Ficha.png
+PNJ Skaven Ratonius el Injertado Ficha.png
+PNJ Skaven Ratsix Ficha.png
+PNJ Skaven Señor de la Guerra Vark Mors en Rata Ogro Ficha.png
+PNJ Troll Druida Ficha.png
+
 Bestia Castor Ficha 1.png
 Bestia Castor Ficha 2.png
 Bestia Castor Ficha 3.png
@@ -28,6 +82,16 @@ Bestia Castor Zombi Ficha 7.png
 Bestia Castor Zombi Ficha 8.png
 Bestia Castor Zombi Ficha 9.png
 Bestia Castor Zombi Ficha 10.png
+Bestia Gallina Aleatoria Ficha 1.png
+Bestia Gallina Aleatoria Ficha 2.png
+Bestia Gallina Aleatoria Ficha 3.png
+Bestia Gallina Aleatoria Ficha 4.png
+Bestia Gallina Aleatoria Ficha 5.png
+Bestia Gallina Aleatoria Ficha 6.png
+Bestia Gallina Aleatoria Ficha 7.png
+Bestia Gallina Aleatoria Ficha 8.png
+Bestia Gallina Aleatoria Ficha 9.png
+Bestia Gallina Aleatoria Ficha 10.png
 Bestia Rey Castor Ficha 1.png
 Bestia Rey Castor Ficha 2.png
 Bestia Rey Castor Ficha 3.png
@@ -38,6 +102,16 @@ Bestia Rey Castor Ficha 7.png
 Bestia Rey Castor Ficha 8.png
 Bestia Rey Castor Ficha 9.png
 Bestia Rey Castor Ficha 10.png
+Elfo Danzaespada Ficha 1.png
+Elfo Danzaespada Ficha 2.png
+Elfo Danzaespada Ficha 3.png
+Elfo Danzaespada Ficha 4.png
+Elfo Danzaespada Ficha 5.png
+Elfo Danzaespada Ficha 6.png
+Elfo Danzaespada Ficha 7.png
+Elfo Danzaespada Ficha 8.png
+Elfo Danzaespada Ficha 9.png
+Elfo Danzaespada Ficha 10.png
 Elfo Silvano Explorador Ficha 1.png
 Elfo Silvano Explorador Ficha 2.png
 Elfo Silvano Explorador Ficha 3.png
@@ -48,6 +122,26 @@ Elfo Silvano Explorador Ficha 7.png
 Elfo Silvano Explorador Ficha 8.png
 Elfo Silvano Explorador Ficha 9.png
 Elfo Silvano Explorador Ficha 10.png
+Elfo Silvano Híbrido Driade Ficha 1.png
+Elfo Silvano Híbrido Driade Ficha 2.png
+Elfo Silvano Híbrido Driade Ficha 3.png
+Elfo Silvano Híbrido Driade Ficha 4.png
+Elfo Silvano Híbrido Driade Ficha 5.png
+Elfo Silvano Híbrido Driade Ficha 6.png
+Elfo Silvano Híbrido Driade Ficha 7.png
+Elfo Silvano Híbrido Driade Ficha 8.png
+Elfo Silvano Híbrido Driade Ficha 9.png
+Elfo Silvano Híbrido Driade Ficha 10.png
+Enano Aprendiz de Guardia Real Ficha 1.png
+Enano Aprendiz de Guardia Real Ficha 2.png
+Enano Aprendiz de Guardia Real Ficha 3.png
+Enano Aprendiz de Guardia Real Ficha 4.png
+Enano Aprendiz de Guardia Real Ficha 5.png
+Enano Aprendiz de Guardia Real Ficha 6.png
+Enano Aprendiz de Guardia Real Ficha 7.png
+Enano Aprendiz de Guardia Real Ficha 8.png
+Enano Aprendiz de Guardia Real Ficha 9.png
+Enano Aprendiz de Guardia Real Ficha 10.png
 Enano Gigante Guerrero Ficha 1.png
 Enano Gigante Guerrero Ficha 2.png
 Enano Gigante Guerrero Ficha 3.png
@@ -58,6 +152,16 @@ Enano Gigante Guerrero Ficha 7.png
 Enano Gigante Guerrero Ficha 8.png
 Enano Gigante Guerrero Ficha 9.png
 Enano Gigante Guerrero Ficha 10.png
+Enano Guardia Real de Barbaslargas Ficha 1.png
+Enano Guardia Real de Barbaslargas Ficha 2.png
+Enano Guardia Real de Barbaslargas Ficha 3.png
+Enano Guardia Real de Barbaslargas Ficha 4.png
+Enano Guardia Real de Barbaslargas Ficha 5.png
+Enano Guardia Real de Barbaslargas Ficha 6.png
+Enano Guardia Real de Barbaslargas Ficha 7.png
+Enano Guardia Real de Barbaslargas Ficha 8.png
+Enano Guardia Real de Barbaslargas Ficha 9.png
+Enano Guardia Real de Barbaslargas Ficha 10.png
 Enano Guerrero Barbagris Ficha 1.png
 Enano Guerrero Barbagris Ficha 2.png
 Enano Guerrero Barbagris Ficha 3.png
@@ -68,6 +172,16 @@ Enano Guerrero Barbagris Ficha 7.png
 Enano Guerrero Barbagris Ficha 8.png
 Enano Guerrero Barbagris Ficha 9.png
 Enano Guerrero Barbagris Ficha 10.png
+Enano Guerrero Corrompido Ficha 1.png
+Enano Guerrero Corrompido Ficha 2.png
+Enano Guerrero Corrompido Ficha 3.png
+Enano Guerrero Corrompido Ficha 4.png
+Enano Guerrero Corrompido Ficha 5.png
+Enano Guerrero Corrompido Ficha 6.png
+Enano Guerrero Corrompido Ficha 7.png
+Enano Guerrero Corrompido Ficha 8.png
+Enano Guerrero Corrompido Ficha 9.png
+Enano Guerrero Corrompido Ficha 10.png
 Enano Guerrero Joven Ficha 1.png
 Enano Guerrero Joven Ficha 2.png
 Enano Guerrero Joven Ficha 3.png
@@ -98,6 +212,26 @@ Enano Ingeniero Atronador Ficha 7.png
 Enano Ingeniero Atronador Ficha 8.png
 Enano Ingeniero Atronador Ficha 9.png
 Enano Ingeniero Atronador Ficha 10.png
+Enano Jinete de Cabra Ficha 1.png
+Enano Jinete de Cabra Ficha 2.png
+Enano Jinete de Cabra Ficha 3.png
+Enano Jinete de Cabra Ficha 4.png
+Enano Jinete de Cabra Ficha 5.png
+Enano Jinete de Cabra Ficha 6.png
+Enano Jinete de Cabra Ficha 7.png
+Enano Jinete de Cabra Ficha 8.png
+Enano Jinete de Cabra Ficha 9.png
+Enano Jinete de Cabra Ficha 10.png
+Estatua Guardiana del Templo Ficha 1.png
+Estatua Guardiana del Templo Ficha 2.png
+Estatua Guardiana del Templo Ficha 3.png
+Estatua Guardiana del Templo Ficha 4.png
+Estatua Guardiana del Templo Ficha 5.png
+Estatua Guardiana del Templo Ficha 6.png
+Estatua Guardiana del Templo Ficha 7.png
+Estatua Guardiana del Templo Ficha 8.png
+Estatua Guardiana del Templo Ficha 9.png
+Estatua Guardiana del Templo Ficha 10.png
 Ficha Acuático Crangrejo Bailongo 1.png
 Ficha Acuático Crangrejo Bailongo 2.png
 Ficha Acuático Crangrejo Bailongo 3.png
@@ -1288,16 +1422,6 @@ Ficha Skaven Enjambre de Ratas Gigantes 7.png
 Ficha Skaven Enjambre de Ratas Gigantes 8.png
 Ficha Skaven Enjambre de Ratas Gigantes 9.png
 Ficha Skaven Enjambre de Ratas Gigantes 10.png
-Ficha Skaven Esclavos 1.png
-Ficha Skaven Esclavos 2.png
-Ficha Skaven Esclavos 3.png
-Ficha Skaven Esclavos 4.png
-Ficha Skaven Esclavos 5.png
-Ficha Skaven Esclavos 6.png
-Ficha Skaven Esclavos 7.png
-Ficha Skaven Esclavos 8.png
-Ficha Skaven Esclavos 9.png
-Ficha Skaven Esclavos 10.png
 Ficha Skaven Guerreros Clan 1 1.png
 Ficha Skaven Guerreros Clan 1 2.png
 Ficha Skaven Guerreros Clan 1 3.png
@@ -1518,6 +1642,16 @@ Hombretauro Luchador Ficha 7.png
 Hombretauro Luchador Ficha 8.png
 Hombretauro Luchador Ficha 9.png
 Hombretauro Luchador Ficha 10.png
+Humano Aberración Mutante Ficha 1.png
+Humano Aberración Mutante Ficha 2.png
+Humano Aberración Mutante Ficha 3.png
+Humano Aberración Mutante Ficha 4.png
+Humano Aberración Mutante Ficha 5.png
+Humano Aberración Mutante Ficha 6.png
+Humano Aberración Mutante Ficha 7.png
+Humano Aberración Mutante Ficha 8.png
+Humano Aberración Mutante Ficha 9.png
+Humano Aberración Mutante Ficha 10.png
 Humano Asaltante Rudo Ficha 1.png
 Humano Asaltante Rudo Ficha 2.png
 Humano Asaltante Rudo Ficha 3.png
@@ -1548,6 +1682,36 @@ Humano Bardo Trovador Sanders Branderson Ficha 7.png
 Humano Bardo Trovador Sanders Branderson Ficha 8.png
 Humano Bardo Trovador Sanders Branderson Ficha 9.png
 Humano Bardo Trovador Sanders Branderson Ficha 10.png
+Humano Caballero Desangrador Ficha 1.png
+Humano Caballero Desangrador Ficha 2.png
+Humano Caballero Desangrador Ficha 3.png
+Humano Caballero Desangrador Ficha 4.png
+Humano Caballero Desangrador Ficha 5.png
+Humano Caballero Desangrador Ficha 6.png
+Humano Caballero Desangrador Ficha 7.png
+Humano Caballero Desangrador Ficha 8.png
+Humano Caballero Desangrador Ficha 9.png
+Humano Caballero Desangrador Ficha 10.png
+Humano Caballero Zweihander Ficha 1.png
+Humano Caballero Zweihander Ficha 2.png
+Humano Caballero Zweihander Ficha 3.png
+Humano Caballero Zweihander Ficha 4.png
+Humano Caballero Zweihander Ficha 5.png
+Humano Caballero Zweihander Ficha 6.png
+Humano Caballero Zweihander Ficha 7.png
+Humano Caballero Zweihander Ficha 8.png
+Humano Caballero Zweihander Ficha 9.png
+Humano Caballero Zweihander Ficha 10.png
+Humano Chucrut Soldado del Emir Ficha 1.png
+Humano Chucrut Soldado del Emir Ficha 2.png
+Humano Chucrut Soldado del Emir Ficha 3.png
+Humano Chucrut Soldado del Emir Ficha 4.png
+Humano Chucrut Soldado del Emir Ficha 5.png
+Humano Chucrut Soldado del Emir Ficha 6.png
+Humano Chucrut Soldado del Emir Ficha 7.png
+Humano Chucrut Soldado del Emir Ficha 8.png
+Humano Chucrut Soldado del Emir Ficha 9.png
+Humano Chucrut Soldado del Emir Ficha 10.png
 Humano Clérigo de La Raíz Ficha 1.png
 Humano Clérigo de La Raíz Ficha 2.png
 Humano Clérigo de La Raíz Ficha 3.png
@@ -1758,6 +1922,16 @@ Humano Soldado Ballesta Ficha 7.png
 Humano Soldado Ballesta Ficha 8.png
 Humano Soldado Ballesta Ficha 9.png
 Humano Soldado Ballesta Ficha 10.png
+Humano Soldado de Asedio Ficha 1.png
+Humano Soldado de Asedio Ficha 2.png
+Humano Soldado de Asedio Ficha 3.png
+Humano Soldado de Asedio Ficha 4.png
+Humano Soldado de Asedio Ficha 5.png
+Humano Soldado de Asedio Ficha 6.png
+Humano Soldado de Asedio Ficha 7.png
+Humano Soldado de Asedio Ficha 8.png
+Humano Soldado de Asedio Ficha 9.png
+Humano Soldado de Asedio Ficha 10.png
 Humano Soldado Lanza Ficha 1.png
 Humano Soldado Lanza Ficha 2.png
 Humano Soldado Lanza Ficha 3.png
@@ -1768,6 +1942,26 @@ Humano Soldado Lanza Ficha 7.png
 Humano Soldado Lanza Ficha 8.png
 Humano Soldado Lanza Ficha 9.png
 Humano Soldado Lanza Ficha 10.png
+Humano Tirador Ficha 1.png
+Humano Tirador Ficha 2.png
+Humano Tirador Ficha 3.png
+Humano Tirador Ficha 4.png
+Humano Tirador Ficha 5.png
+Humano Tirador Ficha 6.png
+Humano Tirador Ficha 7.png
+Humano Tirador Ficha 8.png
+Humano Tirador Ficha 9.png
+Humano Tirador Ficha 10.png
+No Muerto Gladiador Ficha 1.png
+No Muerto Gladiador Ficha 2.png
+No Muerto Gladiador Ficha 3.png
+No Muerto Gladiador Ficha 4.png
+No Muerto Gladiador Ficha 5.png
+No Muerto Gladiador Ficha 6.png
+No Muerto Gladiador Ficha 7.png
+No Muerto Gladiador Ficha 8.png
+No Muerto Gladiador Ficha 9.png
+No Muerto Gladiador Ficha 10.png
 No Muerto Guerrero Esqueleto Antiguo Ficha 1.png
 No Muerto Guerrero Esqueleto Antiguo Ficha 2.png
 No Muerto Guerrero Esqueleto Antiguo Ficha 3.png
@@ -1828,6 +2022,16 @@ Skaven Enjambre de Ratas Ficha 7.png
 Skaven Enjambre de Ratas Ficha 8.png
 Skaven Enjambre de Ratas Ficha 9.png
 Skaven Enjambre de Ratas Ficha 10.png
+Skaven Esclavo Ficha 1.png
+Skaven Esclavo Ficha 2.png
+Skaven Esclavo Ficha 3.png
+Skaven Esclavo Ficha 4.png
+Skaven Esclavo Ficha 5.png
+Skaven Esclavo Ficha 6.png
+Skaven Esclavo Ficha 7.png
+Skaven Esclavo Ficha 8.png
+Skaven Esclavo Ficha 9.png
+Skaven Esclavo Ficha 10.png
 Skaven Montura Mutante Experimental Ficha 1.png
 Skaven Montura Mutante Experimental Ficha 2.png
 Skaven Montura Mutante Experimental Ficha 3.png
