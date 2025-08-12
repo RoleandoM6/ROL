@@ -1,66 +1,173 @@
 1. Dados
-3. Iniciativa
-Majunji
 2. Mapamundi
+3. Iniciativa
+4. Hojas PJ
+Majunji
 5. Mapas
 OST
 X. Fondo
-4. Hojas PJ
+
 
 Plantilla de Fuego.png
 Marcador Orbe Chispeante.png
 
-PJ Sir Dydimus y Ri'Alturk Ficha.png
+PJ Sir Dydimus y Ri'Alturk Tarjeta.png
 PJ Gnomo Sir Dydimus Ficha.png
+PJ Gnomo Sir Dydimus Recorte Tarjeta.png
+PJ Gnomo Sir Dydimus Recorte.png
 PJ Pavo Real Ri'Alturk Ficha.png
+PJ Pavo Real Ri'Alturk Recorte.png
+PJ Pavo Real Ri'Alturk Tarjeta.png
+PJ Sir Dydimus y Ri'Alturk Ficha.png
+PJ Sir Dydimus y Ri'Alturk Recorte.png
 
 PNJ Belloto Ficha.png
+PNJ Belloto Recorte.png
+PNJ Belloto Tarjeta.png
 PNJ Enano Estatua de Maestro Cervecero Bugman Ficha.png
+PNJ Enano Estatua de Maestro Cervecero Bugman Recorte.png
+PNJ Enano Estatua de Maestro Cervecero Bugman Tarjeta.png
 PNJ Enano Gromnir Partemontañas Ficha.png
+PNJ Enano Gromnir Partemontañas Recorte.png
+PNJ Enano Gromnir Partemontañas Tarjeta.png
 PNJ Enano Herrero Frik El Yunke Ficha.png
+PNJ Enano Herrero Frik El Yunke Recorte.png
+PNJ Enano Herrero Frik El Yunke Tarjeta.png
 PNJ Enano Matagigantes Gunnar Runa del Trueno Ficha.png
+PNJ Enano Matagigantes Gunnar Runa del Trueno Recorte.png
+PNJ Enano Matagigantes Gunnar Runa del Trueno Tarjeta.png
 PNJ Enano Paladín de Lábirra Gungar El Ebrio Ficha.png
+PNJ Enano Paladín de Lábirra Gungar El Ebrio Recorte.png
+PNJ Enano Paladín de Lábirra Gungar El Ebrio Tarjeta.png
 PNJ Enano Rey de Karak Gor Ficha.png
+PNJ Enano Rey de Karak Gor Recorte.png
+PNJ Enano Rey de Karak Gor Tarjeta.png
 PNJ Enano Tabernero Flint Piedradura Ficha.png
+PNJ Enano Tabernero Flint Piedradura Recorte.png
+PNJ Enano Tabernero Flint Piedradura Tarjeta.png
 PNJ Errado Gustave du Grenouille Ficha.png
+PNJ Errado Gustave du Grenouille Recorte.png
+PNJ Errado Gustave du Grenouille Tarjeta.png
 PNJ Fey Vidente del Pantano Ficha.png
+PNJ Fey Vidente del Pantano Recorte.png
+PNJ Fey Vidente del Pantano Tarjeta.png
 PNJ Gnomo Brujo de Mycetos Fung Espora Vengativa Ficha.png
+PNJ Gnomo Brujo de Mycetos Fung Espora Vengativa Recorte.png
+PNJ Gnomo Brujo de Mycetos Fung Espora Vengativa Tarjeta.png
 PNJ Gnomo Pipamante David Ficha.png
+PNJ Gnomo Pipamante David Recorte.png
+PNJ Gnomo Pipamante David Tarjeta.png
 PNJ Humana Bruja de los Cuervos Errante Ficha.png
+PNJ Humana Bruja de los Cuervos Errante Recorte.png
+PNJ Humana Bruja de los Cuervos Errante Tarjeta.png
 PNJ Humano Bárbaro Olaf Ordrog Ficha.png
+PNJ Humano Bárbaro Olaf Ordrog Recorte.png
+PNJ Humano Bárbaro Olaf Ordrog Tarjeta.png
 PNJ Humano Caballero Sir Augustus El Certero Ficha.png
+PNJ Humano Caballero Sir Augustus El Certero Recorte.png
+PNJ Humano Caballero Sir Augustus El Certero Tarjeta.png
 PNJ Humano Campeón Duelista Ficha.png
+PNJ Humano Campeón Duelista Recorte.png
+PNJ Humano Campeón Duelista Tarjeta.png
 PNJ Humano Campeón Paladín Solar Lord Abelard von Valancius Ficha.png
+PNJ Humano Campeón Paladín Solar Lord Abelard von Valancius Recorte.png
+PNJ Humano Campeón Paladín Solar Lord Abelard von Valancius Tarjeta.png
 PNJ Humano Capitán Zweihander Ficha.png
+PNJ Humano Capitán Zweihander Recorte.png
+PNJ Humano Capitán Zweihander Tarjeta.png
 PNJ Humano Clérigo Fray Roberto El Beodo Ficha.png
+PNJ Humano Clérigo Fray Roberto El Beodo Recorte.png
+PNJ Humano Clérigo Fray Roberto El Beodo Tarjeta.png
 PNJ Humano Druida Ficha.png
+PNJ Humano Druida Recorte.png
+PNJ Humano Druida Tarjeta.png
 PNJ Humano Nigromante Nalgash El Grimoso Ficha.png
+PNJ Humano Nigromante Nalgash El Grimoso Recorte.png
+PNJ Humano Nigromante Nalgash El Grimoso Tarjeta.png
 PNJ Humano Paria Carey Lider de La Raíz Ficha.png
+PNJ Humano Paria Carey Lider de La Raíz Recorte.png
+PNJ Humano Paria Carey Lider de La Raíz Tarjeta.png
 PNJ Los Fungis Ficha.png
+PNJ Los Fungis Recorte.png
+PNJ Los Fungis Tarjeta.png
 PNJ Mediano Vendedor Ambulante Mike El Sonriente Ficha.png
+PNJ Mediano Vendedor Ambulante Mike El Sonriente Recorte.png
+PNJ Mediano Vendedor Ambulante Mike El Sonriente Tarjeta.png
 PNJ Musaraña Baby Grogu Ficha.png
+PNJ Musaraña Baby Grogu Recorte.png
+PNJ Musaraña Baby Grogu Tarjeta.png
 PNJ No Muerto Amon-Tep de la Arena Muerta Ficha.png
+PNJ No Muerto Amon-Tep de la Arena Muerta Recorte.png
+PNJ No Muerto Amon-Tep de la Arena Muerta Tarjeta.png
 PNJ No Muerto ArchLiche Ficha.png
+PNJ No Muerto ArchLiche Recorte.png
+PNJ No Muerto ArchLiche Tarjeta.png
 PNJ No Muerto Comandante Liche Ficha.png
-PNJ No Muerto Demiliche Ficha.png
+PNJ No Muerto Comandante Liche Recorte.png
+PNJ No Muerto Comandante Liche Tarjeta.png
+PNJ No Muerto Demilich 2 Ficha.png
+PNJ No Muerto Demilich 2 Recorte.png
+PNJ No Muerto Demilich 2 Tarjeta.png
+PNJ No Muerto Demilich 3 Ficha.png
+PNJ No Muerto Demilich 3 Recorte.png
+PNJ No Muerto Demilich 3 Tarjeta.png
+PNJ No Muerto Demiliche 1 Ficha.png
+PNJ No Muerto Demiliche 1 Recorte.png
+PNJ No Muerto Demiliche 1 Tarjeta.png
 PNJ No Muerto Hechicero Ficha.png
+PNJ No Muerto Hechicero Recorte.png
+PNJ No Muerto Hechicero Tarjeta.png
 PNJ No Muerto Heraldo del Hundido Ficha.png
+PNJ No Muerto Heraldo del Hundido Recorte.png
+PNJ No Muerto Heraldo del Hundido Tarjeta.png
 PNJ No Muerto Horda de Esqueletos Ficha.png
+PNJ No Muerto Horda de Esqueletos Recorte.png
+PNJ No Muerto Horda de Esqueletos Tarjeta.png
 PNJ No Muerto Jinete Sin Cabeza Con Cabeza Ficha.png
+PNJ No Muerto Jinete Sin Cabeza Con Cabeza Recorte.png
+PNJ No Muerto Jinete Sin Cabeza Con Cabeza Tarjeta.png
 PNJ No Muerto Liche Ficha.png
 PNJ No Muerto Liche Nalgash Ascendido Ficha.png
+PNJ No Muerto Liche Nalgash Ascendido Recorte.png
+PNJ No Muerto Liche Nalgash Ascendido Tarjeta.png
+PNJ No Muerto Liche Recorte.png
+PNJ No Muerto Liche Tarjeta.png
 PNJ No Muerto Vampiro X Ficha.png
+PNJ No Muerto Vampiro X Recorte.png
+PNJ No Muerto Vampiro X Tarjeta.png
 PNJ Osombre Druida Cambiapieles Ficha.png
+PNJ Osombre Druida Cambiapieles Recorte.png
+PNJ Osombre Druida Cambiapieles Tarjeta.png
 PNJ Ratolinius Ficha.png
+PNJ Ratolinius Recorte.png
+PNJ Ratolinius Tarjeta.png
 PNJ Semielfo Bardo Lombardina Olor de Fresa Ficha.png
+PNJ Semielfo Bardo Lombardina Olor de Fresa Recorte.png
+PNJ Semielfo Bardo Lombardina Olor de Fresa Tarjeta.png
 PNJ Semigigante Braum Ficha.png
+PNJ Semigigante Braum Recorte.png
+PNJ Semigigante Braum Tarjeta.png
 PNJ Semigigante Bron Nacido del Trueno Ficha.png
+PNJ Semigigante Bron Nacido del Trueno Recorte.png
+PNJ Semigigante Bron Nacido del Trueno Tarjeta.png
 PNJ Semigigante Knut Ficha.png
+PNJ Semigigante Knut Recorte.png
+PNJ Semigigante Knut Tarjeta.png
 PNJ Semignomo Hechicero Excéntrico Ficha.png
+PNJ Semignomo Hechicero Excéntrico Recortes.png
+PNJ Semignomo Hechicero Excéntrico Tarjeta.png
 PNJ Skaven Ratonius el Injertado Ficha.png
+PNJ Skaven Ratonius el Injertado Recorte.png
+PNJ Skaven Ratonius el Injertado Tarjeta.png
 PNJ Skaven Ratsix Ficha.png
+PNJ Skaven Ratsix Recorte.png
+PNJ Skaven Ratsix Tarjeta.png
 PNJ Skaven Señor de la Guerra Vark Mors en Rata Ogro Ficha.png
+PNJ Skaven Señor de la Guerra Vark Mors en Rata Ogro Recorte.png
+PNJ Skaven Señor de la Guerra Vark Mors en Rata Ogro Tarjeta.png
 PNJ Troll Druida Ficha.png
+PNJ Troll Druida Recorte.png
+PNJ Troll Druida Tarjeta.png
 
 Bestia Castor Ficha 1.png
 Bestia Castor Ficha 2.png
