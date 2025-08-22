@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Barra de Iniciativa Dinámica</title>
+<style>
+  body {
+    background-color: #222;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    font-family: Arial, sans-serif;
+    height: 100vh;
+    color: #eee;
+    overflow-x: hidden;
+  }
+
+  #grid-wrapper {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    padding: 10px 0;
+  }
+
+  #grid {
+    display: grid;
+    grid-template-columns: repeat(10, minmax(50px, 188px));
+    grid-auto-rows: minmax(85px, 202px);
+    gap: 5px;
+    justify-content: center;
+    max-width: 95%;
+  }
+
+  .cell {
+    aspect-ratio: 188 / 202;
+    background-color: #777;
+    border: 2px solid #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    user-select: none;
+    transition: border 0.2s;
+    cursor: grab;
+  }
+
+  .cell img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    pointer-events: none;
+  }
+
+  .current {
+    border: 4px solid gold;
+  }
+
+  button {
+    margin: 5px;
+    padding: 5px 10px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+
+<div id="grid-wrapper">
+  <div id="grid"></div>
+</div>
+
+<div>
+  <button onclick="prevTurn()">Turno Anterior</button>
+  <button onclick="nextTurn()">Siguiente Turno</button>
+</div>
+
+<script>
+const grid = document.getElementById("grid");
+let currentIndex = parseInt(localStorage.getItem("currentIndex")) || 0;
+
+// Inicialmente creamos 10 celdas
+function ensureCells(count) {
+  while (grid.children.length < count) {
+    const cell = document.createElement("div");
+    cell.className = "cell";
+    cell.setAttribute("draggable", true);
+    grid.appendChild(cell);
+  }
+}
+
+// --- Funciones ---
+function loadGrid() {
+  const saved = JSON.parse(localStorage.getItem("barra")) || [];
+  ensureCells(Math.max(saved.length, 10));
+  [...grid.children].forEach((cell, i) => {
+    if (saved[i]) cell.innerHTML = `<img src="${saved[i]}">`;
+  });
+  addCellEvents();
+  updateHighlight();
+}
+
+function addCellEvents() {
+  [...grid.children].forEach((cell, i) => {
+    cell.replaceWith(cell.cloneNode(true));
+  });
+  const cells = [...grid.children];
+  cells.forEach((cell, i) => {
+
+    // Arrastrar imágenes desde archivo
+    cell.addEventListener("dragover", e => e.preventDefault());
+    cell.addEventListener("drop", e => {
+      e.preventDefault();
+      if (e.dataTransfer.files.length) {
+        const file = e.dataTransfer.files[0];
+        if (file.type.startsWith("image/")) {
+          const reader = new FileReader();
+          reader.onload = () => insertImageAt(i, reader.result);
+          reader.readAsDataURL(file);
+        }
+      }
+    });
+
+    // Drag & Drop para reordenar
+    cell.addEventListener("dragstart", e => {
+      if (!cell.querySelector("img")) e.preventDefault();
+      else e.dataTransfer.setData("text/plain", i);
+    });
+    cell.addEventListener("dragenter", e => e.preventDefault());
+    cell.addEventListener("dragover", e => e.preventDefault());
+    cell.addEventListener("drop", e => {
+      e.preventDefault();
+      const fromIndex = parseInt(e.dataTransfer.getData("text/plain"));
+      if (fromIndex !== i) moveImage(fromIndex, i);
+    });
+
+    // Clic derecho para borrar y compactar
+    cell.addEventListener("contextmenu", e => {
+      e.preventDefault();
+      deleteAt(i);
+    });
+  });
+}
+
+function insertImageAt(index, src) {
+  ensureCells(index + 1); // crear celdas adicionales si es necesario
+  grid.children[index].innerHTML = `<img src="${src}">`;
+  saveGrid();
+}
+
+function deleteAt(index) {
+  const hadTurn = currentIndex === index; // si el turno estaba en esta celda
+  const removedImage = grid.children[index].querySelector("img");
+
+  // compactar
+  for (let i = index; i < grid.children.length - 1; i++) {
+    grid.children[i].innerHTML = grid.children[i + 1].innerHTML;
+  }
+  grid.children[grid.children.length - 1].innerHTML = "";
+
+  // ajustar currentIndex
+  if (removedImage) {
+    if (hadTurn) {
+      // si la unidad que tenía el turno fue borrada
+      // pasar el turno a la siguiente imagen disponible
+      let next = index;
+      while(next < grid.children.length && !grid.children[next].querySelector("img")) next++;
+      if (next < grid.children.length) currentIndex = next;
+      else {
+        // si no hay ninguna imagen adelante, buscar atrás
+        next = index - 1;
+        while(next >= 0 && !grid.children[next].querySelector("img")) next--;
+        currentIndex = next >= 0 ? next : -1; // -1 si no hay ninguna
+      }
+    } else if (currentIndex > index) {
+      // si la celda borrada estaba antes del turno, ajustar índice
+      currentIndex--;
+    }
+  }
+
+  updateHighlight();
+  saveGrid();
+}
+
+function moveImage(fromIndex, toIndex) {
+  if (fromIndex === toIndex) return;
+  const moved = grid.children[fromIndex].innerHTML;
+  if (!moved) return;
+
+  if (fromIndex < toIndex) {
+    for (let i = fromIndex; i < toIndex; i++) grid.children[i].innerHTML = grid.children[i + 1].innerHTML;
+  } else {
+    for (let i = fromIndex; i > toIndex; i--) grid.children[i].innerHTML = grid.children[i - 1].innerHTML;
+  }
+  grid.children[toIndex].innerHTML = moved;
+
+  if (currentIndex === fromIndex) currentIndex = toIndex;
+  else if (fromIndex < currentIndex && toIndex >= currentIndex) currentIndex--;
+  else if (fromIndex > currentIndex && toIndex <= currentIndex) currentIndex++;
+
+  updateHighlight();
+  saveGrid();
+}
+
+function updateHighlight() {
+  [...grid.children].forEach((cell, i) => {
+    cell.classList.toggle("current", i === currentIndex && cell.querySelector("img"));
+  });
+}
+
+function nextTurn() {
+  const images = [...grid.children].filter(c => c.querySelector("img"));
+  if (!images.length) return;
+  do { currentIndex = (currentIndex + 1) % grid.children.length; } 
+  while (!grid.children[currentIndex].querySelector("img"));
+  updateHighlight();
+  saveGrid();
+}
+
+function prevTurn() {
+  const images = [...grid.children].filter(c => c.querySelector("img"));
+  if (!images.length) return;
+  do { currentIndex = (currentIndex - 1 + grid.children.length) % grid.children.length; } 
+  while (!grid.children[currentIndex].querySelector("img"));
+  updateHighlight();
+  saveGrid();
+}
+
+function saveGrid() {
+  const data = [...grid.children].map(c => c.querySelector("img")?.src || null);
+  localStorage.setItem("barra", JSON.stringify(data));
+  localStorage.setItem("currentIndex", currentIndex);
+}
+
+loadGrid();
+</script>
+
+</body>
+</html>
