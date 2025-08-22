@@ -30,11 +30,9 @@
     gap: 5px;
     justify-content: center;
     max-width: 100%;
-    position: relative;
   }
 
   .cell {
-    position: relative;
     aspect-ratio: 188 / 202;
     background-color: #777;
     border: 5px solid #000;
@@ -45,6 +43,7 @@
     user-select: none;
     transition: border 0.2s, transform 0.2s;
     cursor: grab;
+    position: relative;
     box-shadow: 0 0 15px rgba(255,255,0,0.6);
   }
 
@@ -60,18 +59,15 @@
     pointer-events: none;
   }
 
-  .cell-number {
+  .number {
     position: absolute;
     top: 2px;
-    left: 2px;
-    background-color: rgba(0,0,0,0.7);
-    color: #fff;
-    font-size: 14px;
+    left: 4px;
+    color: white;
     font-weight: bold;
-    padding: 2px 4px;
-    border-radius: 3px;
+    font-size: 16px;
+    text-shadow: 0 0 3px black;
     pointer-events: none;
-    z-index: 5;
   }
 
   .current {
@@ -120,6 +116,7 @@
   <button onclick="nextTurn()">Siguiente Turno</button>
   <button onclick="clearGrid()">Vaciar Barra</button>
   <button onclick="deleteSelected()">Eliminar Seleccionadas</button>
+  <button onclick="deleteEmpty()">Eliminar Vacías</button>
 </div>
 
 <div id="add-cell">+</div>
@@ -145,19 +142,6 @@ function centerGrid() {
   grid.style.justifyContent = 'center';
 }
 
-// Actualizar números de iniciativa
-function updateNumbers() {
-  [...grid.children].forEach((cell, i) => {
-    let numSpan = cell.querySelector('.cell-number');
-    if (!numSpan) {
-      numSpan = document.createElement('span');
-      numSpan.className = 'cell-number';
-      cell.appendChild(numSpan);
-    }
-    numSpan.textContent = i + 1;
-  });
-}
-
 // --- Funciones ---
 function loadGrid() {
   const saved = JSON.parse(localStorage.getItem("barra")) || [];
@@ -165,13 +149,13 @@ function loadGrid() {
 
   saved.forEach((src, i) => {
     ensureCells(i + 1);
-    if (src) grid.children[i].innerHTML = `<img src="${src}"><span class="cell-number">${i+1}</span>`;
+    if (src) grid.children[i].innerHTML = `<img src="${src}">`;
   });
 
   addCellEvents();
+  updateNumbers();
   updateHighlight();
   centerGrid();
-  updateNumbers();
 }
 
 function addCellEvents() {
@@ -214,10 +198,9 @@ function addCellEvents() {
 // Insertar imagen en una celda
 function insertImageAt(index, src) {
   ensureCells(index + 1);
-  const cell = grid.children[index];
-  cell.innerHTML = `<img src="${src}"><span class="cell-number">${index+1}</span>`;
-  centerGrid();
+  grid.children[index].innerHTML = `<img src="${src}">`;
   updateNumbers();
+  centerGrid();
   saveGrid();
 }
 
@@ -226,9 +209,9 @@ function clearGrid() {
   [...grid.children].forEach(cell => cell.innerHTML = "");
   selectedCells.clear();
   currentIndex = -1;
+  updateNumbers();
   updateHighlight();
   centerGrid();
-  updateNumbers();
   saveGrid();
 }
 
@@ -259,9 +242,9 @@ function deleteAt(index) {
     }
   }
 
+  updateNumbers();
   updateHighlight();
   centerGrid();
-  updateNumbers();
   saveGrid();
 }
 
@@ -290,9 +273,9 @@ function moveImage(fromIndex, toIndex) {
   else if (fromIndex < currentIndex && toIndex >= currentIndex) currentIndex--;
   else if (fromIndex > currentIndex && toIndex <= currentIndex) currentIndex++;
 
+  updateNumbers();
   updateHighlight();
   centerGrid();
-  updateNumbers();
   saveGrid();
 }
 
@@ -300,6 +283,19 @@ function moveImage(fromIndex, toIndex) {
 function updateHighlight() {
   [...grid.children].forEach((cell, i) => {
     cell.classList.toggle("current", i === currentIndex && cell.querySelector("img"));
+  });
+}
+
+// Actualizar números de iniciativa
+function updateNumbers() {
+  [...grid.children].forEach((cell, i) => {
+    let num = cell.querySelector('.number');
+    if (!num) {
+      num = document.createElement('div');
+      num.className = 'number';
+      cell.appendChild(num);
+    }
+    num.textContent = i + 1;
   });
 }
 
@@ -320,6 +316,19 @@ function prevTurn() {
   while (!grid.children[currentIndex].querySelector("img"));
   updateHighlight();
   saveGrid();
+}
+
+// **Eliminar celdas vacías**
+function deleteEmpty() {
+  for (let i = grid.children.length - 1; i >= 0; i--) {
+    const cell = grid.children[i];
+    if (!cell.querySelector("img")) {
+      grid.removeChild(cell);
+    }
+  }
+  selectedCells.clear();
+  updateNumbers();
+  centerGrid();
 }
 
 // Guardado
