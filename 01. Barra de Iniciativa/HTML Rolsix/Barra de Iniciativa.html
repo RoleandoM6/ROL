@@ -6,7 +6,7 @@
 <style>
   body {
     background-color: #f5e0c3; /* color base tipo pergamino */
-    background-image: url('https://github.com/RoleandoM6/ROL/blob/main/04.%20Mapas/Fondo%20Pergamino%20Viejo.png?raw=true'); /* textura de pergamino */
+    background-image: url('https://github.com/RoleandoM6/ROL/blob/main/01.%20Barra%20de%20Iniciativa/HTML%20Rolsix/Textura%20Pergamino.png?raw=true'); /* textura de pergamino */
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center;
@@ -17,7 +17,7 @@
     margin: 0;
     font-family: Arial, sans-serif;
     height: 100vh;
-    color: #333; /* mejor contraste sobre pergamino */
+    color: #333;
     overflow-x: hidden;
     padding: 20px;
     box-sizing: border-box;
@@ -30,6 +30,7 @@
     padding: 20px;
     box-sizing: border-box;
     max-width: 95%;
+    position: relative; /* para que los botones se posicionen encima */
   }
 
   #grid {
@@ -53,7 +54,7 @@
     transition: border 0.2s, transform 0.3s;
     cursor: grab;
     position: relative;
-    box-shadow: 0 0 15px rgba(255,255,0,0.6);
+    box-shadow: 0 0 15px rgba(231, 39, 5, 0.6);
   }
 
   .cell:hover {
@@ -95,13 +96,13 @@
   }
 
   @keyframes pulse {
-    0% { box-shadow: 0 0 8px gold; }
-    50% { box-shadow: 0 0 20px gold; }
-    100% { box-shadow: 0 0 8px gold; }
+    0% { box-shadow: 0 0 8px rgb(48, 231, 88); }
+    50% { box-shadow: 0 0 20px rgb(48, 231, 88); }
+    100% { box-shadow: 0 0 8px rgb(48, 231, 88); }
   }
 
   .cell.current {
-    border: 6px solid gold;
+    border: 6px solid rgb(48, 231, 88);
   }
 
   .cell.current:not(.removed) {
@@ -111,6 +112,17 @@
   .selected {
     outline: 3px dashed red;
   }
+
+  #buttons-overlay {
+    position: absolute;
+    top: 1000px; /* ajusta este valor para separar más los botones */
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 5px;
+    z-index: 20;
+    pointer-events: auto;
+}
 
   #add-cell {
     width: 188px;
@@ -161,14 +173,13 @@
 
 <div id="grid-wrapper">
   <div id="grid"></div>
-</div>
-
-<div>
-  <button onclick="prevTurn()">Turno Anterior</button>
-  <button onclick="nextTurn()">Siguiente Turno</button>
-  <button onclick="clearGrid()">Vaciar Barra</button>
-  <button onclick="deleteSelected()">Eliminar Seleccionadas</button>
-  <button onclick="deleteEmpty()">Eliminar Vacías</button>
+  <div id="buttons-overlay">
+    <button onclick="prevTurn()">Turno Anterior</button>
+    <button onclick="nextTurn()">Siguiente Turno</button>
+    <button onclick="clearGrid()">Vaciar Barra</button>
+    <button onclick="deleteSelected()">Eliminar Seleccionadas</button>
+    <button onclick="deleteEmpty()">Eliminar Vacías</button>
+  </div>
 </div>
 
 <div id="add-cell">+</div>
@@ -176,6 +187,7 @@
 <script>
 const grid = document.getElementById("grid");
 const addCell = document.getElementById("add-cell");
+const buttonsOverlay = document.getElementById("buttons-overlay");
 let currentIndex = parseInt(localStorage.getItem("currentIndex")) || -1;
 let selectedCells = new Set();
 
@@ -406,6 +418,10 @@ addCell.addEventListener("drop", e => {
     reader.readAsDataURL(file);
   });
 });
+
+// Funciones para ocultar/mostrar botones
+function hideButtons() { buttonsOverlay.style.display = "none"; }
+function showButtons() { buttonsOverlay.style.display = "flex"; }
 
 loadGrid();
 </script>
