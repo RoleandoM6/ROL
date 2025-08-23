@@ -14,18 +14,18 @@
     height: 100vh;
     color: #eee;
     overflow-x: hidden;
-    padding: 20px; /* <- agrega espacio alrededor de todo */
+    padding: 20px;
     box-sizing: border-box;
   }
 
   #grid-wrapper {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  padding: 20px; /* <- espacio dentro del contenedor */
-  box-sizing: border-box;
-  max-width: 95%; /* <- para que no toque los bordes al hacer zoom */
-}
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+    box-sizing: border-box;
+    max-width: 95%;
+  }
 
   #grid {
     display: grid;
@@ -45,7 +45,7 @@
     justify-content: center;
     overflow: hidden;
     user-select: none;
-    transition: border 0.2s, transform 0.2s;
+    transition: border 0.2s, transform 0.3s;
     cursor: grab;
     position: relative;
     box-shadow: 0 0 15px rgba(255,255,0,0.6);
@@ -62,9 +62,9 @@
     height: 100%;
     object-fit: contain;
     pointer-events: none;
+    transition: transform 0.3s;
   }
 
-  /* NÚMERO MEJORADO */
   .number {
     position: absolute;
     top: 0px;
@@ -79,17 +79,16 @@
     font-weight: bold;
     font-size: 18px;
     text-shadow: 0 0 3px black;
-    border-radius: 4px; /* círculo */
-    border: 2px solid gold; /* marquito */
+    border-radius: 4px;
+    border: 2px solid gold;
     pointer-events: none;
     transition: transform 0.2s;
   }
 
   .cell:hover .number {
-    transform: scale(1.3); /* efecto al pasar ratón */
+    transform: scale(1.3);
   }
 
-  /* ANIMACIÓN DE RESALTADO */
   @keyframes pulse {
     0% { box-shadow: 0 0 8px gold; }
     50% { box-shadow: 0 0 20px gold; }
@@ -98,6 +97,9 @@
 
   .cell.current {
     border: 6px solid gold;
+  }
+
+  .cell.current:not(.removed) {
     animation: pulse 1s infinite;
   }
 
@@ -130,6 +132,24 @@
     font-size: 16px;
     cursor: pointer;
   }
+
+  @keyframes cellIn {
+    0% { opacity: 0; transform: scale(0.5); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+
+  @keyframes cellOut {
+    0% { opacity: 1; transform: scale(1); }
+    100% { opacity: 0; transform: scale(0.5); }
+  }
+
+  .cell.added {
+    animation: cellIn 0.3s ease forwards;
+  }
+
+  .cell.removed {
+    animation: cellOut 0.3s ease forwards;
+  }
 </style>
 </head>
 <body>
@@ -160,6 +180,7 @@ function ensureCells(count) {
     cell.className = "cell";
     cell.setAttribute("draggable", true);
     grid.appendChild(cell);
+    addCellEventsToCell(cell, grid.children.length - 1);
   }
 }
 
@@ -170,60 +191,57 @@ function centerGrid() {
 function loadGrid() {
   const saved = JSON.parse(localStorage.getItem("barra")) || [];
   [...grid.children].forEach(c => c.remove());
-
   saved.forEach((src, i) => {
     ensureCells(i + 1);
     if (src) grid.children[i].innerHTML = `<img src="${src}">`;
   });
-
-  addCellEvents();
   updateNumbers();
   updateHighlight();
   centerGrid();
 }
 
+function addCellEventsToCell(cell, i) {
+  cell.addEventListener("dragstart", e => {
+    if (!cell.querySelector("img")) e.preventDefault();
+    else e.dataTransfer.setData("text/plain", i);
+  });
+  cell.addEventListener("dragenter", e => e.preventDefault());
+  cell.addEventListener("dragover", e => e.preventDefault());
+  cell.addEventListener("drop", e => {
+    e.preventDefault();
+    const fromIndex = parseInt(e.dataTransfer.getData("text/plain"));
+    if (fromIndex !== i) moveImage(fromIndex, i);
+  });
+
+  cell.addEventListener("contextmenu", e => {
+    e.preventDefault();
+    deleteAt(i);
+  });
+
+  cell.addEventListener("click", e => {
+    const hasImg = !!cell.querySelector("img");
+    if (e.ctrlKey && hasImg) {
+      if (selectedCells.has(i)) selectedCells.delete(i);
+      else selectedCells.add(i);
+      cell.classList.toggle("selected");
+    } else if (hasImg) {
+      currentIndex = i;
+      updateHighlight();
+      saveGrid();
+    }
+  });
+}
+
 function addCellEvents() {
-  [...grid.children].forEach((cell) => {
-    cell.replaceWith(cell.cloneNode(true));
-  });
-
-  const cells = [...grid.children];
-  cells.forEach((cell, i) => {
-    cell.addEventListener("dragstart", e => {
-      if (!cell.querySelector("img")) e.preventDefault();
-      else e.dataTransfer.setData("text/plain", i);
-    });
-    cell.addEventListener("dragenter", e => e.preventDefault());
-    cell.addEventListener("dragover", e => e.preventDefault());
-    cell.addEventListener("drop", e => {
-      e.preventDefault();
-      const fromIndex = parseInt(e.dataTransfer.getData("text/plain"));
-      if (fromIndex !== i) moveImage(fromIndex, i);
-    });
-
-    cell.addEventListener("contextmenu", e => {
-      e.preventDefault();
-      deleteAt(i);
-    });
-
-    cell.addEventListener("click", e => {
-      const hasImg = !!cell.querySelector("img");
-      if (e.ctrlKey && hasImg) {
-        if (selectedCells.has(i)) selectedCells.delete(i);
-        else selectedCells.add(i);
-        cell.classList.toggle("selected");
-      } else if (hasImg) {
-        currentIndex = i;
-        updateHighlight();
-        saveGrid();
-      }
-    });
-  });
+  [...grid.children].forEach((cell, i) => addCellEventsToCell(cell, i));
 }
 
 function insertImageAt(index, src) {
   ensureCells(index + 1);
-  grid.children[index].innerHTML = `<img src="${src}">`;
+  const cell = grid.children[index];
+  cell.innerHTML = `<img src="${src}">`;
+  cell.classList.add('added');
+  setTimeout(() => cell.classList.remove('added'), 300);
   updateNumbers();
   centerGrid();
   saveGrid();
@@ -240,19 +258,23 @@ function clearGrid() {
 }
 
 function deleteAt(index) {
-  const hadTurn = currentIndex === index;
-  const removedImage = grid.children[index].querySelector("img");
+  const cell = grid.children[index];
+  const removedImage = cell.querySelector("img");
+  if (!removedImage) return;
 
-  for (let i = index; i < grid.children.length - 1; i++) {
-    grid.children[i].innerHTML = grid.children[i + 1].innerHTML;
-  }
-  grid.children[grid.children.length - 1].innerHTML = "";
+  cell.classList.add('removed');
 
-  if (removedImage) {
-    if (hadTurn) {
+  setTimeout(() => {
+    for (let i = index; i < grid.children.length - 1; i++) {
+      grid.children[i].innerHTML = grid.children[i + 1].innerHTML;
+    }
+    grid.children[grid.children.length - 1].innerHTML = "";
+    cell.classList.remove('removed');
+
+    if (currentIndex === index) {
       let next = index;
       while(next < grid.children.length && !grid.children[next].querySelector("img")) next++;
-      if (next < grid.children.length) currentIndex = next;
+      if(next < grid.children.length) currentIndex = next;
       else {
         next = index - 1;
         while(next >= 0 && !grid.children[next].querySelector("img")) next--;
@@ -261,12 +283,12 @@ function deleteAt(index) {
     } else if (currentIndex > index) {
       currentIndex--;
     }
-  }
 
-  updateNumbers();
-  updateHighlight();
-  centerGrid();
-  saveGrid();
+    updateNumbers();
+    updateHighlight();
+    centerGrid();
+    saveGrid();
+  }, 300);
 }
 
 function deleteSelected() {
@@ -281,10 +303,10 @@ function moveImage(fromIndex, toIndex) {
   const moved = grid.children[fromIndex].innerHTML;
   if (!moved) return;
 
-  if (fromIndex < toIndex) {
-    for (let i = fromIndex; i < toIndex; i++) grid.children[i].innerHTML = grid.children[i + 1].innerHTML;
-  } else {
-    for (let i = fromIndex; i > toIndex; i--) grid.children[i].innerHTML = grid.children[i - 1].innerHTML;
+  const step = fromIndex < toIndex ? 1 : -1;
+  for (let i = fromIndex; i !== toIndex; i += step) {
+    const next = i + step;
+    grid.children[i].innerHTML = grid.children[next].innerHTML;
   }
   grid.children[toIndex].innerHTML = moved;
 
@@ -362,7 +384,6 @@ addCell.addEventListener("drop", e => {
       const firstEmpty = [...grid.children].findIndex(c => !c.querySelector("img"));
       if (firstEmpty >= 0) insertImageAt(firstEmpty, reader.result);
       else insertImageAt(grid.children.length, reader.result);
-      addCellEvents();
     };
     reader.readAsDataURL(file);
   });
