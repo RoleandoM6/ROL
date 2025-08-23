@@ -5,14 +5,19 @@
 <title>Barra de Iniciativa Dinámica</title>
 <style>
   body {
-    background-color: #222;
+    background-color: #f5e0c3; /* color base tipo pergamino */
+    background-image: url('https://github.com/RoleandoM6/ROL/blob/main/04.%20Mapas/Fondo%20Pergamino%20Viejo.png?raw=true'); /* textura de pergamino */
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    filter: contrast(1.05) sepia(0.1);
     display: flex;
     flex-direction: column;
     align-items: center;
     margin: 0;
     font-family: Arial, sans-serif;
     height: 100vh;
-    color: #eee;
+    color: #333; /* mejor contraste sobre pergamino */
     overflow-x: hidden;
     padding: 20px;
     box-sizing: border-box;
@@ -38,7 +43,7 @@
 
   .cell {
     aspect-ratio: 188 / 202;
-    background-color: #777;
+    background-color: rgba(119,119,119,0.9);
     border: 5px solid #000;
     display: flex;
     align-items: center;
@@ -113,7 +118,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: #555;
+    background-color: rgba(85,85,85,0.8);
     border: 2px dashed #aaa;
     font-size: 48px;
     cursor: pointer;
@@ -180,7 +185,6 @@ function ensureCells(count) {
     cell.className = "cell";
     cell.setAttribute("draggable", true);
     grid.appendChild(cell);
-    addCellEventsToCell(cell, grid.children.length - 1);
   }
 }
 
@@ -195,45 +199,49 @@ function loadGrid() {
     ensureCells(i + 1);
     if (src) grid.children[i].innerHTML = `<img src="${src}">`;
   });
+  addCellEvents();
   updateNumbers();
   updateHighlight();
   centerGrid();
 }
 
-function addCellEventsToCell(cell, i) {
-  cell.addEventListener("dragstart", e => {
-    if (!cell.querySelector("img")) e.preventDefault();
-    else e.dataTransfer.setData("text/plain", i);
-  });
-  cell.addEventListener("dragenter", e => e.preventDefault());
-  cell.addEventListener("dragover", e => e.preventDefault());
-  cell.addEventListener("drop", e => {
-    e.preventDefault();
-    const fromIndex = parseInt(e.dataTransfer.getData("text/plain"));
-    if (fromIndex !== i) moveImage(fromIndex, i);
-  });
-
-  cell.addEventListener("contextmenu", e => {
-    e.preventDefault();
-    deleteAt(i);
-  });
-
-  cell.addEventListener("click", e => {
-    const hasImg = !!cell.querySelector("img");
-    if (e.ctrlKey && hasImg) {
-      if (selectedCells.has(i)) selectedCells.delete(i);
-      else selectedCells.add(i);
-      cell.classList.toggle("selected");
-    } else if (hasImg) {
-      currentIndex = i;
-      updateHighlight();
-      saveGrid();
-    }
-  });
-}
-
 function addCellEvents() {
-  [...grid.children].forEach((cell, i) => addCellEventsToCell(cell, i));
+  [...grid.children].forEach(cell => {
+    cell.replaceWith(cell.cloneNode(true));
+  });
+
+  const cells = [...grid.children];
+  cells.forEach((cell, i) => {
+    cell.addEventListener("dragstart", e => {
+      if (!cell.querySelector("img")) e.preventDefault();
+      else e.dataTransfer.setData("text/plain", i);
+    });
+    cell.addEventListener("dragenter", e => e.preventDefault());
+    cell.addEventListener("dragover", e => e.preventDefault());
+    cell.addEventListener("drop", e => {
+      e.preventDefault();
+      const fromIndex = parseInt(e.dataTransfer.getData("text/plain"));
+      if (fromIndex !== i) moveImage(fromIndex, i);
+    });
+
+    cell.addEventListener("contextmenu", e => {
+      e.preventDefault();
+      deleteAt(i);
+    });
+
+    cell.addEventListener("click", e => {
+      const hasImg = !!cell.querySelector("img");
+      if (e.ctrlKey && hasImg) {
+        if (selectedCells.has(i)) selectedCells.delete(i);
+        else selectedCells.add(i);
+        cell.classList.toggle("selected");
+      } else if (hasImg) {
+        currentIndex = i;
+        updateHighlight();
+        saveGrid();
+      }
+    });
+  });
 }
 
 function insertImageAt(index, src) {
@@ -266,7 +274,12 @@ function deleteAt(index) {
 
   setTimeout(() => {
     for (let i = index; i < grid.children.length - 1; i++) {
-      grid.children[i].innerHTML = grid.children[i + 1].innerHTML;
+      const nextContent = grid.children[i + 1].innerHTML;
+      if(nextContent) {
+        grid.children[i].innerHTML = nextContent;
+        grid.children[i].style.transform = 'translateX(100%)';
+        setTimeout(() => grid.children[i].style.transform = 'translateX(0)', 10);
+      } else grid.children[i].innerHTML = "";
     }
     grid.children[grid.children.length - 1].innerHTML = "";
     cell.classList.remove('removed');
@@ -313,6 +326,10 @@ function moveImage(fromIndex, toIndex) {
   if (currentIndex === fromIndex) currentIndex = toIndex;
   else if (fromIndex < currentIndex && toIndex >= currentIndex) currentIndex--;
   else if (fromIndex > currentIndex && toIndex <= currentIndex) currentIndex++;
+
+  [...grid.children].forEach(cell => {
+    cell.style.transition = 'transform 0.3s';
+  });
 
   updateNumbers();
   updateHighlight();
@@ -384,6 +401,7 @@ addCell.addEventListener("drop", e => {
       const firstEmpty = [...grid.children].findIndex(c => !c.querySelector("img"));
       if (firstEmpty >= 0) insertImageAt(firstEmpty, reader.result);
       else insertImageAt(grid.children.length, reader.result);
+      addCellEvents();
     };
     reader.readAsDataURL(file);
   });
