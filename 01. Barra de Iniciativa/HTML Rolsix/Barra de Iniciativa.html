@@ -14,14 +14,18 @@
     height: 100vh;
     color: #eee;
     overflow-x: hidden;
+    padding: 20px; /* <- agrega espacio alrededor de todo */
+    box-sizing: border-box;
   }
 
   #grid-wrapper {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    padding: 10px 0;
-  }
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 20px; /* <- espacio dentro del contenedor */
+  box-sizing: border-box;
+  max-width: 95%; /* <- para que no toque los bordes al hacer zoom */
+}
 
   #grid {
     display: grid;
@@ -50,6 +54,7 @@
   .cell:hover {
     transform: scale(1.2);
     z-index: 10;
+    animation: pulse 1s infinite;
   }
 
   .cell img {
@@ -59,19 +64,41 @@
     pointer-events: none;
   }
 
+  /* NÚMERO MEJORADO */
   .number {
     position: absolute;
-    top: 2px;
-    left: 4px;
+    top: 0px;
+    left: 0px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0,0,0,0.6);
     color: white;
     font-weight: bold;
-    font-size: 16px;
+    font-size: 18px;
     text-shadow: 0 0 3px black;
+    border-radius: 4px; /* círculo */
+    border: 2px solid gold; /* marquito */
     pointer-events: none;
+    transition: transform 0.2s;
   }
 
-  .current {
+  .cell:hover .number {
+    transform: scale(1.3); /* efecto al pasar ratón */
+  }
+
+  /* ANIMACIÓN DE RESALTADO */
+  @keyframes pulse {
+    0% { box-shadow: 0 0 8px gold; }
+    50% { box-shadow: 0 0 20px gold; }
+    100% { box-shadow: 0 0 8px gold; }
+  }
+
+  .cell.current {
     border: 6px solid gold;
+    animation: pulse 1s infinite;
   }
 
   .selected {
@@ -127,7 +154,6 @@ const addCell = document.getElementById("add-cell");
 let currentIndex = parseInt(localStorage.getItem("currentIndex")) || -1;
 let selectedCells = new Set();
 
-// Crear celdas según necesidad
 function ensureCells(count) {
   while (grid.children.length < count) {
     const cell = document.createElement("div");
@@ -137,12 +163,10 @@ function ensureCells(count) {
   }
 }
 
-// Centrar las celdas horizontalmente
 function centerGrid() {
   grid.style.justifyContent = 'center';
 }
 
-// --- Funciones ---
 function loadGrid() {
   const saved = JSON.parse(localStorage.getItem("barra")) || [];
   [...grid.children].forEach(c => c.remove());
@@ -159,13 +183,12 @@ function loadGrid() {
 }
 
 function addCellEvents() {
-  [...grid.children].forEach((cell, i) => {
+  [...grid.children].forEach((cell) => {
     cell.replaceWith(cell.cloneNode(true));
   });
+
   const cells = [...grid.children];
   cells.forEach((cell, i) => {
-
-    // Drag & Drop para reordenar
     cell.addEventListener("dragstart", e => {
       if (!cell.querySelector("img")) e.preventDefault();
       else e.dataTransfer.setData("text/plain", i);
@@ -178,24 +201,26 @@ function addCellEvents() {
       if (fromIndex !== i) moveImage(fromIndex, i);
     });
 
-    // Clic derecho para borrar y compactar
     cell.addEventListener("contextmenu", e => {
       e.preventDefault();
       deleteAt(i);
     });
 
-    // Ctrl + click para seleccionar celdas
     cell.addEventListener("click", e => {
-      if (e.ctrlKey && cell.querySelector("img")) {
+      const hasImg = !!cell.querySelector("img");
+      if (e.ctrlKey && hasImg) {
         if (selectedCells.has(i)) selectedCells.delete(i);
         else selectedCells.add(i);
         cell.classList.toggle("selected");
+      } else if (hasImg) {
+        currentIndex = i;
+        updateHighlight();
+        saveGrid();
       }
     });
   });
 }
 
-// Insertar imagen en una celda
 function insertImageAt(index, src) {
   ensureCells(index + 1);
   grid.children[index].innerHTML = `<img src="${src}">`;
@@ -204,7 +229,6 @@ function insertImageAt(index, src) {
   saveGrid();
 }
 
-// Vaciar barra
 function clearGrid() {
   [...grid.children].forEach(cell => cell.innerHTML = "");
   selectedCells.clear();
@@ -215,18 +239,15 @@ function clearGrid() {
   saveGrid();
 }
 
-// Borrar celda individual
 function deleteAt(index) {
   const hadTurn = currentIndex === index;
   const removedImage = grid.children[index].querySelector("img");
 
-  // compactar
   for (let i = index; i < grid.children.length - 1; i++) {
     grid.children[i].innerHTML = grid.children[i + 1].innerHTML;
   }
   grid.children[grid.children.length - 1].innerHTML = "";
 
-  // ajustar currentIndex
   if (removedImage) {
     if (hadTurn) {
       let next = index;
@@ -248,7 +269,6 @@ function deleteAt(index) {
   saveGrid();
 }
 
-// Borrar seleccionadas
 function deleteSelected() {
   const indices = Array.from(selectedCells).sort((a,b)=>b-a);
   indices.forEach(i => deleteAt(i));
@@ -256,7 +276,6 @@ function deleteSelected() {
   [...grid.children].forEach(cell => cell.classList.remove("selected"));
 }
 
-// Mover imagen
 function moveImage(fromIndex, toIndex) {
   if (fromIndex === toIndex) return;
   const moved = grid.children[fromIndex].innerHTML;
@@ -279,14 +298,12 @@ function moveImage(fromIndex, toIndex) {
   saveGrid();
 }
 
-// Resaltar celda actual
 function updateHighlight() {
   [...grid.children].forEach((cell, i) => {
     cell.classList.toggle("current", i === currentIndex && cell.querySelector("img"));
   });
 }
 
-// Actualizar números de iniciativa
 function updateNumbers() {
   [...grid.children].forEach((cell, i) => {
     let num = cell.querySelector('.number');
@@ -299,7 +316,6 @@ function updateNumbers() {
   });
 }
 
-// Turnos
 function nextTurn() {
   const images = [...grid.children].filter(c => c.querySelector("img"));
   if (!images.length) return;
@@ -318,7 +334,6 @@ function prevTurn() {
   saveGrid();
 }
 
-// **Eliminar celdas vacías**
 function deleteEmpty() {
   for (let i = grid.children.length - 1; i >= 0; i--) {
     const cell = grid.children[i];
@@ -331,14 +346,12 @@ function deleteEmpty() {
   centerGrid();
 }
 
-// Guardado
 function saveGrid() {
   const data = [...grid.children].map(c => c.querySelector("img")?.src || null);
   localStorage.setItem("barra", JSON.stringify(data));
   localStorage.setItem("currentIndex", currentIndex);
 }
 
-// --- Celda de añadir imagen ---
 addCell.addEventListener("dragover", e => e.preventDefault());
 addCell.addEventListener("drop", e => {
   e.preventDefault();
