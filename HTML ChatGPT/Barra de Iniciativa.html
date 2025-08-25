@@ -740,26 +740,26 @@ function addCellEvents() {
       deleteAt(i);
     };
 
-    // Click izquierdo: selección / turno / condiciones
+    // Click izquierdo: selección / condiciones
     cell.onclick = e => {
-      const hasImg = !!cell.querySelector("img");
-      if (!hasImg) return;
+    const hasImg = !!cell.querySelector("img");
+    if (!hasImg) return;
 
-      if (conditionsMode) {
+    if (conditionsMode) {
         activeCell = cell;
-        renderCellConditions(cell); // <-- Fuerza renderizar condiciones, incluso si está vacío
+        renderCellConditions(cell); // Fuerza renderizar condiciones, incluso si está vacío
         positionConditionsMenuForCell(cell);
-      } else if (e.ctrlKey) {
+    } else if (e.ctrlKey) {
         if (selectedCells.has(i)) selectedCells.delete(i);
         else selectedCells.add(i);
         cell.classList.toggle("selected");
-      } else {
-        currentIndex = i;
-        updateHighlight();
-        saveGrid();
-      }
-    };
-
+    } else {
+        // Antes cambiaba el turno; ahora solo selecciona sin alterar currentIndex
+        if (selectedCells.has(i)) selectedCells.delete(i);
+        else selectedCells.add(i);
+        cell.classList.toggle("selected");
+    }
+};
     // Siempre renderizamos condiciones especiales (PV/Daño) aunque no haya condiciones normales
     renderCellConditions(cell);
   });
