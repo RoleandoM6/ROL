@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Iniciativa</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .input-row { margin-bottom: 10px; }
+    table { border-collapse: collapse; width: 100%; margin-top: 10px; }
+    th, td { border: 1px solid #ccc; padding: 5px; text-align: left; }
+    input[type="number"] { width: 50px; }
+    button { margin-top: 10px; padding: 5px 10px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <h2>Iniciativa</h2>
+  
+  <div class="input-row">
+    <input type="text" id="nombre" placeholder="Nombre Enemigo">
+    <input type="number" id="bono" placeholder="Bono Destreza">
+    <button onclick="agregarEnemigo()">Añadir Enemigo</button>
+    <button onclick="vaciarTodo()">Vaciar Lista</button>
+  </div>
+  
+  <div id="lista"></div>
+  
+  <button onclick="tirarIniciativa()">Tirar Iniciativa</button>
+  <button onclick="nuevaRonda()">Nueva Ronda</button>
+  <h3>Ronda: <span id="ronda">0</span></h3>
+  
+  <div id="resultado"></div>
+  
+  <script>
+    // PJs predefinidos
+    let participantes = [
+      { nombre: "Mago", bono: 2 },
+      { nombre: "Paladín", bono: 1 },
+      { nombre: "Explorador", bono: 3 },
+      { nombre: "Pícaro", bono: 4 }
+    ];
+    let ronda = 0;
+
+    // Cargar lista y ronda desde localStorage
+    window.onload = function() {
+      let guardados = localStorage.getItem('participantes');
+      let rondaGuardada = localStorage.getItem('ronda');
+      if (guardados) participantes = JSON.parse(guardados);
+      if (rondaGuardada) ronda = parseInt(rondaGuardada);
+      document.getElementById('ronda').innerText = ronda;
+      mostrarLista();
+      mostrarResultado();
+    }
+
+    function guardarLista() {
+      localStorage.setItem('participantes', JSON.stringify(participantes));
+      localStorage.setItem('ronda', ronda);
+    }
+
+    function agregarEnemigo() {
+      let nombre = document.getElementById('nombre').value;
+      let bono = parseInt(document.getElementById('bono').value) || 0;
+      if (nombre) {
+        participantes.push({ nombre, bono });
+        guardarLista();
+        mostrarLista();
+        document.getElementById('nombre').value = '';
+        document.getElementById('bono').value = '';
+      }
+    }
+
+    function mostrarLista() {
+      let html = '<table><tr><th>Nombre</th><th>Bono</th><th>Acción</th></tr>';
+      participantes.forEach((p, i) => {
+        html += `<tr>
+                  <td>${p.nombre}</td>
+                  <td><input type="number" value="${p.bono}" onchange="editarBono(${i}, this.value)"></td>
+                  <td><button onclick="eliminar(${i})">X</button></td>
+                 </tr>`;
+      });
+      html += '</table>';
+      document.getElementById('lista').innerHTML = html;
+    }
+
+    function editarBono(index, valor) {
+      participantes[index].bono = parseInt(valor) || 0;
+      guardarLista();
+    }
+
+    function eliminar(index) {
+      participantes.splice(index, 1);
+      guardarLista();
+      mostrarLista();
+    }
+
+    function vaciarTodo() {
+      participantes = [];
+      ronda = 0;
+      document.getElementById('ronda').innerText = ronda;
+      document.getElementById('resultado').innerHTML = '';
+      localStorage.removeItem('participantes');
+      localStorage.removeItem('ronda');
+      mostrarLista();
+    }
+
+    function tirarIniciativa() {
+      participantes.forEach(p => {
+        p.tirada = Math.floor(Math.random() * 20) + 1 + p.bono;
+      });
+      participantes.sort((a, b) => b.tirada - a.tirada);
+      mostrarResultado();
+      guardarLista();
+    }
+
+    function mostrarResultado() {
+      if (participantes.length === 0) {
+        document.getElementById('resultado').innerHTML = '';
+        return;
+      }
+      let html = '<table><tr><th>Nombre</th><th>Tirada</th></tr>';
+      participantes.forEach(p => {
+        html += `<tr><td>${p.nombre}</td><td>${p.tirada !== undefined ? p.tirada : '-'}</td></tr>`;
+      });
+      html += '</table>';
+      document.getElementById('resultado').innerHTML = html;
+    }
+
+    function nuevaRonda() {
+      ronda++;
+      document.getElementById('ronda').innerText = ronda;
+      guardarLista();
+    }
+  </script>
+</body>
+</html>
