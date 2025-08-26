@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Calendario de Juego - Luz junto a Hora</title>
+<style>
+body {
+  font-family: "Trebuchet MS", sans-serif;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  padding: 20px;
+  gap: 40px;
+  background: #f5e0c3;
+}
+
+.left-panel, .right-panel {
+  border-radius: 8px;
+  padding: 15px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.left-panel {
+  width: 300px;
+  background: #fff;
+}
+
+.right-panel {
+  width: fit-content;       /* se ajusta al contenido */
+  max-width: 90vw;          /* opcional, para no salirse de la pantalla */
+  background-image: url('Textura Pergamino.png');
+  background-repeat: repeat-y;
+  background-size: 100% 100%; /* siempre cubre todo el contenedor */
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+h1 { margin-bottom: 10px; font-size: 20px; }
+
+.clock-line {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.clock-luz {
+  display: flex;
+  gap: 10px;
+  padding: 8px 12px;
+  border: 2px solid #444;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.7);
+}
+
+.clock, .luz {
+  font-weight: bold;
+  font-size: 24px;
+}
+
+.day {
+  text-align: center;
+  font-weight: bold;
+  font-size: 24px;
+  margin-bottom: 10px;
+  text-decoration: underline;
+}
+
+.controls, .event-creator {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+select, input, button { padding: 6px; font-size: 14px; }
+
+.log {
+  width: 100%;          /* Ocupa todo el ancho del pergamino */
+  max-width: 100%;      /* No excede el ancho del contenedor */
+  max-height: 400px;    /* Altura máxima */
+  overflow-y: auto;     /* Scroll solo vertical */
+  border-radius: 6px;
+  padding: 10px;
+  background: rgba(255,255,255,0.85); /* Fondo blanco translúcido */
+  backdrop-filter: blur(2px);
+  border: 1px solid rgba(0,0,0,0.2);
+  box-sizing: border-box; /* Importante para que padding no haga crecer el ancho */
+}
+.log::-webkit-scrollbar {
+  width: 8px;
+}
+.log::-webkit-scrollbar-track {
+  background: rgba(0,0,0,0.1);
+  border-radius: 4px;
+}
+.log::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.3);
+  border-radius: 4px;
+}
+.log-entry { margin-bottom: 5px; font-size: 14px; }
+.day-tag {
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: white;
+  margin-right: 5px;
+}
+</style>
+</head>
+<body>
+
+<div class="left-panel">
+  <h1>Calendario de Juego</h1>
+
+  <div class="controls">
+    <button onclick="resetTime()">Resetear Hora</button>
+    <button onclick="resetLog()">Resetear Registro</button>
+    <button onclick="saveState()">Guardar</button>
+    <button onclick="exportData()">Exportar</button>
+    <button onclick="importData()">Importar</button>
+  </div>
+
+  <div class="event-creator">
+    <select id="eventType">
+      <option value="Combate">Rondas de Combate contra</option>
+      <option value="Descanso Largo">Descanso largo en</option>
+      <option value="Descanso Corto">Descanso corto en</option>
+      <option value="Descanso">Descanso X en</option>
+      <option value="Viaje">Viaje a</option>
+      <option value="Investigación">Investigación de</option>
+      <option value="Pasa el tiempo">Pasa el tiempo</option>
+      <option value="Esperan a que">Esperan a que</option>
+      <option value="Evento">Evento:</option>
+    </select>
+    <input type="text" id="eventDetail" placeholder="Detalle">
+    <div style="display:flex; gap:5px;">
+      <input type="number" id="eventHours" placeholder="h" min="0" style="width:50px;">
+      <input type="number" id="eventMinutes" placeholder="m" min="0" style="width:50px;">
+    </div>
+    <button onclick="applyEvent()">Aplicar</button>
+  </div>
+</div>
+
+<div class="right-panel">
+  <div class="clock-line">
+    <span class="clock-luz">
+      <span class="clock" id="clock">Hora: 08:00</span>
+      <span class="luz" id="luz">— Día 🌞</span>
+    </span>
+  </div>
+  <div class="day" id="day">Día 1</div>
+  <div class="log" id="log"></div>
+</div>
+
+<script>
+let currentHour = parseInt(localStorage.getItem('currentHour')) || 8;
+let currentMinute = parseInt(localStorage.getItem('currentMinute')) || 0;
+let currentDay = parseInt(localStorage.getItem('currentDay')) || 1;
+let logData = JSON.parse(localStorage.getItem('logData')) || [];
+let lastDirectoryHandle = null;
+
+const dayColors = ["#3498db", "#27ae60", "#8e44ad", "#d35400", "#c0392b", "#16a085"];
+
+function updateDisplay() {
+  document.getElementById("clock").textContent = `Hora: ${String(currentHour).padStart(2,'0')}:${String(currentMinute).padStart(2,'0')}`;
+  document.getElementById("day").textContent = `Día ${currentDay}`;
+  updateLuz();
+}
+
+function updateLuz() {
+  const luzDiv = document.getElementById('luz');
+  const minutesTotal = currentHour*60 + currentMinute;
+  let texto = '';
+  let icono = '';
+  
+  if(minutesTotal >= 300 && minutesTotal < 360){ texto='Amaneciendo'; icono='🌅'; }
+  else if(minutesTotal >= 360 && minutesTotal < 480){ texto='Mañana'; icono='☀️'; }
+  else if(minutesTotal >= 480 && minutesTotal < 1080){ texto='Día'; icono='🌞'; }
+  else if(minutesTotal >= 1080 && minutesTotal < 1200){ texto='Atardecer'; icono='🌇'; }
+  else if(minutesTotal >= 1200 && minutesTotal < 1320){ texto='Crepúsculo'; icono='🌆'; }
+  else { texto='Noche'; icono='🌙'; }
+
+  luzDiv.textContent = `— ${texto} ${icono}`;
+}
+
+function saveState() {
+  localStorage.setItem('currentHour', currentHour);
+  localStorage.setItem('currentMinute', currentMinute);
+  localStorage.setItem('currentDay', currentDay);
+  localStorage.setItem('logData', JSON.stringify(logData));
+}
+
+function advanceTime(hours, minutes) {
+  currentMinute += minutes;
+  currentHour += hours;
+  while (currentMinute >= 60) { currentMinute -= 60; currentHour++; }
+  while (currentHour >= 24) { currentHour -= 24; currentDay++; }
+  updateDisplay();
+}
+
+function applyEvent() {
+  const type = document.getElementById("eventType").value;
+  const detail = document.getElementById("eventDetail").value.trim();
+  const hours = parseInt(document.getElementById("eventHours").value) || 0;
+  const minutes = parseInt(document.getElementById("eventMinutes").value) || 0;
+  if(hours===0 && minutes===0){ alert("Introduce una duración válida."); return; }
+
+  const startHour = currentHour;
+  const startMinute = currentMinute;
+
+  advanceTime(hours, minutes);
+
+  const endHour = currentHour;
+  const endMinute = currentMinute;
+
+  const eventText = `${type} ${detail}`;
+  const startTime = `${String(startHour).padStart(2,'0')}:${String(startMinute).padStart(2,'0')}`;
+  const endTime = `${String(endHour).padStart(2,'0')}:${String(endMinute).padStart(2,'0')}`;
+
+  const entry = {
+    day: currentDay,
+    text: `${eventText} (${startTime} → ${endTime})`,
+    color: dayColors[(currentDay-1) % dayColors.length]
+  };
+
+  logData.push(entry);
+  renderLog();
+  saveState();
+
+  document.getElementById("eventDetail").value = "";
+  document.getElementById("eventHours").value = "";
+  document.getElementById("eventMinutes").value = "";
+}
+
+function renderLog() {
+  const logDiv = document.getElementById("log");
+  logDiv.innerHTML = "";
+  logData.forEach(entry => {
+    const div = document.createElement("div");
+    div.className = "log-entry";
+    div.innerHTML = `<span class="day-tag" style="background:${entry.color};">[Día ${entry.day}]</span>${entry.text}`;
+    logDiv.appendChild(div);
+  });
+}
+
+function resetTime() {
+  if(confirm("¿Resetear hora y día al inicio?")){
+    currentHour=8; currentMinute=0; currentDay=1;
+    updateDisplay();
+    saveState();
+  }
+}
+
+function resetLog() {
+  if(confirm("¿Borrar todo el registro?")){
+    logData = [];
+    renderLog();
+    saveState();
+  }
+}
+
+// EXPORT / IMPORT
+async function getDirectoryHandle() {
+  if (lastDirectoryHandle) return lastDirectoryHandle;
+  lastDirectoryHandle = await window.showDirectoryPicker();
+  return lastDirectoryHandle;
+}
+
+async function exportData() {
+  try {
+    const dirHandle = await getDirectoryHandle();
+    const fileName = `Dia_${currentDay}_${String(currentHour).padStart(2,'0')}-${String(currentMinute).padStart(2,'0')}.json`;
+    const fileHandle = await dirHandle.getFileHandle(fileName, { create: true });
+    const writable = await fileHandle.createWritable();
+    await writable.write(JSON.stringify({hour: currentHour, minute: currentMinute, day: currentDay, log: logData}, null, 2));
+    await writable.close();
+    alert("Archivo exportado correctamente: "+fileName);
+  } catch(e) {
+    console.error(e);
+    alert("Error al exportar. Debes usar Chrome/Edge y permitir acceso a la carpeta.");
+  }
+}
+
+function importData() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  input.onchange = e => {
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = function(event) {
+      const data = JSON.parse(event.target.result);
+      currentHour = data.hour;
+      currentMinute = data.minute;
+      currentDay = data.day;
+      logData = data.log;
+      updateDisplay();
+      renderLog();
+      saveState();
+      alert("Archivo importado correctamente.");
+    }
+    reader.readAsText(file);
+  }
+  input.click();
+}
+
+// Inicializar
+updateDisplay();
+renderLog();
+</script>
+
+</body>
+</html>

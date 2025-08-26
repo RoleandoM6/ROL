@@ -2,16 +2,11 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Iniciativa Enemigos Compacta</title>
+<title>Tirada de Iniciativa</title>
 <style>
   html, body { height: 100%; margin: 0; font-family: Arial, sans-serif; background: #ccc; }
-  body {
-    display: flex;
-    justify-content: center; 
-    align-items: center;     
-  }
+  body { display: flex; justify-content: center; align-items: center; }
 
-  /* Marco negro y fondo de pergamino */
   #marco {
     border: 3px solid black;
     background-image: url('Textura Pergamino.png');
@@ -22,67 +17,67 @@
     align-items: center;
   }
 
-  #contenedor {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-width: 300px;
-  }
+  #contenedor { display: flex; flex-direction: column; align-items: center; min-width: 300px; }
 
-  .input-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 2px;
-    margin-bottom: 3px;
-    font-size: 14px;
-    font-weight: bold;
-  }
-
+  .input-row { display: flex; flex-wrap: wrap; gap: 2px; margin-bottom: 3px; font-size: 14px; font-weight: bold; }
   .input-row input[type="text"] { width: auto; min-width: 70px; padding: 3px; font-weight: normal; }
   .input-row input[type="number"] { width: 40px; padding: 3px; font-weight: normal; }
   .input-row button { padding: 3px 6px; font-size: 13px; cursor: pointer; font-weight: bold; }
   button:disabled { opacity: 0.5; cursor: not-allowed; }
 
   table { border-collapse: collapse; font-size: 14px; font-weight: bold; margin: 0; width: 100%; }
-  th, td { border: 1px solid #000; padding: 2px 5px; text-align: left; white-space: nowrap; 
-           background-color: rgba(255,255,255,0.8); /* halo blanco interior */ }
+  th, td { border: 1px solid #000; padding: 2px 5px; text-align: left; white-space: nowrap; background-color: rgba(255,255,255,0.8); }
   input[type="number"].small { width: 35px; padding: 2px; font-size: 13px; font-weight: normal; }
+  input[type="number"].player { background-color: #fff2cc; } /* color crema para jugadores */
   button.small { padding: 2px 5px; font-size: 13px; font-weight: bold; }
-
 </style>
 </head>
 <body>
-  <div id="marco">
-    <div id="contenedor">
-      <h2 style="margin:2px 0;">Iniciativa Enemigos</h2>
+<div id="marco">
+  <div id="contenedor">
+    <h2 style="margin:2px 0;">Tirada de Iniciativa</h2>
 
-      <div class="input-row">
-        <input type="text" id="nombre" placeholder="Nombre">
-        <input type="number" id="bono" placeholder="Bono">
-        <input type="number" id="cantidad" placeholder="Cant." value="1" min="1">
-        <button onclick="agregarEnemigo()" class="small">Añadir</button>
-        <button onclick="vaciarTodo()" class="small">Vaciar</button>
-        <button onclick="tirarIniciativa()" class="small">Tirar Ini.</button>
-      </div>
-
-      <div id="lista"></div>
-      <div id="resultado"></div>
+    <div class="input-row">
+      <input type="text" id="nombre" placeholder="Nombre">
+      <input type="number" id="bono" placeholder="Bono">
+      <input type="number" id="cantidad" placeholder="Cant." value="1" min="1">
+      <button onclick="agregarEnemigo()" class="small">Añadir</button>
+      <button onclick="vaciarTodo()" class="small">Vaciar</button>
+      <button onclick="tirarIniciativa()" class="small">Tirar Ini.</button>
+      <button onclick="ordenarTabla()" class="small">Ordenar Tabla</button>
     </div>
+
+    <div id="lista"></div>
   </div>
+</div>
 
 <script>
+let jugadoresBase = [
+  {nombre:"Mago", bono:2, tirada:undefined},
+  {nombre:"Paladín", bono:1, tirada:undefined},
+  {nombre:"Explorador", bono:3, tirada:undefined},
+  {nombre:"Pícaro", bono:4, tirada:undefined}
+];
+
 let participantes = [];
 
 window.onload = function() {
   let guardados = localStorage.getItem('participantes');
-  if (guardados) participantes = JSON.parse(guardados);
+  if (guardados) {
+    participantes = JSON.parse(guardados);
+  }
+
+  // Asegurar que los 4 jugadores estén siempre presentes
+  jugadoresBase.forEach(j => {
+    if (!participantes.some(p => p.nombre === j.nombre)) {
+      participantes.unshift({...j}); // añadir al inicio
+    }
+  });
+
   mostrarLista();
-  mostrarResultado();
 }
 
-function guardarLista() {
-  localStorage.setItem('participantes', JSON.stringify(participantes));
-}
+function guardarLista() { localStorage.setItem('participantes', JSON.stringify(participantes)); }
 
 function agregarEnemigo() {
   let nombre = document.getElementById('nombre').value.trim();
@@ -112,64 +107,52 @@ function agregarEnemigo() {
 }
 
 function mostrarLista() {
-  if (participantes.length === 0) {
-    document.getElementById('lista').innerHTML = '';
-    return;
+  if (participantes.length === 0) { 
+    document.getElementById('lista').innerHTML = ''; 
+    return; 
   }
-  let html = '<table><tr><th>Nombre</th><th>Bono</th><th>Acción</th></tr>';
+  let html = '<table><tr><th>#</th><th>Nombre</th><th>Bono</th><th>Tirada</th><th>Acción</th></tr>';
   participantes.forEach((p, i) => {
+    let esJugador = jugadoresBase.some(j=>j.nombre===p.nombre);
     html += `<tr>
+      <td>${i+1}</td>
       <td>${p.nombre}</td>
-      <td><input type="number" class="small" value="${p.bono}" onchange="editarBono(${i}, this.value)" ${p.tirada !== undefined ? 'disabled' : ''}></td>
-      <td><button class="small" onclick="eliminar(${i})" ${p.tirada !== undefined ? 'disabled' : ''}>X</button></td>
+      <td><input type="number" class="small" value="${p.bono}" onchange="editarBono(${i}, this.value)"></td>
+      <td><input type="number" class="small ${esJugador?'player':''}" value="${p.tirada!==undefined?p.tirada:''}" onchange="editarTirada(${i}, this.value)"></td>
+      <td><button class="small" onclick="eliminar(${i})" ${esJugador?'disabled':''}>X</button></td>
     </tr>`;
   });
   html += '</table>';
   document.getElementById('lista').innerHTML = html;
 }
 
-function editarBono(index, valor) {
-  participantes[index].bono = parseInt(valor) || 0;
-  guardarLista();
-}
-
-function eliminar(index) {
-  participantes.splice(index, 1);
-  guardarLista();
-  mostrarLista();
-}
+function editarBono(index, valor) { participantes[index].bono = parseInt(valor)||0; guardarLista(); }
+function editarTirada(index, valor) { participantes[index].tirada = parseInt(valor)||0; guardarLista(); }
+function eliminar(index) { participantes.splice(index,1); guardarLista(); mostrarLista(); }
 
 function vaciarTodo() {
-  participantes = [];
-  document.getElementById('resultado').innerHTML = '';
-  localStorage.removeItem('participantes');
+  // Solo conservar los PJs
+  participantes = participantes.filter(p => jugadoresBase.some(j=>j.nombre===p.nombre));
+  participantes.forEach(p => p.tirada = undefined);
+  guardarLista();
   mostrarLista();
 }
 
 function tirarIniciativa() {
-  participantes.forEach(p => {
-    if (p.tirada === undefined) {
-      p.tirada = Math.floor(Math.random() * 10) + Math.floor(Math.random() * 10) + 1 + p.bono;
-    }
+  participantes.forEach(p => { 
+    let esJugador = jugadoresBase.some(j=>j.nombre===p.nombre);
+    if(p.tirada===undefined && !esJugador) 
+      p.tirada=Math.floor(Math.random()*10)+Math.floor(Math.random()*10)+1+p.bono; 
   });
   participantes.sort((a,b)=>(b.tirada||0)-(a.tirada||0));
-  mostrarResultado();
   mostrarLista();
   guardarLista();
 }
 
-function mostrarResultado() {
-  if (participantes.length === 0) {
-    document.getElementById('resultado').innerHTML = '';
-    return;
-  }
-  // Misma tabla que la de arriba
-  let html = '<table><tr><th>Nombre</th><th>Tirada</th></tr>';
-  participantes.forEach(p => {
-    html += `<tr><td>${p.nombre}</td><td>${p.tirada !== undefined ? p.tirada : '-'}</td></tr>`;
-  });
-  html += '</table>';
-  document.getElementById('resultado').innerHTML = html;
+function ordenarTabla() {
+  participantes.sort((a,b)=>(b.tirada||0)-(a.tirada||0));
+  mostrarLista();
+  guardarLista();
 }
 </script>
 </body>

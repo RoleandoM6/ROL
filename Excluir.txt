@@ -1,6 +1,9 @@
 1. Dados
 2. Mapamundi
-3. Iniciativa
+3.1 Barra de Iniciativa + Condiciones + PV
+3.2 Ronda
+3.3 Tirada de Iniciativa
+3.4 Tiempo
 4. Hojas PJ
 Majunji
 5. Mapas

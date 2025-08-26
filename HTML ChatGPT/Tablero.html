@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Tablero de Juego Completo</title>
+<style>
+body { margin:0; background:#222; color:white; font-family:sans-serif; display:flex; flex-direction:column; align-items:center; }
+#viewport { width:1920px; height:1080px; position:relative; overflow:hidden; border:2px solid #555; margin-bottom:10px; background:#111; }
+#map-layer, #ficha-layer, #efecto-layer, #flecha-layer { position:absolute; top:0; left:0; width:7680px; height:4320px; }
+#ficha-layer, #efecto-layer, #flecha-layer { pointer-events:auto; }
+.ficha, .efecto { position:absolute; background-size:contain; background-repeat:no-repeat; cursor:pointer; }
+#dropzones { display:flex; gap:10px; margin-bottom:10px; }
+.dropzone { width:150px; height:100px; border:2px dashed #888; display:flex; justify-content:center; align-items:center; background:#333; }
+.dropzone.dragover { border-color: lime; }
+#controls { margin-bottom:10px; display:flex; gap:10px; }
+.flecha { position:absolute; border:2px solid yellow; pointer-events:none; transform-origin:0 0; }
+</style>
+</head>
+<body>
+
+<div id="dropzones">
+  <div class="dropzone" id="drop-map">MAPAS</div>
+  <div class="dropzone" id="drop-ficha">FICHAS</div>
+  <div class="dropzone" id="drop-efecto">EFECTOS</div>
+</div>
+
+<div id="controls">
+  <button onclick="guardarManual()">Guardar Manual</button>
+  <button onclick="medir()">Medir (Agregar Flecha)</button>
+  Tamaño ficha: <input type="number" id="size" value="50" min="10" max="200">
+</div>
+
+<div id="viewport">
+  <div id="map-layer"></div>
+  <div id="ficha-layer"></div>
+  <div id="efecto-layer"></div>
+  <div id="flecha-layer"></div>
+</div>
+
+<script>
+const mapLayer = document.getElementById('map-layer');
+const fichaLayer = document.getElementById('ficha-layer');
+const efectoLayer = document.getElementById('efecto-layer');
+const flechaLayer = document.getElementById('flecha-layer');
+
+let offsetX = 0, offsetY = 0, startX, startY;
+let draggingMap = false, draggingFicha = null;
+let fichas = [], efectos = [], flechas = [];
+
+/* --- Drag & Drop --- */
+document.querySelectorAll('.dropzone').forEach(zone => {
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+  zone.addEventListener('drop', e => {
+    e.preventDefault(); zone.classList.remove('dragover');
+    const file = e.dataTransfer.files[0]; if(!file.type.startsWith('image/')) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      if(zone.id==='drop-map'){ mapLayer.style.backgroundImage=`url(${ev.target.result})`; mapLayer.style.backgroundSize='cover'; }
+      else if(zone.id==='drop-ficha'){ addFicha(ev.target.result, parseInt(document.getElementById('size').value)); }
+      else if(zone.id==='drop-efecto'){ addEfecto(ev.target.result,150); }
+    };
+    reader.readAsDataURL(file);
+  });
+});
+
+/* --- Añadir fichas y efectos --- */
+function addFicha(src, size){
+  let f = document.createElement('div'); f.className='ficha';
+  f.style.width=size+'px'; f.style.height=size+'px'; f.style.left='100px'; f.style.top='100px';
+  f.style.backgroundImage=`url(${src})`; fichaLayer.appendChild(f);
+  f.addEventListener('mousedown', e=>{ draggingFicha=f; offsetX=e.offsetX; offsetY=e.offsetY; e.stopPropagation(); });
+  fichas.push(f);
+}
+function addEfecto(src,size){
+  let e = document.createElement('div'); e.className='efecto';
+  e.style.width=size+'px'; e.style.height=size+'px'; e.style.left='500px'; e.style.top='500px';
+  e.style.backgroundImage=`url(${src})`; efectoLayer.appendChild(e); efectos.push(e);
+}
+
+/* --- Medir con flechas --- */
+let measuring=false, startMeasure=null;
+function medir(){ measuring=true; alert('Click para inicio de flecha, luego click para final.'); }
+
+flechaLayer.addEventListener('click', e=>{
+  if(!measuring) return;
+  const rect=flechaLayer.getBoundingClientRect();
+  if(!startMeasure){ startMeasure={x:e.clientX-rect.left,y:e.clientY-rect.top}; }
+  else{
+    const end={x:e.clientX-rect.left,y:e.clientY-rect.top};
+    const dx=end.x-startMeasure.x, dy=end.y-startMeasure.y;
+    let line=document.createElement('div'); line.className='flecha';
+    line.style.width=Math.hypot(dx,dy)+'px';
+    line.style.height='0px';
+    line.style.left=startMeasure.x+'px';
+    line.style.top=startMeasure.y+'px';
+    line.style.transform=`rotate(${Math.atan2(dy,dx)}rad)`;
+    flechaLayer.appendChild(line);
+    flechas.push({x:startMeasure.x,y:startMeasure.y,dx,dy});
+    startMeasure=null; measuring=false;
+  }
+});
+
+/* --- Movimiento de mapa --- */
+mapLayer.parentElement.addEventListener('mousedown', e=>{
+  if(e.target.classList.contains('ficha')||e.target.classList.contains('efecto')) return;
+  draggingMap=true; startX=e.clientX-offsetX; startY=e.clientY-offsetY; mapLayer.style.cursor='grabbing';
+});
+document.addEventListener('mouseup',()=>{ draggingMap=false; draggingFicha=null; mapLayer.style.cursor='grab'; guardarAutomatico(); });
+document.addEventListener('mousemove',e=>{
+  if(draggingMap){ offsetX=e.clientX-startX; offsetY=e.clientY-startY; mapLayer.style.transform=`translate(${offsetX}px,${offsetY}px)`; fichaLayer.style.transform=`translate(${offsetX}px,${offsetY}px)`; efectoLayer.style.transform=`translate(${offsetX}px,${offsetY}px)`; flechaLayer.style.transform=`translate(${offsetX}px,${offsetY}px)`; }
+  else if(draggingFicha){
+    let rect=fichaLayer.getBoundingClientRect();
+    draggingFicha.style.left=(e.clientX-rect.left-offsetX)+'px';
+    draggingFicha.style.top=(e.clientY-rect.top-offsetY)+'px';
+  }
+});
+
+/* --- Guardado automático --- */
+function guardarAutomatico(){
+  const data={
+    mapa: mapLayer.style.backgroundImage||'',
+    mapOffset:{x:offsetX,y:offsetY},
+    fichas:fichas.map(f=>({src:f.style.backgroundImage.slice(5,-2),left:f.style.left,top:f.style.top,width:f.style.width,height:f.style.height})),
+    efectos:efectos.map(e=>({src:e.style.backgroundImage.slice(5,-2),left:e.style.left,top:e.style.top,width:e.style.width,height:e.style.height})),
+    flechas
+  };
+  localStorage.setItem('tableroGuardado',JSON.stringify(data));
+}
+
+/* --- Guardado manual --- */
+function guardarManual(){
+  guardarAutomatico();
+  const json=localStorage.getItem('tableroGuardado');
+  const blob=new Blob([json],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download='tablero.json'; a.click(); URL.revokeObjectURL(url);
+}
+
+/* --- Cargar automático al abrir --- */
+window.addEventListener('load',()=>{
+  const saved=localStorage.getItem('tableroGuardado'); if(!saved) return;
+  const data=JSON.parse(saved);
+  mapLayer.style.backgroundImage=data.mapa;
+  offsetX=data.mapOffset.x||0; offsetY=data.mapOffset.y||0;
+  mapLayer.style.transform=`translate(${offsetX}px,${offsetY}px)`; fichaLayer.style.transform=`translate(${offsetX}px,${offsetY}px)`; efectoLayer.style.transform=`translate(${offsetX}px,${offsetY}px)`; flechaLayer.style.transform=`translate(${offsetX}px,${offsetY}px)`;
+  fichaLayer.innerHTML=''; efectoLayer.innerHTML=''; flechaLayer.innerHTML='';
+  data.fichas.forEach(f=>addFicha(f.src,parseInt(f.width)));
+  data.fichas.forEach((f,i)=>{ let el=fichaLayer.children[i]; el.style.left=f.left; el.style.top=f.top; el.style.width=f.width; el.style.height=f.height; });
+  data.efectos.forEach(e=>addEfecto(e.src,parseInt(e.width)));
+  data.efectos.forEach((e,i)=>{ let el=efectoLayer.children[i]; el.style.left=e.left; el.style.top=e.top; el.style.width=e.width; el.style.height=e.height; });
+  if(data.flechas) data.flechas.forEach(fl=>{ let line=document.createElement('div'); line.className='flecha'; line.style.width=Math.hypot(fl.dx,fl.dy)+'px'; line.style.height='0px'; line.style.left=fl.x+'px'; line.style.top=fl.y+'px'; line.style.transform=`rotate(${Math.atan2(fl.dy,fl.dx)}rad)`; flechaLayer.appendChild(line); });
+});
+
+/* --- Guardar cada 5 segundos --- */
+setInterval(guardarAutomatico,5000);
+</script>
+</body>
+</html>
