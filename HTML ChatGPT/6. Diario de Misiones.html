@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Diario de Misiones</title>
+<style>
+  /* Fuentes */
+  @import url('https://fonts.googleapis.com/css2?family=IM+Fell+English&display=swap');
+
+  :root{
+    --bg:#24190f;
+    --panel:#f6eee3;
+    --ink:#1b120c;
+    --accent:#7a4b2b;
+    --danger:#7b1d1d;
+    --muted:#6b5a4a;
+  }
+
+  html,body{height:100%;margin:0;padding:0;font-family: 'IM Fell English', serif;background: #00FF00; /* Verde Croma */ color:var(--ink);}
+
+  .centered-wrapper {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center; /* centra horizontalmente */
+  align-items: flex-start; /* pega al top */
+  background: #00FF00;
+  overflow: hidden;
+  padding-top: 10px; /* opcional, un pequeño margen superior */
+}
+
+/* Escalar la wrap proporcionalmente */
+.wrap {
+  width: 1920px;
+  height: 1080px;
+  transform-origin: top left;
+  transform: scale(calc(min(100vw / 1920, 100vh / 1080)));
+}
+
+  header{
+    display:flex; gap:16px; align-items:center; justify-content:space-between;
+    margin-bottom:12px;
+  }
+  header h1{
+    margin:0; font-size:20px; color:#f3e7d7; text-shadow: 2px 2px 0 rgba(0,0,0,0.6);
+    display:flex; align-items:center; gap:12px;
+  }
+
+  /* Controls */
+  .controls { display:flex; gap:8px; align-items:center; }
+  .btn {
+    background:var(--accent); color:var(--panel); padding:8px 12px; border-radius:8px;
+    border:2px solid rgba(0,0,0,0.25); cursor:pointer; box-shadow:0 2px 0 rgba(0,0,0,0.4);
+    font-weight:700; font-family:inherit;
+  }
+  .btn.alt { background:#cf610c; border:2px dashed #8b5e3c; color:var(--panel); }
+  .btn.warn { background:var(--danger); }
+  .btn.small { padding:6px 8px; font-size:12px; border-radius:6px; }
+
+  .btnComplete {
+  background: #e2be20; /* verde intenso */
+  color: #000000;          /* texto blanco */
+  border: 2px solid #000000;
+}
+
+.btnActive {
+  background: #ff0000; /* rojo intenso */
+  color: #000000;          /* texto blanco */
+  border: 2px solid #000000;
+}
+
+
+  /* Layout panels */
+  .grid { display:grid; grid-template-columns: 1fr 360px; gap:14px; }
+  .main {
+    background: linear-gradient(180deg, rgba(246,238,227,0.98), rgba(238,226,210,0.96));
+    border: 3px solid rgba(120,70,40,0.9); border-radius:14px; padding:12px; /*box-shadow: 0 6px 18px rgba(0,0,0,0.6);*/
+    min-height:520px;
+  }
+  .side {
+    background: linear-gradient(180deg,#efe6d5,#eee0c8);
+    border: 2px solid rgba(120,70,40,0.8); border-radius:12px; padding:12px; /*box-shadow: 0 4px 14px rgba(0,0,0,0.5);*/
+    height:520px; overflow:auto;
+  }
+
+  /* Panels for categories */
+  .category-row { display:flex; gap:10px; align-items:center; margin-bottom:8px; }
+  .filter { padding:8px; border-radius:8px; border:2px solid rgba(0,0,0,0.12); background:#fff6ed; }
+
+  .columns-wrapper {
+  width: 100%;
+  max-width: 1920px;
+  margin: 0 auto;
+  aspect-ratio: 16 / 9; /* proporción 1080p */
+  background: rgba(0,0,0,0); /* transparente para chroma */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  transform-origin: top left;
+}
+
+/* Escalar el contenido interno al tamaño del wrapper */
+.columns-wrapper .columns {
+  width: 1920px;
+  height: 1080px;
+}
+
+/* Escalado automático */
+@media (max-width:1920px) {
+  .columns-wrapper {
+    transform: scale(calc(100vw / 1920));
+  }
+}
+@media (max-height:1080px) {
+  .columns-wrapper {
+    transform: scale(calc(100vh / 1080));
+  }
+}
+
+
+  .columns {
+  display: flex;
+  gap: 12px;
+}
+
+.col {
+  flex: 1 1 0; /* permite que crezca y se encoja según el espacio */
+  min-height: 420px;
+  background: linear-gradient(180deg, rgba(255,250,245,0.98), rgba(245,238,225,0.98));
+  border: 3px solid #8b5e3c;
+  border-radius: 10px;
+  padding: 10px;
+  overflow: auto;
+  display: flex;        /* añadir */
+  flex-direction: column; /* añadir */
+}
+
+  .col h2{ 
+    margin:0 0 8px 0; 
+    font-size:20px; 
+    color:var(--muted); 
+    text-transform:uppercase; 
+    font-weight:900; 
+    letter-spacing:0.04em; 
+    text-align: center;      /* CENTRAR texto */}
+
+  .card {
+    background: linear-gradient(180deg,#fffaf1,#fff5ea);
+    border: 3px solid #7a4b2b; /* borde completo */
+    border-left-width: 5px;     /* borde izquierdo más grueso */
+    margin-bottom:10px;
+    padding:10px;
+    border-radius:8px;
+    box-shadow: inset 0 -6px 8px rgba(120,70,40,0.02);
+}
+
+  .card .meta { display:flex; gap:8px; align-items:center; justify-content:space-between; margin-bottom:6px; }
+  .card h3{ margin:0; font-size:20px; }
+  .smallmuted { font-size:18px; color:var(--muted); }
+
+  .card p{ margin:6px 0 8px 0; font-size:18px; line-height:1.5; color:#2a1f18; }
+
+  .card .actions { display:flex; gap:6px; justify-content:flex-end; }
+  .pill { padding:6px 8px; border-radius:8px; background:rgba(0,0,0,0.04); font-size:12px; }
+
+  /* Form */
+  form { display:flex; flex-direction:column; gap:8px; margin-bottom:8px; }
+  label { font-size:18px; color:var(--muted); }
+  input[type="text"], textarea, select {
+    width:100%; padding:8px; border-radius:8px; border:2px solid rgba(0,0,0,0.08); font-family:inherit;
+    background:rgba(255,255,255,0.96);
+  }
+  textarea { min-height:80px; resize:vertical; }
+
+  footer { margin-top:12px; display:flex; justify-content:space-between; align-items:center; gap:8px; color: #e9dfd3; font-size:20px; }
+
+  .info { font-size:20px; color:#e9dfd3; opacity:0.95; }
+
+  /* Tiny responsive */
+  @media (max-width:980px){
+    .grid{ grid-template-columns: 1fr; }
+    .side{ height:auto; }
+    .main{ min-height:auto; }
+    .columns{ flex-direction:column; }
+  }
+
+/* Oculta la sección de export/import y último guardado en el aside */
+#btnExportNow,
+#btnImportNow,
+#lastSaved {
+  display: none;
+}
+
+
+</style>
+</head>
+<body>
+  <div class="centered-wrapper">
+  <div class="wrap">
+    <header>
+      <div class="controls">
+        <button class="btn" id="btnAdd">+ Añadir Misión</button>
+        <button class="btn alt" id="btnSave">Guardar (Local)</button>
+        <button class="btn small" id="btnExport">Exportar JSON</button>
+        <label class="btn small alt" for="fileImport" style="margin:0"><input id="fileImport" type="file" accept="application/json" style="display:none" />Importar JSON</label>
+        <button class="btn warn small" id="btnClear">Borrar todo</button>
+      </div>
+    </header>
+
+    <div class="grid">
+      <section class="main">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:10px;">
+          <div style="display:inline-flex; align-items:center;">
+  <img src="Diario de Misiones.png" 
+       alt="Logo" 
+       style="width:54px; height:54px; border-radius:8px; object-fit:contain; margin-right:8px;">
+  <span style="font-size:20px; opacity:0.9; color:rgb(0, 0, 0); font-weight:bold;">Diario de Misiones — La Marca del Errante</span>
+</div>
+
+          <div style="display:flex;gap:8px;align-items:center;">
+            <div class="smallmuted" id="storageInfo">Estado: no guardado</div>
+            <div class="smallmuted" id="sizeInfo"></div>
+          </div>
+        </div>
+
+        <!-- Form (oculto por defecto) -->
+        <div id="formContainer" style="display:none;border:2px dashed rgba(120,70,40,0.4);padding:10px;border-radius:8px;margin-bottom:10px;background:linear-gradient(180deg,#fffaf1,#fff5ea);">
+          <form id="missionForm">
+            <input type="hidden" id="missionId" />
+            <div style="display:flex;gap:8px;">
+              <div style="flex:1;">
+                <label>Título</label>
+                <input id="title" type="text" required placeholder="Título de la misión (breve)" />
+              </div>
+              <div style="width:140px;">
+                <label>Categoría</label>
+                <select id="category">
+                  <option value="activa">Activa</option>
+                  <option value="rumor">Rumor</option>
+                  <option value="completada">Completada</option>
+                </select>
+              </div>
+            </div>
+
+            <label>Descripción</label>
+            <textarea id="description" placeholder="Descripción completa, objetivos y detalles..."></textarea>
+
+            <div style="display:flex;gap:8px;">
+              <div style="flex:1;">
+                <label>Recompensa (BTC)</label>
+                <input id="reward" type="text" placeholder="Ej: 120" />
+              </div>
+              
+            </div>
+
+            <label>Notas rápidas</label>
+            <textarea id="notes" placeholder="Notas de la mesa, pistas, NPCs, consecuencias..." style="min-height:50px"></textarea>
+
+            <div style="display:flex;gap:8px;justify-content:flex-end;">
+              <button type="button" class="btn alt" id="btnCancel">Cancelar</button>
+              <button type="submit" class="btn">Guardar Misión</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Columns: Activas / Rumores / Completadas -->
+         <div class="columns-wrapper">
+        <div class="columns">
+          <div class="col" id="colActiva">
+            <h2>Misiones Activas</h2>
+            <div id="listActiva"></div>
+          </div>
+
+          <div class="col" id="colRumor">
+            <h2>Rumores</h2>
+            <div id="listRumor"></div>
+          </div>
+
+          <div class="col" id="colCompletada">
+            <h2>Completadas</h2>
+            <div id="listCompletada"></div>
+          </div>
+        </div>
+        </div>
+
+      </section>
+
+      <aside class="side">
+        <strong>Filtro & Herramientas</strong>
+        <div style="margin-top:8px;">
+          <div class="category-row">
+            <label class="filter"><input type="checkbox" id="hideActive" /> Ocultar Activas</label>
+            <label class="filter"><input type="checkbox" id="hideRumor" /> Ocultar Rumores</label>
+            <label class="filter"><input type="checkbox" id="hideCompleted" /> Ocultar Completadas</label>
+          </div>
+
+          <div style="margin-top:10px;">
+            <label>Buscar</label>
+            <input id="search" type="text" placeholder="Buscar por título, descripción o notas..." />
+          </div>
+
+          <div style="margin-top:12px;">
+            <strong>Importante</strong>
+            <p class="smallmuted">Puedes convertir un Rumor en Misión Activa si lo marcas como Completado y lo Reactivas.</p>
+          </div>
+
+          <div style="margin-top:10px; display:flex; gap:8px;">
+            <button class="btn small" id="btnExportNow">Exportar ahora</button>
+            <button class="btn alt small" id="btnImportNow">Importar archivo</button>
+          </div>
+
+          <div>
+            <strong>-----</strong>
+            <div id="lastSaved" class="info" style="margin-top:6px">Nunca</div>
+          </div>
+        </div>
+
+      </aside>
+    </div>
+  </div>
+  
+
+<script>
+/* Diario de Misiones — JavaScript
+   Características:
+   - Guardado automático en LocalStorage (clave: diarioMisiones_v1)
+   - Botón Guardar explícito
+   - Exportar JSON con nombre: "Estado Diario de Misiones.json"
+   - Importar JSON (reemplaza)
+   - Añadir / Editar / Borrar / Marcar como completada
+   - Muestra tamaño de datos y advertencia
+*/
+
+// KEY for localStorage
+const STORAGE_KEY = 'diarioMisiones_v1';
+const filenameBase = 'Estado Diario de Misiones.json';
+
+let missions = []; // array of mission objects
+let autosaveEnabled = true;
+let autosaveDebounceTimer = null;
+
+// util: generate id
+function uid(){ return 'm_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,8); }
+
+// util: format date
+function nowStr(){
+  const d = new Date();
+  return d.toLocaleString('es-ES', { year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' });
+}
+
+// Save to localStorage
+function saveLocal(showToast=true){
+  try {
+    const payload = { version:1, savedAt: new Date().toISOString(), missions };
+    const s = JSON.stringify(payload);
+    localStorage.setItem(STORAGE_KEY, s);
+    const lastSavedEl = document.getElementById('lastSaved');
+    lastSavedEl.textContent = new Date().toLocaleString('es-ES');
+    document.getElementById('storageInfo').textContent = 'Guardado local ✔';
+    updateSizeInfo(s.length);
+    if(showToast) flashStatus('Guardado en LocalStorage');
+  } catch(e){
+    console.error('Error guardando en LocalStorage', e);
+    alert('Error al guardar en LocalStorage: ' + (e && e.message ? e.message : String(e)));
+  }
+}
+
+// Load from localStorage
+function loadLocal(){
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if(!raw) return false;
+  try {
+    const parsed = JSON.parse(raw);
+    if(parsed && Array.isArray(parsed.missions)){
+      missions = parsed.missions;
+      renderAll();
+      document.getElementById('lastSaved').textContent = new Date(parsed.savedAt || Date.now()).toLocaleString('es-ES');
+      document.getElementById('storageInfo').textContent = 'Cargado desde LocalStorage';
+      updateSizeInfo(raw.length);
+      return true;
+    }
+  } catch(e){
+    console.error('Error cargando LocalStorage', e);
+  }
+  return false;
+}
+
+// update size info and warn
+function updateSizeInfo(bytes){
+  const kb = Math.round(bytes/1024);
+  const el = document.getElementById('sizeInfo');
+  el.textContent = kb + ' KB';
+  // warn if too large (>4MB)
+  const warnEl = document.getElementById('storageInfo');
+  if(bytes > 4*1024*1024){
+    warnEl.textContent = '⚠ Datos muy grandes para LocalStorage (riesgo)';
+    warnEl.style.color = '#ffd6d6';
+  } else {
+    warnEl.style.color = '';
+  }
+}
+
+// Flash small status text
+function flashStatus(msg){
+  const el = document.getElementById('storageInfo');
+  const old = el.textContent;
+  el.textContent = msg;
+  setTimeout(()=> el.textContent = 'Guardado local ✔', 1200);
+}
+
+// Filtrado de ocultar Rumores / Completadas
+const hideActiveCheckbox = document.getElementById('hideActive');
+const hideRumorCheckbox = document.getElementById('hideRumor');
+const hideCompletedCheckbox = document.getElementById('hideCompleted');
+
+hideActiveCheckbox.addEventListener('change', () => renderAll());
+hideRumorCheckbox.addEventListener('change', () => renderAll());
+hideCompletedCheckbox.addEventListener('change', () => renderAll());
+
+function renderAll() {
+  // limpiar listas
+  ['listActiva','listRumor','listCompletada'].forEach(id => document.getElementById(id).innerHTML = '');
+  const q = document.getElementById('search').value.toLowerCase();
+  const hideRumor = hideRumorCheckbox.checked;
+  const hideCompleted = hideCompletedCheckbox.checked;
+
+  missions.forEach(m => {
+    // filtro búsqueda
+    if(q){
+      const hay = (m.title+m.description+m.notes+(m.reward||'')).toLowerCase();
+      if(!hay.includes(q)) return;
+    }
+
+    // filtro ocultar categorías
+    if((hideRumor && m.category === 'rumor') || (hideCompleted && m.category === 'completada')) return;
+
+    const card = document.createElement('div'); 
+    card.className = 'card';
+
+    const meta = document.createElement('div'); 
+    meta.className = 'meta';
+    const h3 = document.createElement('h3'); 
+    h3.textContent = m.title;
+    const metaRight = document.createElement('div');
+    metaRight.className = 'smallmuted';
+    metaRight.innerHTML = (m.reward ? 'Recompensa: <strong>' + String(m.reward) + ' BTC</strong>' : '');
+    meta.appendChild(h3); 
+    meta.appendChild(metaRight);
+    card.appendChild(meta);
+
+    const p = document.createElement('p'); 
+    p.textContent = m.description || '';
+    card.appendChild(p);
+
+    if(m.notes){
+      const note = document.createElement('div'); 
+      note.className='smallmuted'; 
+      note.style.marginBottom='8px'; 
+      note.textContent = 'Notas: ' + m.notes;
+      card.appendChild(note);
+    }
+
+    const actions = document.createElement('div'); 
+    actions.className = 'actions';
+    const btnEdit = document.createElement('button'); 
+    btnEdit.className='btn small'; 
+    btnEdit.textContent='Editar';
+    btnEdit.onclick = ()=> openForm(m.id);
+    const btnDelete = document.createElement('button'); 
+    btnDelete.className='btn warn small'; 
+    btnDelete.textContent='Eliminar';
+    btnDelete.onclick = ()=> { if(confirm('Borrar esta misión?')) { missions = missions.filter(x=> x.id !== m.id); scheduleSave(); renderAll(); } };
+    const btnToggle = document.createElement('button');
+    btnToggle.className = 'btn small';
+    if(m.category !== 'completada') { 
+      btnToggle.textContent = 'Marcar completada'; 
+      btnToggle.classList.add('btnComplete');
+      btnToggle.onclick = ()=> { m.category='completada'; scheduleSave(); renderAll(); }; 
+    } else { 
+      btnToggle.textContent = 'Marcar activa'; 
+      btnToggle.classList.add('btnActive');
+      btnToggle.onclick = ()=> { m.category='activa'; scheduleSave(); renderAll(); }; 
+    }
+
+    actions.appendChild(btnToggle);
+    actions.appendChild(btnEdit);
+    actions.appendChild(btnDelete);
+    card.appendChild(actions);
+
+    // asignación a columna según categoría
+    if(m.category === 'activa') document.getElementById('listActiva').appendChild(card);
+    else if(m.category === 'rumor') document.getElementById('listRumor').appendChild(card);
+    else if(m.category === 'completada') document.getElementById('listCompletada').appendChild(card);
+  });
+
+  // mostrar/ocultar columnas según filtros y ajustar ancho
+  const colActiva = document.getElementById('colActiva');
+  const colRumor = document.getElementById('colRumor');
+  const colCompletada = document.getElementById('colCompletada');
+
+  colActiva.style.display = hideActiveCheckbox.checked ? 'none' : 'flex';
+  colRumor.style.display = hideRumor ? 'none' : 'flex';
+  colCompletada.style.display = hideCompleted ? 'none' : 'flex';
+
+
+  // contar cuántas columnas están visibles
+  let visibleCount = 0;
+      if(!hideActiveCheckbox.checked) visibleCount++;
+      if(!hideRumor) visibleCount++;
+      if(!hideCompleted) visibleCount++;
+
+  // asignar ancho proporcional
+  const widthPercent = (100 / visibleCount) + '%';
+  [colActiva, colRumor, colCompletada].forEach(col => {
+    if(col.style.display !== 'none') col.style.width = widthPercent;
+  });
+
+  // actualizar tamaño
+  try{ updateSizeInfo(JSON.stringify({missions}).length); }catch(e){}
+}
+
+
+// Form open
+function openForm(id){
+  const container = document.getElementById('formContainer');
+  const form = document.getElementById('missionForm');
+  container.style.display = 'block';
+  if(id){
+    const m = missions.find(x=>x.id===id);
+    if(!m) return;
+    document.getElementById('missionId').value = m.id;
+    document.getElementById('title').value = m.title;
+    document.getElementById('category').value = m.category;
+    document.getElementById('description').value = m.description;
+    document.getElementById('reward').value = m.reward || '';
+    document.getElementById('notes').value = m.notes || '';
+  } else {
+    document.getElementById('missionId').value = '';
+    document.getElementById('title').value = '';
+    document.getElementById('category').value = 'activa';
+    document.getElementById('description').value = '';
+    document.getElementById('reward').value = '';
+    document.getElementById('notes').value = '';
+  }
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// close form
+function closeForm(){
+  document.getElementById('formContainer').style.display = 'none';
+  document.getElementById('missionForm').reset();
+}
+
+// handle submit
+document.getElementById('missionForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  const id = document.getElementById('missionId').value || uid();
+  const payload = {
+    id,
+    title: document.getElementById('title').value.trim(),
+    category: document.getElementById('category').value,
+    description: document.getElementById('description').value.trim(),
+    reward: document.getElementById('reward').value.trim(),
+     notes: document.getElementById('notes').value.trim()
+  };
+  const existing = missions.find(m=>m.id===id);
+  if(existing){
+    Object.assign(existing, payload);
+  } else {
+    missions.unshift(payload); // newest first
+  }
+  closeForm();
+  renderAll();
+  scheduleSave();
+});
+
+// button actions
+document.getElementById('btnAdd').addEventListener('click', ()=> openForm());
+document.getElementById('btnCancel').addEventListener('click', ()=> closeForm());
+document.getElementById('btnSave').addEventListener('click', ()=> saveLocal(true));
+document.getElementById('btnClear').addEventListener('click', ()=> {
+  if(confirm('Borrar todas las misiones y reiniciar el Diario? Esta acción no se puede deshacer.')){
+    missions = []; saveLocal(); renderAll();
+  }
+});
+
+// Export
+function exportJSON(){
+  const payload = { version:1, exportedAt: new Date().toISOString(), missions };
+  const s = JSON.stringify(payload, null, 2);
+  const blob = new Blob([s], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filenameBase;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+  flashStatus('Exportado ✔');
+}
+document.getElementById('btnExport').addEventListener('click', exportJSON);
+document.getElementById('btnExportNow').addEventListener('click', exportJSON);
+
+// Import (via hidden file input)
+document.getElementById('fileImport').addEventListener('change', function(ev){
+  const f = ev.target.files[0];
+  if(!f) return;
+  if(!confirm('Importar este archivo reemplazará los datos actuales. ¿Continuar?')) { ev.target.value=''; return; }
+  const reader = new FileReader();
+  reader.onload = function(e){
+    try {
+      const parsed = JSON.parse(e.target.result);
+      if(!parsed || !Array.isArray(parsed.missions)) throw new Error('Formato inválido');
+      missions = parsed.missions;
+      saveLocal();
+      renderAll();
+      alert('Importación completada.');
+    } catch(err){
+      alert('Error al importar JSON: ' + err.message);
+    }
+  };
+  reader.readAsText(f);
+  ev.target.value='';
+});
+document.getElementById('btnImportNow').addEventListener('click', ()=> document.getElementById('fileImport').click());
+
+// Search and filters
+document.getElementById('search').addEventListener('input', debounce(()=> renderAll(), 250));
+
+// schedule save with debounce
+function scheduleSave(){
+  if(!autosaveEnabled) return;
+  if(autosaveDebounceTimer) clearTimeout(autosaveDebounceTimer);
+  autosaveDebounceTimer = setTimeout(()=> {
+    saveLocal(false);
+  }, 800);
+}
+
+// debounce util
+function debounce(fn, wait=300){
+  let t;
+  return function(...args){
+    clearTimeout(t);
+    t = setTimeout(()=> fn.apply(this,args), wait);
+  }
+}
+
+// load at start
+(function init(){
+  // attempt to load from localStorage
+  const ok = loadLocal();
+  if(!ok){
+  // diario vacío
+  missions = [];
+  renderAll();
+}
+
+})();
+
+// auto-save indicator and unload
+window.addEventListener('beforeunload', function(){
+  // ensure last save
+  saveLocal(false);
+});
+
+// small UI helpers
+function flashMsg(text){
+  const el = document.getElementById('storageInfo');
+  el.textContent = text;
+  setTimeout(()=> el.textContent = 'Guardado local ✔', 1200);
+}
+
+// keyboard shortcut: Ctrl+S to save
+window.addEventListener('keydown', function(e){
+  if((e.ctrlKey||e.metaKey) && e.key.toLowerCase() === 's'){ e.preventDefault(); saveLocal(true); }
+});
+
+</script>
+
+</div>
+</body>
+</html>

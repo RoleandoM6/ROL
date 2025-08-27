@@ -249,6 +249,12 @@
     <button onclick="deleteEmpty()">Eliminar Vacías</button>
     <button onclick="saveGrid()">Guardar Estado</button>
     <button id="toggle-conditions">Modo Condiciones</button>
+
+    <!-- NUEVOS BOTONES -->
+  <button id="export-json">Exportar JSON</button>
+  <input type="file" id="import-json" style="display:none;" accept=".json">
+  <button onclick="document.getElementById('import-json').click()">Importar JSON</button>
+
   </div>
 </div>
 
@@ -785,5 +791,68 @@ addCell.addEventListener("drop", e => {
 /* ==================== Inicio ==================== */
 loadGrid();
 </script>
+
+<script>
+/* ==================== Exportar JSON ==================== */
+document.getElementById("export-json").addEventListener("click", () => {
+  const data = [...grid.children].map(c => ({
+    img: c.querySelector("img")?.src || null,
+    conditions: c.conditions || [],
+    pv: c.pv ?? 10,
+    dano: c.dano ?? 0
+  }));
+  const exportData = {
+    currentIndex,
+    grid: data
+  };
+  const blob = new Blob([JSON.stringify(exportData, null, 2)], {type: "application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `BarraDeIniciativa_${new Date().toISOString()}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+/* ==================== Importar JSON ==================== */
+document.getElementById("import-json").addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const data = JSON.parse(reader.result);
+      if (!data.grid || !Array.isArray(data.grid)) throw "Formato inválido";
+      
+      // Limpiamos grid
+      [...grid.children].forEach(c => c.remove());
+      
+      // Restauramos celdas
+      data.grid.forEach((cellData, i) => {
+        ensureCells(i + 1);
+        const cell = grid.children[i];
+        cell.innerHTML = "";
+        if (cellData.img) cell.innerHTML = `<img src="${cellData.img}">`;
+        cell.conditions = cellData.conditions || [];
+        cell.pv = cellData.pv ?? 10;
+        cell.dano = cellData.dano ?? 0;
+        renderCellConditions(cell);
+      });
+      
+      addCellEvents();
+      currentIndex = data.currentIndex ?? -1;
+      updateNumbers();
+      updateHighlight();
+      centerGrid();
+      saveGrid();
+      alert("Importación completada correctamente.");
+    } catch(err) {
+      alert("Error al importar el archivo JSON: " + err);
+    }
+  };
+  reader.readAsText(file);
+});
+</script>
+
 </body>
 </html>

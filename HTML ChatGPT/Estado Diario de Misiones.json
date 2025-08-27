@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "exportedAt": "2025-08-27T11:47:02.723Z",
+  "missions": [
+    {
+      "id": "m_metss7d2_ujnlb6",
+      "title": "La Caza del Winkipuff",
+      "category": "activa",
+      "description": "Los granjeros de Ondor desesperan porque hay un Winkipuff comiéndose sus ovejas.\nCada semana aparece, rompe el cercado, se lleva 1 o 2 ovejas y siempre el caos entre el rebaño.",
+      "reward": "35",
+      "date": "",
+      "notes": ""
+    },
+    {
+      "id": "m_metrjmxt_26m5e2",
+      "title": "Ruidos extraños en el bosque de Ondor",
+      "category": "rumor",
+      "description": "Se comenta por las tabernas de la región de Ondor que en el bosque ocurre algo extrañó.\nCazadores y leñadores aseguran que por las noches, a lo lejos, se escuchan unos ruidos extraños y hasta luces.",
+      "reward": "-",
+      "date": "",
+      "notes": "Por ahora no ha ocurrido nada y no parece haber peligro."
+    },
+    {
+      "id": "m_metrca4f_9jqe0o",
+      "title": "Problemas con la cosecha",
+      "category": "activa",
+      "description": "Varios lugareños aseguran que sus cosechas se echan a perder sin razón aparente.\nNecesitan que un Errante lo investigue.",
+      "reward": "120",
+      "date": "",
+      "notes": "No es un fenómeno natural. \nAquí ocurre algo..."
+    }
+  ]
+}
