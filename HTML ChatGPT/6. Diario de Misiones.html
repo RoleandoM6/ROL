@@ -472,9 +472,14 @@ function renderAll() {
   imgDrop.textContent = 'Arrastra una imagen aquí';
 
   // mostrar imagen existente
-  if(m.image){
-    imgDrop.innerHTML = `<img src="${m.image}" style="max-width:100%; border-radius:4px;">`;
-  }
+if (m.imageName) {
+  const imgPath = './images/' + m.imageName;
+  imgDrop.innerHTML = `<img src="${imgPath}" style="max-width:100%; border-radius:4px;">`;
+} else {
+  imgDrop.textContent = 'Arrastra una imagen aquí';
+}
+
+
 
   card.appendChild(imgDrop);
   setupImageDrop(imgDrop, m);
@@ -598,21 +603,25 @@ function enableDragAndDrop() {
   });
 }
 
-function setupImageDrop(drop, mission){
+function setupImageDrop(drop, mission) {
   drop.addEventListener('dragover', e => e.preventDefault());
   drop.addEventListener('drop', e => {
-    e.preventDefault();
-    const file = e.dataTransfer.files[0];
-    if(!file || !file.type.startsWith('image/')) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      mission.image = reader.result; // guardar Base64
-      drop.innerHTML = `<img src="${mission.image}" style="max-width:100%; border-radius:4px;">`;
-      scheduleSave();
-    };
-    reader.readAsDataURL(file);
-  });
+  e.preventDefault();
+  const file = e.dataTransfer.files[0];
+  if (!file || !file.type.startsWith('image/')) return;
+
+  const missionId = document.getElementById('missionId').value;
+  const m = missions.find(x=> x.id === missionId);
+
+  if(m){
+    m.imageName = file.name;
+  }
+
+  drop.innerHTML = `<img src="./images/${file.name}" style="max-width:100%; border-radius:4px;">`;
+  scheduleSave();
+});
 }
+
 
 
 // helper: find element to insert after
@@ -711,13 +720,15 @@ document.getElementById('missionForm').addEventListener('submit', function(e){
   e.preventDefault();
   const id = document.getElementById('missionId').value || uid();
   const payload = {
-    id,
-    title: document.getElementById('title').value.trim(),
-    category: document.getElementById('category').value,
-    description: document.getElementById('description').value.trim(),
-    reward: document.getElementById('reward').value.trim(),
-     notes: document.getElementById('notes').value.trim()
-  };
+  id,
+  title: document.getElementById('title').value.trim(),
+  category: document.getElementById('category').value,
+  description: document.getElementById('description').value.trim(),
+  reward: document.getElementById('reward').value.trim(),
+  notes: document.getElementById('notes').value.trim(),
+  imageName: document.getElementById('missionId').dataset.imageName || ''
+};
+
   const existing = missions.find(m=>m.id===id);
   if(existing){
     Object.assign(existing, payload);
