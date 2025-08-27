@@ -5,417 +5,276 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Diario de Misiones</title>
 <style>
-  /* Fuentes */
+  /* (tu CSS original intacto) */
   @import url('https://fonts.googleapis.com/css2?family=IM+Fell+English&display=swap');
-
-  :root{
-    --bg:#24190f;
-    --panel:#f6eee3;
-    --ink:#1b120c;
-    --accent:#7a4b2b;
-    --danger:#7b1d1d;
-    --muted:#6b5a4a;
-  }
-
-  html,body{height:100%;margin:0;padding:0;font-family: 'IM Fell English', serif;background: #00FF00; /* Verde Croma */ color:var(--ink);}
-
-  .centered-wrapper {
-  width: 100vw;
-  height: 100vh;
-  display: flex;
-  justify-content: center; /* centra horizontalmente */
-  align-items: flex-start; /* pega al top */
-  background: #00FF00;
-  overflow: hidden;
-  padding-top: 10px; /* opcional, un pequeño margen superior */
-}
-
-/* Escalar la wrap proporcionalmente */
-.wrap {
-  width: 1920px;
-  height: 1080px;
-  transform-origin: top left;
-  transform: scale(calc(min(100vw / 1920, 100vh / 1080)));
-}
-
-  header{
-    display:flex; gap:16px; align-items:center; justify-content:space-between;
-    margin-bottom:12px;
-  }
-  header h1{
-    margin:0; font-size:20px; color:#f3e7d7; text-shadow: 2px 2px 0 rgba(0,0,0,0.6);
-    display:flex; align-items:center; gap:12px;
-  }
-
-  .image-drop img {
-  display: block;
-  margin: 0 auto;
-  max-height: 120px; /* ajusta según necesidad */
-  }
-
-
-  /* Controls */
+  :root{ --bg:#24190f; --panel:#f6eee3; --ink:#1b120c; --accent:#7a4b2b; --danger:#7b1d1d; --muted:#6b5a4a; }
+  html,body{height:100%;margin:0;padding:0;font-family: 'IM Fell English', serif;background: #00FF00; color:var(--ink);}
+  .centered-wrapper { width:100vw;height:100vh;display:flex;justify-content:center;align-items:flex-start;background:#00FF00;overflow:hidden;padding-top:10px;}
+  .wrap{ width:1920px;height:1080px;transform-origin:top left;transform:scale(calc(min(100vw / 1920, 100vh / 1080))); }
+  header{ display:flex; gap:16px; align-items:center; justify-content:space-between; margin-bottom:12px; }
+  header h1{ margin:0; font-size:20px; color:#f3e7d7; text-shadow: 2px 2px 0 rgba(0,0,0,0.6); display:flex; align-items:center; gap:12px; }
+  .image-drop img{ display:block; margin:0 auto; max-height:120px; }
   .controls { display:flex; gap:8px; align-items:center; }
-  .btn {
-    background:var(--accent); color:var(--panel); padding:8px 12px; border-radius:8px;
-    border:2px solid rgba(0,0,0,0.25); cursor:pointer; box-shadow:0 2px 0 rgba(0,0,0,0.4);
-    font-weight:700; font-family:inherit;
-  }
+  .btn { background:var(--accent); color:var(--panel); padding:8px 12px; border-radius:8px; border:2px solid rgba(0,0,0,0.25); cursor:pointer; box-shadow:0 2px 0 rgba(0,0,0,0.4); font-weight:700; font-family:inherit; }
   .btn.alt { background:#cf610c; border:2px dashed #8b5e3c; color:var(--panel); }
   .btn.warn { background:var(--danger); }
   .btn.small { padding:6px 8px; font-size:12px; border-radius:6px; }
+  .btnComplete { background: #e2be20; color: #000000; border: 2px solid #000000; }
+  .btnActive { background: #ff0000; color: #000000; border: 2px solid #000000; }
 
-  .btnComplete {
-  background: #e2be20; /* verde intenso */
-  color: #000000;          /* texto blanco */
-  border: 2px solid #000000;
-}
-
-.btnActive {
-  background: #ff0000; /* rojo intenso */
-  color: #000000;          /* texto blanco */
-  border: 2px solid #000000;
-}
-
-
-  /* Layout panels */
   .grid { display:grid; grid-template-columns: 1fr 360px; gap:14px; }
-  .main {
-    background: linear-gradient(180deg, rgba(246,238,227,0.98), rgba(238,226,210,0.96));
-    border: 3px solid rgba(120,70,40,0.9); border-radius:14px; padding:12px; /*box-shadow: 0 6px 18px rgba(0,0,0,0.6);*/
-    min-height:520px;
-  }
-  .side {
-    background: linear-gradient(180deg,#efe6d5,#eee0c8);
-    border: 2px solid rgba(120,70,40,0.8); border-radius:12px; padding:12px; /*box-shadow: 0 4px 14px rgba(0,0,0,0.5);*/
-    height:520px; overflow:auto;
-  }
-
-  /* Panels for categories */
+  .main { background: linear-gradient(180deg, rgba(246,238,227,0.98), rgba(238,226,210,0.96)); border: 3px solid rgba(120,70,40,0.9); border-radius:14px; padding:12px; min-height:520px; }
+  .side { background: linear-gradient(180deg,#efe6d5,#eee0c8); border: 2px solid rgba(120,70,40,0.8); border-radius:12px; padding:12px; height:520px; overflow:auto; }
   .category-row { display:flex; gap:10px; align-items:center; margin-bottom:8px; }
   .filter { padding:8px; border-radius:8px; border:2px solid rgba(0,0,0,0.12); background:#fff6ed; }
 
-  .columns-wrapper {
-  width: 100%;
-  max-width: 1920px;
-  margin: 0 auto;
-  aspect-ratio: 16 / 9; /* proporción 1080p */
-  background: rgba(0,0,0,0); /* transparente para chroma */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  overflow: hidden;
-  transform-origin: top left;
-}
+  .columns-wrapper { width:100%; max-width:1920px; margin:0 auto; aspect-ratio:16/9; display:flex; justify-content:center; align-items:center; overflow:hidden; transform-origin:top left; }
+  .columns-wrapper .columns { width:1920px; height:1080px; }
+  @media (max-width:1920px) { .columns-wrapper { transform: scale(calc(100vw / 1920)); } }
+  @media (max-height:1080px) { .columns-wrapper { transform: scale(calc(100vh / 1080)); } }
 
-/* Escalar el contenido interno al tamaño del wrapper */
-.columns-wrapper .columns {
-  width: 1920px;
-  height: 1080px;
-}
-
-/* Escalado automático */
-@media (max-width:1920px) {
-  .columns-wrapper {
-    transform: scale(calc(100vw / 1920));
-  }
-}
-@media (max-height:1080px) {
-  .columns-wrapper {
-    transform: scale(calc(100vh / 1080));
-  }
-}
-
-
-  .columns {
-  display: flex;
-  gap: 12px;
-}
-
+  .columns{ display:flex; gap:12px; }
 .col {
-  flex: 1 1 0; /* permite que crezca y se encoja según el espacio */
+  flex: 1 1 0;
   min-height: 420px;
   background: linear-gradient(180deg, rgba(255,250,245,0.98), rgba(245,238,225,0.98));
   border: 3px solid #8b5e3c;
   border-radius: 10px;
   padding: 10px;
   overflow: auto;
-  display: flex;        /* añadir */
-  flex-direction: column; /* añadir */
+  display: flex;
+  flex-direction: column;
+  transition: all 0.4s ease; /* <--- transición suave */
 }
-
-  .col h2{ 
-    margin:0 0 8px 0; 
-    font-size:20px; 
-    color:var(--muted); 
-    text-transform:uppercase; 
-    font-weight:900; 
-    letter-spacing:0.04em; 
-    text-align: center;      /* CENTRAR texto */}
-
-  .card {
-    background: linear-gradient(180deg,#fffaf1,#fff5ea);
-    border: 1px solid #474545; /* borde completo */
-    border-left-width: 15px;     /* borde izquierdo más grueso */
-    margin-bottom:10px;
-    padding:10px;
-    border-radius:8px;
-    box-shadow: inset 0 -6px 8px rgba(120,70,40,0.02);
-}
-
-.card.activa {
-  border-left-color: #e2be20; /* Dorado */
-  background: linear-gradient(180deg,#fffaf1,#fff5ea);
-}
-
-.card.rumor {
-  border-left-color: #8b5e3c; /* Marrón */
-  background: linear-gradient(180deg,#fffaf1,#f5ebe3);
-}
-
-.card.completada {
-  border-left-color: #4caf50; /* Verde */
-  background: linear-gradient(180deg,#e8f5e9,#dcedc8);
-}
-
-
-  .card .meta { display:flex; gap:8px; align-items:center; justify-content:space-between; margin-bottom:6px; }
+  .col h2{ margin:0 0 8px 0; font-size:20px; color:var(--muted); text-transform:uppercase; font-weight:900; letter-spacing:0.04em; text-align:center; }
+  .card{ background: linear-gradient(180deg,#fffaf1,#fff5ea); border:1px solid #474545; border-left-width:15px; margin-bottom:10px; padding:10px; border-radius:8px; box-shadow: inset 0 -6px 8px rgba(120,70,40,0.02); display:flex; flex-direction:column; gap:8px; }
+  .card.activa{ border-left-color:#e2be20; }
+  .card.rumor{ border-left-color:#8b5e3c; }
+  .card.completada{ border-left-color:#4caf50; }
+  .card .meta{ display:flex; gap:8px; align-items:center; justify-content:space-between; margin-bottom:6px; }
   .card h3{ margin:0; font-size:20px; }
   .smallmuted { font-size:18px; color:var(--muted); }
-
   .card p{ margin:6px 0 8px 0; font-size:18px; line-height:1.5; color:#2a1f18; }
-
-  .card .actions { display:flex; gap:6px; justify-content:flex-end; }
-  .pill { padding:6px 8px; border-radius:8px; background:rgba(0,0,0,0.04); font-size:12px; }
-
-  /* Form */
-  form { display:flex; flex-direction:column; gap:8px; margin-bottom:8px; }
-  label { font-size:18px; color:var(--muted); }
-  input[type="text"], textarea, select {
-    width:100%; padding:8px; border-radius:8px; border:2px solid rgba(0,0,0,0.08); font-family:inherit;
-    background:rgba(255,255,255,0.96);
-  }
-  textarea { min-height:80px; resize:vertical; }
-
-  footer { margin-top:12px; display:flex; justify-content:space-between; align-items:center; gap:8px; color: #e9dfd3; font-size:20px; }
-
+  .card .actions{ display:flex; gap:6px; justify-content:flex-end; }
+  form{ display:flex; flex-direction:column; gap:8px; margin-bottom:8px; }
+  label{ font-size:18px; color:var(--muted); }
+  input[type="text"], textarea, select { width:100%; padding:8px; border-radius:8px; border:2px solid rgba(0,0,0,0.08); font-family:inherit; background:rgba(255,255,255,0.96); }
+  textarea{ min-height:80px; resize:vertical; }
+  footer{ margin-top:12px; display:flex; justify-content:space-between; align-items:center; gap:8px; color:#e9dfd3; font-size:20px; }
   .info { font-size:20px; color:#e9dfd3; opacity:0.95; }
-
-  /* Tiny responsive */
-  @media (max-width:980px){
-    .grid{ grid-template-columns: 1fr; }
-    .side{ height:auto; }
-    .main{ min-height:auto; }
-    .columns{ flex-direction:column; }
-  }
-
-/* Oculta la sección de export/import y último guardado en el aside */
-#btnExportNow,
-#btnImportNow,
-#lastSaved {
-  display: none;
-}
-
-
+  @media (max-width:980px){ .grid{ grid-template-columns:1fr; } .side{ height:auto; } .main{ min-height:auto; } .columns{ flex-direction:column; } }
+  #btnExportNow,#btnImportNow,#lastSaved{ display:none; }
 </style>
 </head>
 <body>
   <div class="centered-wrapper">
-  <div class="wrap">
-    <header>
-      <div class="controls">
-        <button class="btn" id="btnAdd">+ Añadir Misión</button>
-        <button class="btn alt" id="btnSave">Guardar (Local)</button>
-        <button class="btn small" id="btnExport">Exportar JSON</button>
-        <label class="btn small alt" for="fileImport" style="margin:0"><input id="fileImport" type="file" accept="application/json" style="display:none" />Importar JSON</label>
-        <button class="btn warn small" id="btnClear">Borrar todo</button>
+    <div class="wrap">
+      <header>
+        <div class="controls">
+          <button class="btn" id="btnAdd">+ Añadir Misión</button>
+          <button class="btn alt" id="btnSave">Guardar (Local)</button>
+          <button class="btn small" id="btnExport">Exportar JSON</button>
+          <label class="btn small alt" for="fileImport" style="margin:0">
+            <input id="fileImport" type="file" accept="application/json" style="display:none" />Importar JSON
+          </label>
+          <button class="btn warn small" id="btnClear">Borrar todo</button>
+        </div>
+      </header>
+
+      <div class="grid">
+        <section class="main">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:10px;">
+            <div style="display:inline-flex; align-items:center;">
+              <img src="Diario de Misiones.png" alt="Logo" style="width:54px; height:54px; border-radius:8px; object-fit:contain; margin-right:8px;">
+              <span style="font-size:20px; opacity:0.9; color:rgb(0,0,0); font-weight:bold;">Diario de Misiones — La Marca del Errante</span>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <div class="smallmuted" id="storageInfo">Estado: no guardado</div>
+              <div class="smallmuted" id="sizeInfo"></div>
+            </div>
+          </div>
+
+          <!-- Form (oculto por defecto) -->
+          <div id="formContainer" style="display:none;border:2px dashed rgba(120,70,40,0.4);padding:10px;border-radius:8px;margin-bottom:10px;background:linear-gradient(180deg,#fffaf1,#fff5ea);">
+            <form id="missionForm">
+              <input type="hidden" id="missionId" />
+              <div style="display:flex;gap:8px;">
+                <div style="flex:1;">
+                  <label>Título</label>
+                  <input id="title" type="text" required placeholder="Título de la misión (breve)" />
+                </div>
+                <div style="width:140px;">
+                  <label>Categoría</label>
+                  <select id="category">
+                    <option value="activa">Activa</option>
+                    <option value="rumor">Rumor</option>
+                    <option value="completada">Completada</option>
+                  </select>
+                </div>
+              </div>
+
+              <label>Descripción</label>
+              <textarea id="description" placeholder="Descripción completa, objetivos y detalles..."></textarea>
+
+              <div style="display:flex;gap:8px;">
+                <div style="flex:1;">
+                  <label>Recompensa (BTC)</label>
+                  <input id="reward" type="text" placeholder="Ej: 120" />
+                </div>
+              </div>
+
+              <label>Notas rápidas</label>
+              <textarea id="notes" placeholder="Notas de la mesa, pistas, NPCs, consecuencias..." style="min-height:50px"></textarea>
+
+              <!-- Imagen SOLO desde el formulario -->
+              <label>Imagen (solo al crear/editar)</label>
+              <input type="file" id="imageFile" accept="image/*" />
+              <div id="imagePreview" style="margin-top:6px;"></div>
+              <div class="smallmuted" style="font-size:12px;margin-top:6px;">
+                Nota: para que la imagen persista después de recargar debes colocar el archivo en <code>./images/</code> con el mismo nombre. (Actualmente guardamos solo el nombre del archivo.)
+              </div>
+
+              <div style="display:flex;gap:8px;justify-content:flex-end;">
+                <button type="button" class="btn alt" id="btnCancel">Cancelar</button>
+                <button type="submit" class="btn">Guardar Misión</button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Columns -->
+          <div class="columns-wrapper">
+            <div class="columns">
+              <div class="col" id="colActiva">
+                <h2>Misiones Activas</h2>
+                <div id="listActiva"></div>
+              </div>
+              <div class="col" id="colRumor">
+                <h2>Rumores</h2>
+                <div id="listRumor"></div>
+              </div>
+              <div class="col" id="colCompletada">
+                <h2>Completadas</h2>
+                <div id="listCompletada"></div>
+              </div>
+            </div>
+          </div>
+
+        </section>
+
+        <aside class="side">
+          <strong>Filtro & Herramientas</strong>
+          <div style="margin-top:8px;">
+            <div class="category-row">
+              <label class="filter"><input type="checkbox" id="hideActive" /> Ocultar Activas</label>
+              <label class="filter"><input type="checkbox" id="hideRumor" /> Ocultar Rumores</label>
+              <label class="filter"><input type="checkbox" id="hideCompleted" /> Ocultar Completadas</label>
+            </div>
+
+            <div style="margin-top:10px;">
+              <label>Buscar</label>
+              <input id="search" type="text" placeholder="Buscar por título, descripción o notas..." />
+            </div>
+
+            <div style="margin-top:12px;">
+              <strong>Importante</strong>
+              <p class="smallmuted">Puedes convertir un Rumor en Misión Activa si lo marcas como Completado y lo Reactivas.</p>
+            </div>
+
+            <div style="margin-top:10px; display:flex; gap:8px;">
+              <button class="btn small" id="btnExportNow">Exportar ahora</button>
+              <button class="btn alt small" id="btnImportNow">Importar archivo</button>
+            </div>
+
+            <div>
+              <strong>-----</strong>
+              <div id="lastSaved" class="info" style="margin-top:6px">Nunca</div>
+            </div>
+          </div>
+        </aside>
       </div>
-    </header>
-
-    <div class="grid">
-      <section class="main">
-        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:10px;">
-          <div style="display:inline-flex; align-items:center;">
-  <img src="Diario de Misiones.png" 
-       alt="Logo" 
-       style="width:54px; height:54px; border-radius:8px; object-fit:contain; margin-right:8px;">
-  <span style="font-size:20px; opacity:0.9; color:rgb(0, 0, 0); font-weight:bold;">Diario de Misiones — La Marca del Errante</span>
-</div>
-
-          <div style="display:flex;gap:8px;align-items:center;">
-            <div class="smallmuted" id="storageInfo">Estado: no guardado</div>
-            <div class="smallmuted" id="sizeInfo"></div>
-          </div>
-        </div>
-
-        <!-- Form (oculto por defecto) -->
-        <div id="formContainer" style="display:none;border:2px dashed rgba(120,70,40,0.4);padding:10px;border-radius:8px;margin-bottom:10px;background:linear-gradient(180deg,#fffaf1,#fff5ea);">
-          <form id="missionForm">
-            <input type="hidden" id="missionId" />
-            <div style="display:flex;gap:8px;">
-              <div style="flex:1;">
-                <label>Título</label>
-                <input id="title" type="text" required placeholder="Título de la misión (breve)" />
-              </div>
-              <div style="width:140px;">
-                <label>Categoría</label>
-                <select id="category">
-                  <option value="activa">Activa</option>
-                  <option value="rumor">Rumor</option>
-                  <option value="completada">Completada</option>
-                </select>
-              </div>
-            </div>
-
-            <label>Descripción</label>
-            <textarea id="description" placeholder="Descripción completa, objetivos y detalles..."></textarea>
-
-            <div style="display:flex;gap:8px;">
-              <div style="flex:1;">
-                <label>Recompensa (BTC)</label>
-                <input id="reward" type="text" placeholder="Ej: 120" />
-              </div>
-              
-            </div>
-
-            <label>Notas rápidas</label>
-            <textarea id="notes" placeholder="Notas de la mesa, pistas, NPCs, consecuencias..." style="min-height:50px"></textarea>
-
-            <div style="display:flex;gap:8px;justify-content:flex-end;">
-              <button type="button" class="btn alt" id="btnCancel">Cancelar</button>
-              <button type="submit" class="btn">Guardar Misión</button>
-            </div>
-          </form>
-        </div>
-
-        <!-- Columns: Activas / Rumores / Completadas -->
-         <div class="columns-wrapper">
-        <div class="columns">
-          <div class="col" id="colActiva">
-            <h2>Misiones Activas</h2>
-            <div id="listActiva"></div>
-          </div>
-
-          <div class="col" id="colRumor">
-            <h2>Rumores</h2>
-            <div id="listRumor"></div>
-          </div>
-
-          <div class="col" id="colCompletada">
-            <h2>Completadas</h2>
-            <div id="listCompletada"></div>
-          </div>
-        </div>
-        </div>
-
-      </section>
-
-      <aside class="side">
-        <strong>Filtro & Herramientas</strong>
-        <div style="margin-top:8px;">
-          <div class="category-row">
-            <label class="filter"><input type="checkbox" id="hideActive" /> Ocultar Activas</label>
-            <label class="filter"><input type="checkbox" id="hideRumor" /> Ocultar Rumores</label>
-            <label class="filter"><input type="checkbox" id="hideCompleted" /> Ocultar Completadas</label>
-          </div>
-
-          <div style="margin-top:10px;">
-            <label>Buscar</label>
-            <input id="search" type="text" placeholder="Buscar por título, descripción o notas..." />
-          </div>
-
-          <div style="margin-top:12px;">
-            <strong>Importante</strong>
-            <p class="smallmuted">Puedes convertir un Rumor en Misión Activa si lo marcas como Completado y lo Reactivas.</p>
-          </div>
-
-          <div style="margin-top:10px; display:flex; gap:8px;">
-            <button class="btn small" id="btnExportNow">Exportar ahora</button>
-            <button class="btn alt small" id="btnImportNow">Importar archivo</button>
-          </div>
-
-          <div>
-            <strong>-----</strong>
-            <div id="lastSaved" class="info" style="margin-top:6px">Nunca</div>
-          </div>
-        </div>
-
-      </aside>
     </div>
-  </div>
-  
 
 <script>
-/* Diario de Misiones — JavaScript
-   Características:
-   - Guardado automático en LocalStorage (clave: diarioMisiones_v1)
-   - Botón Guardar explícito
-   - Exportar JSON con nombre: "Estado Diario de Misiones.json"
-   - Importar JSON (reemplaza)
-   - Añadir / Editar / Borrar / Marcar como completada
-   - Muestra tamaño de datos y advertencia
-*/
 
-// KEY for localStorage
+let db;
+function initDB() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open('DiarioMisionesDB', 1);
+
+    request.onupgradeneeded = function(e) {
+      db = e.target.result;
+      if (!db.objectStoreNames.contains('misiones')) {
+        db.createObjectStore('misiones', { keyPath: 'id' });
+      }
+    };
+
+    request.onsuccess = function(e) {
+      db = e.target.result;
+      resolve(db);
+    };
+
+    request.onerror = function() {
+      reject('Error al abrir IndexedDB');
+    };
+  });
+}
+
+
 const STORAGE_KEY = 'diarioMisiones_v1';
 const filenameBase = 'Estado Diario de Misiones.json';
 
-let missions = []; // array of mission objects
+let missions = []; // array de misiones
 let autosaveEnabled = true;
 let autosaveDebounceTimer = null;
 
-// util: generate id
+// preview temporal para sesión (id -> objectURL)
+const tempPreviews = {};
+
+// util: id
 function uid(){ return 'm_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,8); }
 
-// util: format date
-function nowStr(){
-  const d = new Date();
-  return d.toLocaleString('es-ES', { year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' });
+async function saveIndexedDB(showToast = true) {
+  await initDB();
+  const tx = db.transaction('misiones', 'readwrite');
+  const store = tx.objectStore('misiones');
+
+  // Limpiar primero para evitar duplicados
+  const clearReq = store.clear();
+  clearReq.onsuccess = () => {
+    missions.forEach(m => store.put(m));
+  };
+
+  tx.oncomplete = () => {
+    document.getElementById('lastSaved').textContent = new Date().toLocaleString('es-ES');
+    document.getElementById('storageInfo').textContent = 'Guardado en IndexedDB ✔';
+    if (showToast) flashStatus('Guardado en IndexedDB');
+  };
 }
 
-// Save to localStorage
-function saveLocal(showToast=true){
-  try {
-    const payload = { version:1, savedAt: new Date().toISOString(), missions };
-    const s = JSON.stringify(payload);
-    localStorage.setItem(STORAGE_KEY, s);
-    const lastSavedEl = document.getElementById('lastSaved');
-    lastSavedEl.textContent = new Date().toLocaleString('es-ES');
-    document.getElementById('storageInfo').textContent = 'Guardado local ✔';
-    updateSizeInfo(s.length);
-    if(showToast) flashStatus('Guardado en LocalStorage');
-  } catch(e){
-    console.error('Error guardando en LocalStorage', e);
-    alert('Error al guardar en LocalStorage: ' + (e && e.message ? e.message : String(e)));
-  }
+async function loadIndexedDB() {
+  await initDB();
+  return new Promise((resolve) => {
+    const tx = db.transaction('misiones', 'readonly');
+    const store = tx.objectStore('misiones');
+    const request = store.getAll();
+    request.onsuccess = function () {
+      if (request.result.length > 0) {
+        missions = request.result;
+        renderAll();
+        document.getElementById('lastSaved').textContent = new Date().toLocaleString('es-ES');
+        document.getElementById('storageInfo').textContent = 'Cargado desde IndexedDB';
+        resolve(true);
+      } else {
+        resolve(false);
+      }
+    };
+  });
 }
 
-// Load from localStorage
-function loadLocal(){
-  const raw = localStorage.getItem(STORAGE_KEY);
-  if(!raw) return false;
-  try {
-    const parsed = JSON.parse(raw);
-    if(parsed && Array.isArray(parsed.missions)){
-      missions = parsed.missions;
-      renderAll();
-      document.getElementById('lastSaved').textContent = new Date(parsed.savedAt || Date.now()).toLocaleString('es-ES');
-      document.getElementById('storageInfo').textContent = 'Cargado desde LocalStorage';
-      updateSizeInfo(raw.length);
-      return true;
-    }
-  } catch(e){
-    console.error('Error cargando LocalStorage', e);
-  }
-  return false;
-}
-
-// update size info and warn
 function updateSizeInfo(bytes){
   const kb = Math.round(bytes/1024);
   const el = document.getElementById('sizeInfo');
   el.textContent = kb + ' KB';
-  // warn if too large (>4MB)
   const warnEl = document.getElementById('storageInfo');
   if(bytes > 4*1024*1024){
     warnEl.textContent = '⚠ Datos muy grandes para LocalStorage (riesgo)';
@@ -425,7 +284,6 @@ function updateSizeInfo(bytes){
   }
 }
 
-// Flash small status text
 function flashStatus(msg){
   const el = document.getElementById('storageInfo');
   const old = el.textContent;
@@ -433,7 +291,7 @@ function flashStatus(msg){
   setTimeout(()=> el.textContent = 'Guardado local ✔', 1200);
 }
 
-// Filtrado de ocultar Rumores / Completadas
+// filtros
 const hideActiveCheckbox = document.getElementById('hideActive');
 const hideRumorCheckbox = document.getElementById('hideRumor');
 const hideCompletedCheckbox = document.getElementById('hideCompleted');
@@ -442,192 +300,117 @@ hideActiveCheckbox.addEventListener('change', () => renderAll());
 hideRumorCheckbox.addEventListener('change', () => renderAll());
 hideCompletedCheckbox.addEventListener('change', () => renderAll());
 
-function renderAll() {
-  // limpiar listas
-  ['listActiva','listRumor','listCompletada'].forEach(id => document.getElementById(id).innerHTML = '');
+// ---------------- Renderizado respetando el orden ----------------
+function renderAll(){
+  ['listActiva','listRumor','listCompletada'].forEach(id => {
+    document.getElementById(id).innerHTML = '';
+  });
+
   const q = document.getElementById('search').value.toLowerCase();
+  const hideActive = hideActiveCheckbox.checked;
   const hideRumor = hideRumorCheckbox.checked;
   const hideCompleted = hideCompletedCheckbox.checked;
 
-  missions.forEach(m => {
-    // filtro búsqueda
-    if(q){
-      const hay = (m.title+m.description+m.notes+(m.reward||'')).toLowerCase();
-      if(!hay.includes(q)) return;
-    }
+  function createCard(m) {
+    const card = document.createElement('div');
+    card.className = `card ${m.category}`;
+    card.dataset.id = m.id;
+    
+    card.innerHTML = `
+      <h3>${m.title}</h3>
+      <p>${m.description||''}</p>
+      ${m.imageName ? `<img src="./images/${m.imageName}" style="max-width:120px;border-radius:4px;">` : ''}
+      <div class="actions"></div>
+    `;
 
-    // filtro ocultar categorías
-    if((hideRumor && m.category === 'rumor') || (hideCompleted && m.category === 'completada')) return;
+    const actionsEl = card.querySelector('.actions');
 
-    const card = document.createElement('div'); 
-    card.className = 'card ' + m.category;  // <— añadimos la categoría como clase
+    // Botón Editar
+    const btnEdit = document.createElement('button');
+    btnEdit.className = 'btn small';
+    btnEdit.textContent = 'Editar';
+    btnEdit.addEventListener('click', () => openForm(m.id));
+    actionsEl.appendChild(btnEdit);
 
-    // --- Zona de imagen Drag & Drop ---
-  const imgDrop = document.createElement('div');
-  imgDrop.className = 'image-drop';
-  imgDrop.style.border = '2px dashed #ccc';
-  imgDrop.style.padding = '6px';
-  imgDrop.style.textAlign = 'center';
-  imgDrop.style.marginBottom = '6px';
-  imgDrop.textContent = 'Arrastra una imagen aquí';
+    // Botón Completar / Reactivar
+    const btnComplete = document.createElement('button');
+    btnComplete.className = 'btnComplete small';
+    btnComplete.textContent = m.category === 'completada' ? 'Reactivar' : 'Completar';
+    btnComplete.addEventListener('click', () => {
+      m.category = m.category === 'completada' ? 'activa' : 'completada';
+      renderAll();
+      scheduleSave();
+    });
+    actionsEl.appendChild(btnComplete);
 
-  // mostrar imagen existente
-if (m.imageName) {
-  const imgPath = './images/' + m.imageName;
-  imgDrop.innerHTML = `<img src="${imgPath}" style="max-width:100%; border-radius:4px;">`;
-} else {
-  imgDrop.textContent = 'Arrastra una imagen aquí';
-}
-
-
-
-  card.appendChild(imgDrop);
-  setupImageDrop(imgDrop, m);
-
-
-
-    const meta = document.createElement('div'); 
-    meta.className = 'meta';
-    const h3 = document.createElement('h3'); 
-    h3.textContent = m.title;
-    const metaRight = document.createElement('div');
-    metaRight.className = 'smallmuted';
-    metaRight.innerHTML = (m.reward ? 'Recompensa: <strong>' + String(m.reward) + ' BTC</strong>' : '');
-    meta.appendChild(h3); 
-    meta.appendChild(metaRight);
-    card.appendChild(meta);
-
-    const p = document.createElement('p'); 
-    p.textContent = m.description || '';
-    card.appendChild(p);
-
-    if(m.notes){
-      const note = document.createElement('div'); 
-      note.className='smallmuted'; 
-      note.style.marginBottom='8px'; 
-      note.textContent = 'Notas: ' + m.notes;
-      card.appendChild(note);
-    }
-
-    const actions = document.createElement('div'); 
-    actions.className = 'actions';
-    const btnEdit = document.createElement('button'); 
-    btnEdit.className='btn small'; 
-    btnEdit.textContent='Editar';
-    btnEdit.onclick = ()=> openForm(m.id);
-    const btnDelete = document.createElement('button'); 
-    btnDelete.className='btn warn small'; 
-    btnDelete.textContent='Eliminar';
-    btnDelete.onclick = ()=> { if(confirm('Borrar esta misión?')) { missions = missions.filter(x=> x.id !== m.id); scheduleSave(); renderAll(); } };
-    const btnToggle = document.createElement('button');
-    btnToggle.className = 'btn small';
-    if(m.category !== 'completada') { 
-      btnToggle.textContent = 'Marcar completada'; 
-      btnToggle.classList.add('btnComplete');
-      btnToggle.onclick = ()=> { m.category='completada'; scheduleSave(); renderAll(); }; 
-    } else { 
-      btnToggle.textContent = 'Marcar activa'; 
-      btnToggle.classList.add('btnActive');
-      btnToggle.onclick = ()=> { m.category='activa'; scheduleSave(); renderAll(); }; 
-    }
-
-    actions.appendChild(btnToggle);
-    actions.appendChild(btnEdit);
-    actions.appendChild(btnDelete);
-    card.appendChild(actions);
-
-    // asignación a columna según categoría
-    if(m.category === 'activa') document.getElementById('listActiva').appendChild(card);
-    else if(m.category === 'rumor') document.getElementById('listRumor').appendChild(card);
-    else if(m.category === 'completada') document.getElementById('listCompletada').appendChild(card);
-  });
-
-  // mostrar/ocultar columnas según filtros y ajustar ancho
-  const colActiva = document.getElementById('colActiva');
-  const colRumor = document.getElementById('colRumor');
-  const colCompletada = document.getElementById('colCompletada');
-
-  colActiva.style.display = hideActiveCheckbox.checked ? 'none' : 'flex';
-  colRumor.style.display = hideRumor ? 'none' : 'flex';
-  colCompletada.style.display = hideCompleted ? 'none' : 'flex';
-
-
-  // contar cuántas columnas están visibles
-  let visibleCount = 0;
-      if(!hideActiveCheckbox.checked) visibleCount++;
-      if(!hideRumor) visibleCount++;
-      if(!hideCompleted) visibleCount++;
-
-  // asignar ancho proporcional
-  const widthPercent = (100 / visibleCount) + '%';
-  [colActiva, colRumor, colCompletada].forEach(col => {
-    if(col.style.display !== 'none') col.style.width = widthPercent;
-  });
-
-  // actualizar tamaño
-  try{ updateSizeInfo(JSON.stringify({missions}).length); }catch(e){}
-
-  // --- Drag & Drop --- //
-function enableDragAndDrop() {
-  const lists = ['listActiva','listRumor','listCompletada'];
-  lists.forEach(listId => {
-    const listEl = document.getElementById(listId);
-
-    listEl.addEventListener('dragstart', (e) => {
-      if(e.target.classList.contains('card')){
-        e.dataTransfer.setData('text/plain', e.target.dataset.id);
-        e.dataTransfer.effectAllowed = 'move';
-        e.target.classList.add('dragging');
+    // Botón Eliminar
+    const btnDelete = document.createElement('button');
+    btnDelete.className = 'btn.warn small';
+    btnDelete.textContent = 'Eliminar';
+    btnDelete.addEventListener('click', () => {
+      if(confirm('¿Eliminar esta misión?')){
+        missions = missions.filter(mm => mm.id !== m.id);
+        renderAll();
+        scheduleSave();
       }
     });
+    actionsEl.appendChild(btnDelete);
 
-    listEl.addEventListener('dragend', (e) => {
-      if(e.target.classList.contains('card')){
-        e.target.classList.remove('dragging');
-      }
-    });
-
-    listEl.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      e.dataTransfer.dropEffect = 'move';
-      const afterElement = getDragAfterElement(listEl, e.clientY);
-      const draggingId = e.dataTransfer.getData('text/plain');
-      const draggingEl = listEl.querySelector(`.card[data-id='${draggingId}']`);
-      if(!draggingEl) return; // <-- si no está en esta columna, no se mueve
-      if(afterElement == null){
-        listEl.appendChild(draggingEl);
-      } else {
-        listEl.insertBefore(draggingEl, afterElement);
-      }
-    });
-  });
-}
-
-function setupImageDrop(drop, mission) {
-  drop.addEventListener('dragover', e => e.preventDefault());
-  drop.addEventListener('drop', e => {
-  e.preventDefault();
-  const file = e.dataTransfer.files[0];
-  if (!file || !file.type.startsWith('image/')) return;
-
-  const missionId = document.getElementById('missionId').value;
-  const m = missions.find(x=> x.id === missionId);
-
-  if(m){
-    m.imageName = file.name;
+    return card;
   }
 
-  drop.innerHTML = `<img src="./images/${file.name}" style="max-width:100%; border-radius:4px;">`;
-  scheduleSave();
-});
+  ['activa','rumor','completada'].forEach(category => {
+    // Verificar si la categoría está oculta
+    const colEl = document.getElementById('col' + capitalize(category));
+const shouldHide = (category === 'activa' && hideActive) ||
+                   (category === 'rumor' && hideRumor) ||
+                   (category === 'completada' && hideCompleted);
+
+// animación suave
+colEl.style.flex = shouldHide ? '0 0 0' : '1 1 0';
+colEl.style.padding = shouldHide ? '0' : '10px';
+colEl.style.opacity = shouldHide ? '0' : '1';
+colEl.style.pointerEvents = shouldHide ? 'none' : 'auto';
+
+// renderizar solo si no está oculta
+if(shouldHide) return; 
+
+const listEl = document.getElementById('list' + capitalize(category));
+missions
+  .filter(m => m.category === category)
+  .filter(m => {
+    if(q) return (m.title+m.description+m.notes+(m.reward||'')).toLowerCase().includes(q);
+    return true;
+  })
+  .sort((a,b) => a.order - b.order)
+  .forEach(m => {
+    const card = createCard(m);
+    listEl.appendChild(card);
+  });
+
+  });
+
+  markCardsDraggable();
+  enableDragAndDrop();
+  updateSizeInfo(JSON.stringify({missions}).length);
 }
 
 
+function markCardsDraggable(){
+  document.querySelectorAll('.card').forEach(card => {
+    card.setAttribute('draggable', 'true');
 
-// helper: find element to insert after
+    card.addEventListener('dragstart', (e) => {
+  card.classList.add('dragging');
+  e.dataTransfer.setData('text/plain', card.dataset.id); // <-- aquí guardamos el id
+});
+
+    card.addEventListener('dragend', () => card.classList.remove('dragging'));
+  });
+}
+
 function getDragAfterElement(container, y){
   const draggableElements = [...container.querySelectorAll('.card:not(.dragging)')];
-
   return draggableElements.reduce((closest, child) => {
     const box = child.getBoundingClientRect();
     const offset = y - box.top - box.height/2;
@@ -639,171 +422,204 @@ function getDragAfterElement(container, y){
   }, { offset: Number.NEGATIVE_INFINITY }).element;
 }
 
-// mark cards draggable after render
-function markCardsDraggable() {
-  document.querySelectorAll('.card').forEach(card => {
-    card.setAttribute('draggable', 'true');
-    card.dataset.id = card.querySelector('h3').textContent + '_' + Math.random().toString(36).slice(2,6); // unique temp id
-    card.addEventListener('dragstart', () => card.classList.add('dragging'));
-    card.addEventListener('dragend', () => card.classList.remove('dragging'));
-  });
-}
-
-// --- Integración con renderAll ---
-const originalRenderAll = renderAll;
-renderAll = function(){
-  originalRenderAll();
-  markCardsDraggable(); 
-  enableDragAndDrop();
-}
-
-// --- Guardar el orden en missions --- //
-function updateMissionOrder() {
+function enableDragAndDrop(){
   ['listActiva','listRumor','listCompletada'].forEach(listId => {
     const listEl = document.getElementById(listId);
-    const cat = listId.replace('list','').toLowerCase();
-    const idsInOrder = [...listEl.children].map(c => c.dataset.id);
-    missions = missions.filter(m => m.category !== cat).concat(idsInOrder.map(id => missions.find(m => cMatches(m,id))).filter(Boolean));
+
+    listEl.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      const afterElement = getDragAfterElement(listEl, e.clientY);
+      const draggingId = e.dataTransfer.getData('text/plain');
+      const draggingEl = document.querySelector(`.card[data-id='${draggingId}']`);
+      if(!draggingEl) return;
+      if(afterElement == null) listEl.appendChild(draggingEl);
+      else listEl.insertBefore(draggingEl, afterElement);
+    });
+
+    listEl.addEventListener('drop', (e) => {
+  e.preventDefault();
+  setTimeout(() => {
+    updateMissionOrder(); // ahora sí lee el orden real del DOM
+    scheduleSave();       // guarda automáticamente
+  }, 0);
+});
+
   });
 }
 
-// helper para coincidir temporal id con misión real
-function cMatches(m, id){
-  return id.startsWith(m.title + '_');
+function updateMissionOrder(){
+  ['listActiva','listRumor','listCompletada'].forEach(listId => {
+    const listEl = document.getElementById(listId);
+    [...listEl.children].forEach((card, index) => {
+      const m = missions.find(mm => mm.id === card.dataset.id);
+      if(m) m.order = index; // numérico
+    });
+  });
 }
 
-// llamar al guardar después de drag
-['listActiva','listRumor','listCompletada'].forEach(id=>{
-  document.getElementById(id).addEventListener('drop', ()=>{
-    updateMissionOrder();
-    scheduleSave();
-  });
+
+// ---------------- Función utilitaria para capitalizar nombres de columnas ----------------
+function capitalize(s){ return s.charAt(0).toUpperCase() + s.slice(1); }
+
+// attach drop-end to save order
+['listActiva','listRumor','listCompletada'].forEach(id => {
+  document.getElementById(id).addEventListener('drop', ()=>{ updateMissionOrder(); scheduleSave(); });
 });
 
 
+// ---------------- Form (crear/editar) y manejo de imagen solo ahí ----------------
+
+const form = document.getElementById('missionForm');
+const imageFileInput = document.getElementById('imageFile');
+const imagePreviewEl = document.getElementById('imagePreview');
+
+// limpiar preview en formulario
+function clearFormPreview(){
+  if(form.dataset.imageObjectUrl){
+    try{ URL.revokeObjectURL(form.dataset.imageObjectUrl); }catch(e){}
+    delete form.dataset.imageObjectUrl;
+  }
+  delete form.dataset.imageFileName;
+  imagePreviewEl.innerHTML = '';
 }
 
-
-// Form open
+// abrir formulario
 function openForm(id){
-  const container = document.getElementById('formContainer');
-  const form = document.getElementById('missionForm');
-  container.style.display = 'block';
+  document.getElementById('formContainer').style.display = 'block';
+  clearFormPreview();
   if(id){
-    const m = missions.find(x=>x.id===id);
+    const m = missions.find(x => x.id === id);
     if(!m) return;
     document.getElementById('missionId').value = m.id;
     document.getElementById('title').value = m.title;
     document.getElementById('category').value = m.category;
-    document.getElementById('description').value = m.description;
+    document.getElementById('description').value = m.description || '';
     document.getElementById('reward').value = m.reward || '';
     document.getElementById('notes').value = m.notes || '';
+    // mostrar preview existente (archivo en ./images/)
+    if(tempPreviews[m.id]){
+      imagePreviewEl.innerHTML = `<img src="${tempPreviews[m.id]}" style="max-width:120px;border-radius:4px;">`;
+    } else if(m.imageName){
+      imagePreviewEl.innerHTML = `<img src="./images/${m.imageName}" style="max-width:120px;border-radius:4px;">`;
+    } else {
+      imagePreviewEl.innerHTML = '';
+    }
   } else {
+    form.reset();
     document.getElementById('missionId').value = '';
-    document.getElementById('title').value = '';
-    document.getElementById('category').value = 'activa';
-    document.getElementById('description').value = '';
-    document.getElementById('reward').value = '';
-    document.getElementById('notes').value = '';
   }
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
-// close form
-function closeForm(){
+document.getElementById('btnCancel').addEventListener('click', () => {
   document.getElementById('formContainer').style.display = 'none';
-  document.getElementById('missionForm').reset();
-}
+  clearFormPreview();
+});
 
-// handle submit
-document.getElementById('missionForm').addEventListener('submit', function(e){
+// cuando el usuario selecciona un archivo en el formulario (solo ahí)
+imageFileInput.addEventListener('change', (e) => {
+  const f = e.target.files[0];
+  if(!f || !f.type.startsWith('image/')){
+    clearFormPreview();
+    return;
+  }
+  // limpia preview anterior si existía
+  if(form.dataset.imageObjectUrl) {
+    try{ URL.revokeObjectURL(form.dataset.imageObjectUrl); }catch(e){}
+  }
+  const obj = URL.createObjectURL(f);
+  form.dataset.imageObjectUrl = obj;
+  form.dataset.imageFileName = f.name; // guardamos nombre para cuando se haga submit
+  imagePreviewEl.innerHTML = `<img src="${obj}" style="max-width:120px;border-radius:4px;">`;
+});
+
+form.addEventListener('submit', (e) => {
   e.preventDefault();
   const id = document.getElementById('missionId').value || uid();
-  const payload = {
+  const existingIndex = missions.findIndex(m => m.id === id);
+  const imageNameFromForm = form.dataset.imageFileName || null;
+
+// ------------------- MODIFICACIONES PARA GUARDAR ORDEN -------------------
+
+// al crear o editar una misión, asignamos un campo 'order'
+const payload = {
   id,
   title: document.getElementById('title').value.trim(),
   category: document.getElementById('category').value,
   description: document.getElementById('description').value.trim(),
   reward: document.getElementById('reward').value.trim(),
   notes: document.getElementById('notes').value.trim(),
-  imageName: document.getElementById('missionId').dataset.imageName || ''
+  imageName: imageNameFromForm !== null ? imageNameFromForm :
+             (existingIndex >= 0 ? missions[existingIndex].imageName || '' : ''),
+  order: existingIndex >= 0 ? missions[existingIndex].order : Date.now() // orden único inicial
 };
 
-  const existing = missions.find(m=>m.id===id);
-  if(existing){
-    Object.assign(existing, payload);
+  if (existingIndex >= 0) {
+    missions[existingIndex] = payload;
   } else {
-    missions.unshift(payload); // newest first
+    missions.push(payload);
   }
-  closeForm();
-  renderAll();
+
   scheduleSave();
+  renderAll();
+  document.getElementById('formContainer').style.display = 'none';
+  clearFormPreview();
 });
 
-// button actions
-document.getElementById('btnAdd').addEventListener('click', ()=> openForm());
-document.getElementById('btnCancel').addEventListener('click', ()=> closeForm());
-document.getElementById('btnSave').addEventListener('click', ()=> saveLocal(true));
-document.getElementById('btnClear').addEventListener('click', ()=> {
-  if(confirm('Borrar todas las misiones y reiniciar el Diario? Esta acción no se puede deshacer.')){
-    missions = []; saveLocal(); renderAll();
-  }
-});
+// ---------------- botones y utilidades ----------------
 
-// Export
-function exportJSON(){
-  const payload = { version:1, exportedAt: new Date().toISOString(), missions };
-  const s = JSON.stringify(payload, null, 2);
-  const blob = new Blob([s], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
+document.getElementById('btnAdd').addEventListener('click', () => openForm());
+document.getElementById('btnSave').addEventListener('click', () => saveIndexedDB(true));
+
+document.getElementById('btnExport').addEventListener('click', () => {
+  const blob = new Blob([JSON.stringify({missions}, null, 2)], {type: 'application/json'});
   const a = document.createElement('a');
-  a.href = url;
+  a.href = URL.createObjectURL(blob);
   a.download = filenameBase;
-  document.body.appendChild(a);
   a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
-  flashStatus('Exportado ✔');
-}
-document.getElementById('btnExport').addEventListener('click', exportJSON);
-document.getElementById('btnExportNow').addEventListener('click', exportJSON);
-
-// Import (via hidden file input)
-document.getElementById('fileImport').addEventListener('change', function(ev){
-  const f = ev.target.files[0];
-  if(!f) return;
-  if(!confirm('Importar este archivo reemplazará los datos actuales. ¿Continuar?')) { ev.target.value=''; return; }
-  const reader = new FileReader();
-  reader.onload = function(e){
-    try {
-      const parsed = JSON.parse(e.target.result);
-      if(!parsed || !Array.isArray(parsed.missions)) throw new Error('Formato inválido');
-      missions = parsed.missions;
-      saveLocal();
-      renderAll();
-      alert('Importación completada.');
-    } catch(err){
-      alert('Error al importar JSON: ' + err.message);
-    }
-  };
-  reader.readAsText(f);
-  ev.target.value='';
 });
+
+document.getElementById('btnExportNow').addEventListener('click', () => document.getElementById('btnExport').click());
+
+document.getElementById('fileImport').addEventListener('change', e => {
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+  try {
+    const imported = JSON.parse(ev.target.result);
+    if(imported.missions){
+      missions = imported.missions.map(m => ({
+        ...m,
+        order: typeof m.order === 'number' ? m.order : Date.now() + Math.random()*1000
+      }));
+      renderAll();      // renderiza primero
+      scheduleSave();   // luego guarda
+    }
+  } catch(err){
+    alert('Error al importar JSON: ' + err.message);
+  }
+};
+  reader.readAsText(file);
+});
+
 document.getElementById('btnImportNow').addEventListener('click', ()=> document.getElementById('fileImport').click());
 
-// Search and filters
-document.getElementById('search').addEventListener('input', debounce(()=> renderAll(), 250));
+document.getElementById('btnClear').addEventListener('click', () => {
+  if(confirm('¿Borrar todas las misiones?')){
+    missions = [];
+    scheduleSave();
+    renderAll();
+  }
+});
 
-// schedule save with debounce
+document.getElementById('search').addEventListener('input', () => renderAll());
+
 function scheduleSave(){
-  if(!autosaveEnabled) return;
   if(autosaveDebounceTimer) clearTimeout(autosaveDebounceTimer);
-  autosaveDebounceTimer = setTimeout(()=> {
-    saveLocal(false);
-  }, 800);
+  autosaveDebounceTimer = setTimeout(() => saveIndexedDB(false), 800);
 }
 
-// debounce util
 function debounce(fn, wait=300){
   let t;
   return function(...args){
@@ -812,38 +628,25 @@ function debounce(fn, wait=300){
   }
 }
 
-// load at start
-(function init(){
-  // attempt to load from localStorage
-  const ok = loadLocal();
-  if(!ok){
-  // diario vacío
-  missions = [];
-  renderAll();
-}
-
-})();
-
-// auto-save indicator and unload
-window.addEventListener('beforeunload', function(){
-  // ensure last save
-  saveLocal(false);
-});
-
-// small UI helpers
-function flashMsg(text){
-  const el = document.getElementById('storageInfo');
-  el.textContent = text;
-  setTimeout(()=> el.textContent = 'Guardado local ✔', 1200);
-}
-
-// keyboard shortcut: Ctrl+S to save
+// keyboard shortcut
 window.addEventListener('keydown', function(e){
-  if((e.ctrlKey||e.metaKey) && e.key.toLowerCase() === 's'){ e.preventDefault(); saveLocal(true); }
+  if((e.ctrlKey||e.metaKey) && e.key.toLowerCase() === 's'){ e.preventDefault(); saveIndexedDB(true); }
 });
 
+// Save order on drop (already attached), and initialize
+window.addEventListener('beforeunload', function(){ saveIndexedDB(false); });
+window.addEventListener('load', () => {
+  loadIndexedDB().then((loaded) => {
+    if (!loaded) renderAll();
+  });
+});
+
+// cleanup object URLs on unload
+window.addEventListener('unload', () => {
+  Object.values(tempPreviews).forEach(u => { try{ URL.revokeObjectURL(u); }catch(e){} });
+  if(form.dataset.imageObjectUrl) try{ URL.revokeObjectURL(form.dataset.imageObjectUrl); }catch(e){}
+});
 </script>
 
-</div>
 </body>
 </html>
