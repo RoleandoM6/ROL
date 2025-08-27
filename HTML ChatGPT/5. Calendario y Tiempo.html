@@ -25,12 +25,34 @@ body {
   background: #fff;
 }
 
+.info-capsula {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #856944;
+  padding: 10px 20px;
+  border-radius: 8px;
+  color: #fff;
+  font-weight: bold;
+  font-size: 28px;
+  line-height: 1.5;  /* mejora alineación */
+}
+
+.info-capsula span {
+  display: flex;            /* Fuerza que contenido interno se alinee */
+  align-items: center;       /* Centra verticalmente icono y texto */
+  padding: 0 10px;
+}
+
+.info-capsula span:not(:last-child) {
+  border-right: 2px solid #d2b48c; /* Barra divisoria color arena */
+}
+
 .right-panel {
-  width: fit-content;       /* se ajusta al contenido */
-  max-width: 90vw;          /* opcional, para no salirse de la pantalla */
-  background-image: url('Textura Pergamino.png');
-  background-repeat: repeat-y;
-  background-size: 100% 100%; /* siempre cubre todo el contenedor */
+  width: fit-content;
+  max-width: 90vw;
+  background-color: #00ff00; /* verde croma */
+  background-image: none;     /* quitar pergamino */
   padding: 15px;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.2);
@@ -40,8 +62,35 @@ h1 { margin-bottom: 10px; font-size: 20px; }
 
 .clock-line {
   display: flex;
-  justify-content: center;
   align-items: center;
+  gap: 20px; /* espacio entre hora y luz */
+}
+
+.clock {
+  font-weight: bold;
+  font-size: 48px; /* más grande si quieres */
+}
+
+.clock-luz.unified {
+  display: flex;
+  flex-direction: row;       /* Mantener en línea horizontal */
+  align-items: center;       /* Alinear verticalmente todos los elementos */
+  justify-content: center;   /* Centrar horizontalmente dentro de la cápsula */
+  gap: 25px;                 /* Espacio entre fecha y hora/luz */
+  padding: 15px 20px;
+  border: 2px solid #444;
+  border-radius: 6px;
+  background-color: #8B5E3C; /* Marrón sólido */
+  font-weight: bold;
+  color: #fff;
+}
+.clock-luz.unified .day {
+  margin: 0;                 /* Eliminar márgenes extra */
+  padding: 0;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 24px;
+  line-height: 1;            /* Para mejor alineación vertical */
 }
 
 .clock-luz {
@@ -66,6 +115,18 @@ h1 { margin-bottom: 10px; font-size: 20px; }
   text-decoration: underline;
 }
 
+.luz {
+  display: flex;
+  align-items: center;
+  font-weight: bold;
+  font-size: 24px; /* texto normal */
+}
+
+.luz-icon {
+  font-size: 64px; /* emoji grande */
+  margin-left: 8px; /* separación del texto */
+}
+
 .controls, .event-creator {
   display: flex;
   flex-direction: column;
@@ -78,13 +139,22 @@ select, input, button { padding: 6px; font-size: 14px; }
   width: 100%;          /* Ocupa todo el ancho del pergamino */
   max-width: 100%;      /* No excede el ancho del contenedor */
   max-height: 400px;    /* Altura máxima */
-  overflow-y: auto;     /* Scroll solo vertical */
+  overflow-y: auto;  /* scroll vertical cuando sea necesario */
+  overflow-x: hidden; /* opcional, para que no aparezca scroll horizontal */
+  transition: max-height 0.5s ease; /* Animación suave */
   border-radius: 6px;
   padding: 10px;
   background: rgba(255,255,255,0.85); /* Fondo blanco translúcido */
   backdrop-filter: blur(2px);
   border: 1px solid rgba(0,0,0,0.2);
   box-sizing: border-box; /* Importante para que padding no haga crecer el ancho */
+}
+.log.collapsed {
+  max-height: 0;       
+  padding: 0;          /* eliminar padding */
+  margin-bottom: 0;
+  border: 0;           /* eliminar borde */
+  background: transparent; /* quitar fondo */
 }
 .log::-webkit-scrollbar {
   width: 8px;
@@ -97,7 +167,7 @@ select, input, button { padding: 6px; font-size: 14px; }
   background: rgba(0,0,0,0.3);
   border-radius: 4px;
 }
-.log-entry { margin-bottom: 5px; font-size: 14px; }
+.log-entry { margin-bottom: 5px; font-size: 20px; }
 .day-tag {
   font-weight: bold;
   padding: 2px 6px;
@@ -113,6 +183,7 @@ select, input, button { padding: 6px; font-size: 14px; }
   <h1>Calendario de Juego</h1>
 
   <div class="controls">
+    <button id="toggleLogBtn" onclick="toggleLog()" style="margin-bottom:10px;">Ocultar Registro</button>
     <button onclick="resetTime()">Resetear Hora</button>
     <button onclick="resetLog()">Resetear Registro</button>
     <button onclick="saveState()">Guardar</button>
@@ -134,21 +205,21 @@ select, input, button { padding: 6px; font-size: 14px; }
     </select>
     <input type="text" id="eventDetail" placeholder="Detalle">
     <div style="display:flex; gap:5px;">
-      <input type="number" id="eventHours" placeholder="h" min="0" style="width:50px;">
-      <input type="number" id="eventMinutes" placeholder="m" min="0" style="width:50px;">
-    </div>
+  <input type="number" id="eventWeeks" placeholder="sem" min="0" style="width:50px;">
+  <input type="number" id="eventDays" placeholder="d" min="0" style="width:50px;">
+  <input type="number" id="eventHours" placeholder="h" min="0" style="width:50px;">
+  <input type="number" id="eventMinutes" placeholder="m" min="0" style="width:50px;">
+</div>
     <button onclick="applyEvent()">Aplicar</button>
   </div>
 </div>
 
 <div class="right-panel">
-  <div class="clock-line">
-    <span class="clock-luz">
-      <span class="clock" id="clock">Hora: 08:00</span>
-      <span class="luz" id="luz">— Día 🌞</span>
-    </span>
-  </div>
-  <div class="day" id="day">Día 1</div>
+  <div class="info-capsula">
+  <span id="day">01/01/2025</span>
+  <span id="clock">08:00H</span>
+  <span id="luz">Día <span class="luz-icon">🌞</span></span>
+</div>
   <div class="log" id="log"></div>
 </div>
 
@@ -158,12 +229,66 @@ let currentMinute = parseInt(localStorage.getItem('currentMinute')) || 0;
 let currentDay = parseInt(localStorage.getItem('currentDay')) || 1;
 let logData = JSON.parse(localStorage.getItem('logData')) || [];
 let lastDirectoryHandle = null;
+let db;
 
+const DB_NAME = "CalendarioDB";
+const STORE_NAME = "estadoJuego";
 const dayColors = ["#3498db", "#27ae60", "#8e44ad", "#d35400", "#c0392b", "#16a085"];
 
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, 1);
+
+    request.onupgradeneeded = (e) => {
+      db = e.target.result;
+      if (!db.objectStoreNames.contains(STORE_NAME)) {
+        db.createObjectStore(STORE_NAME, { keyPath: "id" });
+      }
+    };
+
+    request.onsuccess = (e) => {
+      db = e.target.result;
+      resolve(db);
+    };
+
+    request.onerror = (e) => reject(e);
+  });
+}
+
+async function loadState() {
+  const dbInstance = db || await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = dbInstance.transaction(STORE_NAME, "readonly");
+    const store = tx.objectStore(STORE_NAME);
+    const req = store.get(1);
+    req.onsuccess = (e) => {
+      const data = e.target.result;
+      if (data) {
+        currentHour = data.currentHour;
+        currentMinute = data.currentMinute;
+        currentDay = data.currentDay;
+        logData = data.logData;
+      }
+      resolve();
+    };
+    req.onerror = (e) => reject(e);
+  });
+}
+
+// Fecha base del juego
+const baseDate = new Date(2025, 0, 1); // 1 de enero de 2025
+
 function updateDisplay() {
-  document.getElementById("clock").textContent = `Hora: ${String(currentHour).padStart(2,'0')}:${String(currentMinute).padStart(2,'0')}`;
-  document.getElementById("day").textContent = `Día ${currentDay}`;
+  // Calcular fecha actual según currentDay
+  const currentDate = new Date(baseDate);
+  currentDate.setDate(baseDate.getDate() + (currentDay - 1));
+
+  const dayStr = String(currentDate.getDate()).padStart(2, '0');
+  const monthStr = String(currentDate.getMonth() + 1).padStart(2, '0'); // +1 porque enero=0
+  const yearStr = currentDate.getFullYear();
+
+  document.getElementById("day").textContent = `${dayStr}/${monthStr}/${yearStr}`;
+  document.getElementById("clock").textContent = `${String(currentHour).padStart(2,'0')}:${String(currentMinute).padStart(2,'0')}H`;
   updateLuz();
 }
 
@@ -180,7 +305,18 @@ function updateLuz() {
   else if(minutesTotal >= 1200 && minutesTotal < 1320){ texto='Crepúsculo'; icono='🌆'; }
   else { texto='Noche'; icono='🌙'; }
 
-  luzDiv.textContent = `— ${texto} ${icono}`;
+  luzDiv.innerHTML = `${texto} <span class="luz-icon">${icono}</span>`;
+}
+
+async function saveToIndexedDB(state) {
+  const dbInstance = db || await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = dbInstance.transaction(STORE_NAME, "readwrite");
+    const store = tx.objectStore(STORE_NAME);
+    store.put({ id: 1, ...state });
+    tx.oncomplete = () => resolve();
+    tx.onerror = (e) => reject(e);
+  });
 }
 
 function saveState() {
@@ -188,27 +324,45 @@ function saveState() {
   localStorage.setItem('currentMinute', currentMinute);
   localStorage.setItem('currentDay', currentDay);
   localStorage.setItem('logData', JSON.stringify(logData));
+
+  saveToIndexedDB({
+    currentHour,
+    currentMinute,
+    currentDay,
+    logData
+  });
 }
 
-function advanceTime(hours, minutes) {
+
+function advanceTime({weeks = 0, days = 0, hours = 0, minutes = 0} = {}) {
+  // Sumar minutos y horas
   currentMinute += minutes;
   currentHour += hours;
-  while (currentMinute >= 60) { currentMinute -= 60; currentHour++; }
-  while (currentHour >= 24) { currentHour -= 24; currentDay++; }
+
+  while(currentMinute >= 60){ currentMinute -= 60; currentHour++; }
+  while(currentHour >= 24){ currentHour -= 24; currentDay++; }
+
+  // Sumar días y semanas directamente
+  currentDay += days + (weeks * 7);
+
   updateDisplay();
 }
 
 function applyEvent() {
   const type = document.getElementById("eventType").value;
   const detail = document.getElementById("eventDetail").value.trim();
-  const hours = parseInt(document.getElementById("eventHours").value) || 0;
-  const minutes = parseInt(document.getElementById("eventMinutes").value) || 0;
-  if(hours===0 && minutes===0){ alert("Introduce una duración válida."); return; }
+  const weeks = parseInt(document.getElementById("eventWeeks").value) || 0;
+const days = parseInt(document.getElementById("eventDays").value) || 0;
+const hours = parseInt(document.getElementById("eventHours").value) || 0;
+const minutes = parseInt(document.getElementById("eventMinutes").value) || 0;
 
-  const startHour = currentHour;
-  const startMinute = currentMinute;
+if(weeks===0 && days===0 && hours===0 && minutes===0){ alert("Introduce una duración válida."); return; }
 
-  advanceTime(hours, minutes);
+const startHour = currentHour;
+const startMinute = currentMinute;
+const startDay = currentDay;
+
+advanceTime({weeks, days, hours, minutes});
 
   const endHour = currentHour;
   const endMinute = currentMinute;
@@ -228,19 +382,23 @@ function applyEvent() {
   saveState();
 
   document.getElementById("eventDetail").value = "";
-  document.getElementById("eventHours").value = "";
-  document.getElementById("eventMinutes").value = "";
+
+// Limpiar todas las casillas de tiempo y duración
+document.getElementById("eventWeeks").value = "";
+document.getElementById("eventDays").value = "";
+document.getElementById("eventHours").value = "";
+document.getElementById("eventMinutes").value = "";
 }
 
 function renderLog() {
   const logDiv = document.getElementById("log");
   logDiv.innerHTML = "";
   logData.forEach(entry => {
-    const div = document.createElement("div");
-    div.className = "log-entry";
-    div.innerHTML = `<span class="day-tag" style="background:${entry.color};">[Día ${entry.day}]</span>${entry.text}`;
-    logDiv.appendChild(div);
-  });
+  const div = document.createElement("div");
+  div.className = "log-entry";
+  div.innerHTML = `<span class="day-tag" style="background:${entry.color};">[Día ${entry.day}]</span>${entry.text}`;
+  logDiv.prepend(div); // se añade al inicio
+});
 }
 
 function resetTime() {
@@ -305,9 +463,35 @@ function importData() {
   input.click();
 }
 
-// Inicializar
-updateDisplay();
-renderLog();
+// Estado del log plegado
+let logCollapsed = JSON.parse(localStorage.getItem('logCollapsed')) || false;
+
+function toggleLog() {
+  const logDiv = document.getElementById('log');
+  const btn = document.getElementById('toggleLogBtn');
+  logCollapsed = !logCollapsed;
+
+  if(logCollapsed){
+    logDiv.classList.add('collapsed');
+    btn.textContent = 'Mostrar Registro';
+  } else {
+    logDiv.classList.remove('collapsed');
+    btn.textContent = 'Ocultar Registro';
+  }
+  localStorage.setItem('logCollapsed', logCollapsed);
+}
+
+// Aplicar estado guardado al cargar
+if(logCollapsed){
+  document.getElementById('log').classList.add('collapsed');
+  document.getElementById('toggleLogBtn').textContent = 'Mostrar Registro';
+}
+
+loadState().then(() => {
+  updateDisplay();
+  renderLog();
+});
+
 </script>
 
 </body>

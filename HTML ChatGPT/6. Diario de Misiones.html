@@ -229,18 +229,14 @@ function initDB() {
   });
 }
 
-
 const STORAGE_KEY = 'diarioMisiones_v1';
 const filenameBase = 'Estado Diario de Misiones.json';
 
-let missions = []; // array de misiones
+let missions = [];
 let autosaveEnabled = true;
 let autosaveDebounceTimer = null;
-
-// preview temporal para sesión (id -> objectURL)
 const tempPreviews = {};
 
-// util: id
 function uid(){ return 'm_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,8); }
 
 async function saveIndexedDB(showToast = true) {
@@ -248,11 +244,8 @@ async function saveIndexedDB(showToast = true) {
   const tx = db.transaction('misiones', 'readwrite');
   const store = tx.objectStore('misiones');
 
-  // Limpiar primero para evitar duplicados
   const clearReq = store.clear();
-  clearReq.onsuccess = () => {
-    missions.forEach(m => store.put(m)); // no clear
-  };
+  clearReq.onsuccess = () => { missions.forEach(m => store.put(m)); };
 
   tx.oncomplete = () => {
     document.getElementById('lastSaved').textContent = new Date().toLocaleString('es-ES');
@@ -310,7 +303,6 @@ hideActiveCheckbox.addEventListener('change', () => renderAll());
 hideRumorCheckbox.addEventListener('change', () => renderAll());
 hideCompletedCheckbox.addEventListener('change', () => renderAll());
 
-// ---------------- Renderizado respetando el orden ----------------
 function renderAll(){
   ['listActiva','listRumor','listCompletada'].forEach(id => {
     document.getElementById(id).innerHTML = '';
@@ -335,14 +327,12 @@ function renderAll(){
 
     const actionsEl = card.querySelector('.actions');
 
-    // Botón Editar
     const btnEdit = document.createElement('button');
     btnEdit.className = 'btn small';
     btnEdit.textContent = 'Editar';
     btnEdit.addEventListener('click', () => openForm(m.id));
     actionsEl.appendChild(btnEdit);
 
-    // Botón Completar / Reactivar
     const btnComplete = document.createElement('button');
     btnComplete.className = 'btnComplete small';
     btnComplete.textContent = m.category === 'completada' ? 'Reactivar' : 'Completar';
@@ -353,7 +343,6 @@ function renderAll(){
     });
     actionsEl.appendChild(btnComplete);
 
-    // Botón Eliminar
     const btnDelete = document.createElement('button');
     btnDelete.className = 'btn.warn small';
     btnDelete.textContent = 'Eliminar';
@@ -370,34 +359,24 @@ function renderAll(){
   }
 
   ['activa','rumor','completada'].forEach(category => {
-    // Verificar si la categoría está oculta
     const colEl = document.getElementById('col' + capitalize(category));
-const shouldHide = (category === 'activa' && hideActive) ||
-                   (category === 'rumor' && hideRumor) ||
-                   (category === 'completada' && hideCompleted);
+    const shouldHide = (category === 'activa' && hideActive) ||
+                       (category === 'rumor' && hideRumor) ||
+                       (category === 'completada' && hideCompleted);
 
-// animación suave
-colEl.style.flex = shouldHide ? '0 0 0' : '1 1 0';
-colEl.style.padding = shouldHide ? '0' : '10px';
-colEl.style.opacity = shouldHide ? '0' : '1';
-colEl.style.pointerEvents = shouldHide ? 'none' : 'auto';
+    colEl.style.flex = shouldHide ? '0 0 0' : '1 1 0';
+    colEl.style.padding = shouldHide ? '0' : '10px';
+    colEl.style.opacity = shouldHide ? '0' : '1';
+    colEl.style.pointerEvents = shouldHide ? 'none' : 'auto';
 
-// renderizar solo si no está oculta
-if(shouldHide) return; 
+    if(shouldHide) return; 
 
-const listEl = document.getElementById('list' + capitalize(category));
-missions
-  .filter(m => m.category === category)
-  .filter(m => {
-    if(q) return (m.title+m.description+m.notes+(m.reward||'')).toLowerCase().includes(q);
-    return true;
-  })
-  .sort((a,b) => a.order - b.order)
-  .forEach(m => {
-    const card = createCard(m);
-    listEl.appendChild(card);
-  });
-
+    const listEl = document.getElementById('list' + capitalize(category));
+    missions
+      .filter(m => m.category === category)
+      .filter(m => !q || (m.title+m.description+m.notes+(m.reward||'')).toLowerCase().includes(q))
+      .sort((a,b) => a.order - b.order)
+      .forEach(m => listEl.appendChild(createCard(m)));
   });
 
   markCardsDraggable();
@@ -405,16 +384,14 @@ missions
   updateSizeInfo(JSON.stringify({missions}).length);
 }
 
-
 function markCardsDraggable(){
   document.querySelectorAll('.card').forEach(card => {
     card.setAttribute('draggable', 'true');
-
     card.addEventListener('dragstart', (e) => {
-  card.classList.add('dragging');
-  e.dataTransfer.setData('text/plain', card.dataset.id); // <-- aquí guardamos el id
-});
-
+      card.classList.add('dragging');
+      e.dataTransfer.effectAllowed = "move";
+      e.dataTransfer.setData('text/plain', card.dataset.id);
+    });
     card.addEventListener('dragend', () => card.classList.remove('dragging'));
   });
 }
@@ -433,45 +410,36 @@ function getDragAfterElement(container, y){
 }
 
 function enableDragAndDrop(){
-  let placeholder; // <-- aquí declaramos el placeholder global para la función
+  let placeholder;
 
   ['listActiva','listRumor','listCompletada'].forEach(listId => {
     const listEl = document.getElementById(listId);
 
-    listEl.addEventListener('dragstart', (e) => {
-      placeholder = document.createElement('div');
-      placeholder.className = 'card placeholder';
-      placeholder.style.height = e.target.offsetHeight + 'px';
-      placeholder.style.marginBottom = '10px';
-      placeholder.style.border = '2px dashed #7a4b2b';
-    });
-
     listEl.addEventListener('dragover', (e) => {
       e.preventDefault();
       const afterElement = getDragAfterElement(listEl, e.clientY);
-      const draggingId = e.dataTransfer.getData('text/plain');
-      const draggingEl = document.querySelector(`.card[data-id='${draggingId}']`);
-      if(!draggingEl) return;
+      if(!placeholder){
+        placeholder = document.createElement('div');
+        placeholder.className = 'card placeholder';
+        placeholder.style.height = '50px';
+        placeholder.style.marginBottom = '10px';
+        placeholder.style.border = '2px dashed #7a4b2b';
+      }
       if(afterElement == null) listEl.appendChild(placeholder);
       else listEl.insertBefore(placeholder, afterElement);
     });
 
     listEl.addEventListener('drop', (e) => {
-  e.preventDefault();
-  const draggingId = e.dataTransfer.getData('text/plain');
-  const draggingEl = document.querySelector(`.card[data-id='${draggingId}']`);
-  if(draggingEl && placeholder && placeholder.parentNode){
-    listEl.insertBefore(draggingEl, placeholder); // <-- inserta la tarjeta
-    placeholder.parentNode.removeChild(placeholder); // <-- luego elimina el placeholder
-  }
-  setTimeout(() => {
-    updateMissionOrder();
-    scheduleSave();
-  }, 0);
-});
-
-    listEl.addEventListener('dragend', () => {
-      if(placeholder && placeholder.parentNode) placeholder.parentNode.removeChild(placeholder);
+      e.preventDefault();
+      const draggingId = e.dataTransfer.getData('text/plain');
+      const draggingEl = document.querySelector(`.card[data-id='${draggingId}']`);
+      if(draggingEl && placeholder && placeholder.parentNode){
+        listEl.insertBefore(draggingEl, placeholder);
+        placeholder.parentNode.removeChild(placeholder);
+        placeholder = null;
+      }
+      updateMissionOrder();
+      scheduleSave();
     });
   });
 }
@@ -481,10 +449,12 @@ function updateMissionOrder(){
     const listEl = document.getElementById(listId);
     [...listEl.children].forEach((card, index) => {
       const m = missions.find(mm => mm.id === card.dataset.id);
-      if(m) m.order = index; // numérico
+      if(m) m.order = index;
     });
   });
 }
+
+function capitalize(s){ return s.charAt(0).toUpperCase() + s.slice(1); }
 
 
 // ---------------- Función utilitaria para capitalizar nombres de columnas ----------------
