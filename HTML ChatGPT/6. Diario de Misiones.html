@@ -56,6 +56,16 @@
   .smallmuted { font-size:18px; color:var(--muted); }
   .card p{ margin:6px 0 8px 0; font-size:18px; line-height:1.5; color:#2a1f18; }
   .card .actions{ display:flex; gap:6px; justify-content:flex-end; }
+  .card.dragging {
+  opacity: 0.6;
+  transform: scale(1.03);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.card.placeholder {
+  background: rgba(250,230,200,0.5);
+  border-radius: 8px;
+}
   form{ display:flex; flex-direction:column; gap:8px; margin-bottom:8px; }
   label{ font-size:18px; color:var(--muted); }
   input[type="text"], textarea, select { width:100%; padding:8px; border-radius:8px; border:2px solid rgba(0,0,0,0.08); font-family:inherit; background:rgba(255,255,255,0.96); }
@@ -241,7 +251,7 @@ async function saveIndexedDB(showToast = true) {
   // Limpiar primero para evitar duplicados
   const clearReq = store.clear();
   clearReq.onsuccess = () => {
-    missions.forEach(m => store.put(m));
+    missions.forEach(m => store.put(m)); // no clear
   };
 
   tx.oncomplete = () => {
@@ -423,8 +433,18 @@ function getDragAfterElement(container, y){
 }
 
 function enableDragAndDrop(){
+  let placeholder; // <-- aquí declaramos el placeholder global para la función
+
   ['listActiva','listRumor','listCompletada'].forEach(listId => {
     const listEl = document.getElementById(listId);
+
+    listEl.addEventListener('dragstart', (e) => {
+      placeholder = document.createElement('div');
+      placeholder.className = 'card placeholder';
+      placeholder.style.height = e.target.offsetHeight + 'px';
+      placeholder.style.marginBottom = '10px';
+      placeholder.style.border = '2px dashed #7a4b2b';
+    });
 
     listEl.addEventListener('dragover', (e) => {
       e.preventDefault();
@@ -432,18 +452,27 @@ function enableDragAndDrop(){
       const draggingId = e.dataTransfer.getData('text/plain');
       const draggingEl = document.querySelector(`.card[data-id='${draggingId}']`);
       if(!draggingEl) return;
-      if(afterElement == null) listEl.appendChild(draggingEl);
-      else listEl.insertBefore(draggingEl, afterElement);
+      if(afterElement == null) listEl.appendChild(placeholder);
+      else listEl.insertBefore(placeholder, afterElement);
     });
 
     listEl.addEventListener('drop', (e) => {
   e.preventDefault();
+  const draggingId = e.dataTransfer.getData('text/plain');
+  const draggingEl = document.querySelector(`.card[data-id='${draggingId}']`);
+  if(draggingEl && placeholder && placeholder.parentNode){
+    listEl.insertBefore(draggingEl, placeholder); // <-- inserta la tarjeta
+    placeholder.parentNode.removeChild(placeholder); // <-- luego elimina el placeholder
+  }
   setTimeout(() => {
-    updateMissionOrder(); // ahora sí lee el orden real del DOM
-    scheduleSave();       // guarda automáticamente
+    updateMissionOrder();
+    scheduleSave();
   }, 0);
 });
 
+    listEl.addEventListener('dragend', () => {
+      if(placeholder && placeholder.parentNode) placeholder.parentNode.removeChild(placeholder);
+    });
   });
 }
 
@@ -613,7 +642,7 @@ document.getElementById('btnClear').addEventListener('click', () => {
   }
 });
 
-document.getElementById('search').addEventListener('input', () => renderAll());
+document.getElementById('search').addEventListener('input', debounce(() => renderAll(), 250));
 
 function scheduleSave(){
   if(autosaveDebounceTimer) clearTimeout(autosaveDebounceTimer);
