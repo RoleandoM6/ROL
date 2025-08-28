@@ -14,16 +14,19 @@
   .area img.dragging { cursor: grabbing; }
   .feedback { position: absolute; top: -40px; left: 50%; transform: translateX(-50%); background-color: #4CAF50; color: white; padding: 5px 15px; border-radius: 5px; font-size: 14px; display: none; z-index: 1000; box-shadow: 0 0 5px #00000066; }
   .ficha-drop { padding: 10px; width: 200px; height: 60px; border: 2px dashed #8B4513; border-radius: 5px; display: flex; align-items: center; justify-content: center; margin-right: 10px; color: #8B4513; cursor: pointer; font-weight: bold; }
+  #mapDrop { background-color: #ffebcd; color: #8B4513; }
   input[type=file] { display:none; }
   #resizeInput { position:absolute; width:60px; display:none; z-index:9999; font-size:14px; padding:2px 4px; border:1px solid #8B4513; border-radius:3px; }
   img.selected { outline: 3px solid #4CAF50; }
   .measurement-line { position: absolute; background: red; height: 2px; transform-origin: 0 0; z-index: 100; pointer-events: none; }
   .measurement-text { position: absolute; background: #4CAF50; color: white; padding: 2px 6px; border-radius: 4px; font-size: 14px; z-index: 101; pointer-events: none; }
+  
 </style>
 </head>
 <body>
 
 <div class="controls">
+  <div class="ficha-drop" id="mapDrop">Arrastra mapa aquí</div>
   <div class="ficha-drop" id="fichaDrop">Arrastra ficha aquí</div>
   <button class="button" id="moveMapBtn">Mover Mapa</button>
   <button class="button" id="fichaBtn">Ficha</button>
@@ -48,6 +51,8 @@
 </div>
 
 <input type="number" id="resizeInput" min="10" placeholder="px">
+<input type="file" id="importMapFile" accept="image/*" style="display:none;">
+
 
 <script>
 /*************************
@@ -94,6 +99,33 @@ function idbGet(id) {
   }));
 }
 
+function pushHistory(){
+    const state = buildState();
+    historyStack = historyStack.slice(0, historyIndex + 1); // recortar redo
+    historyStack.push(JSON.stringify(state));
+    if(historyStack.length > MAX_HISTORY) historyStack.shift();
+    historyIndex = historyStack.length - 1;
+}
+
+async function undo(){
+    if(historyIndex <= 0) return;
+    historyIndex--;
+    const state = JSON.parse(historyStack[historyIndex]);
+    await restoreFromState(state);
+}
+
+async function redo(){
+    if(historyIndex >= historyStack.length - 1) return;
+    historyIndex++;
+    const state = JSON.parse(historyStack[historyIndex]);
+    await restoreFromState(state);
+}
+
+document.addEventListener('keydown', async e=>{
+    if(e.ctrlKey && e.key==='z'){ await undo(); e.preventDefault(); }
+    if(e.ctrlKey && e.key==='y'){ await redo(); e.preventDefault(); }
+});
+
 /*************************
  * Tablero original + cambios a IndexedDB
  *************************/
@@ -110,6 +142,8 @@ const loadBtn = document.getElementById('loadBtn');
 const feedback = document.getElementById('feedback');
 const fichaDrop = document.getElementById('fichaDrop');
 const importFile = document.getElementById('importFile');
+const mapDrop = document.getElementById('mapDrop');
+const importMapFile = document.getElementById('importMapFile');
 const resizeInput = document.getElementById('resizeInput');
 
 let moveMapMode = false;
@@ -121,6 +155,11 @@ let currentImage = null;
 let fichas = [];
 let resizeTarget = null;
 let selectedFichas = [];
+let historyStack = [];
+let historyIndex = -1;
+const MAX_HISTORY = 20;
+
+
 
 // Medición
 let measureLines = [];
@@ -181,6 +220,7 @@ function importStateFromFile(file){
     try {
       const full = JSON.parse(e.target.result);
       await restoreFromState(full);
+      pushHistory();
       await saveIDBState(false);
       showFeedback('Estado importado ✅',1500);
     }catch(err){console.error(err); alert('JSON inválido');}
@@ -193,6 +233,13 @@ function clearAllFichas(){
   fichas.forEach(f=>f.parentNode?.removeChild(f));
   fichas=[];
   selectedFichas=[];
+}
+
+function clearMap(){
+    if(currentImage){ 
+        area.removeChild(currentImage); 
+        currentImage = null; 
+    }
 }
 
 // --- cargar mapa ---
@@ -241,41 +288,51 @@ function loadFicha(src,left=null,top=null,id=null,isData=false,name=null,width=1
 
   ficha.onmousedown = (e)=>{
     if(fichaMode && e.button===0 && !resizeMode){
-      e.preventDefault();
-      if(e.ctrlKey){
-        if(selectedFichas.includes(ficha)){
-          selectedFichas = selectedFichas.filter(f => f!==ficha);
-          ficha.classList.remove('selected');
-        } else {
-          selectedFichas.push(ficha);
-          ficha.classList.add('selected');
+        e.preventDefault();
+
+        // Ctrl+click añade o quita de la selección
+        if(e.ctrlKey){
+  if(selectedFichas.includes(ficha)){
+    selectedFichas = selectedFichas.filter(f => f!==ficha);
+    ficha.classList.remove('selected');
+  } else {
+    selectedFichas.push(ficha);
+    ficha.classList.add('selected');
+  }
+  return;
+}
+
+        // Si la ficha no está seleccionada, seleccionarla sola
+        if(!selectedFichas.includes(ficha)){
+            selectedFichas.forEach(f => f.classList.remove('selected'));
+            selectedFichas = [ficha];
+            ficha.classList.add('selected');
         }
-        return;
-      }
-      if(!selectedFichas.includes(ficha)){
-        selectedFichas.forEach(f => f.classList.remove('selected'));
-        selectedFichas = [ficha];
-        ficha.classList.add('selected');
-      }
-      const startX = e.clientX, startY = e.clientY;
-      const startPos = selectedFichas.map(f => ({f, left: parseInt(f.style.left||0), top: parseInt(f.style.top||0)}));
-      ficha.classList.add('dragging');
-      function onMouseMove(ev){
-        const dx = ev.clientX - startX;
-        const dy = ev.clientY - startY;
-        startPos.forEach(obj => {
-          obj.f.style.left = obj.left + dx + 'px';
-          obj.f.style.top = obj.top + dy + 'px';
-        });
-      }
-      function onMouseUp(){
-        ficha.classList.remove('dragging');
-        document.removeEventListener('mousemove', onMouseMove);
-        document.removeEventListener('mouseup', onMouseUp);
-        saveIDBState(false);
-      }
-      document.addEventListener('mousemove', onMouseMove);
-      document.addEventListener('mouseup', onMouseUp);
+
+        // Ahora sí, arrastrar todas las seleccionadas
+        const startX = e.clientX, startY = e.clientY;
+        const startPos = selectedFichas.map(f => ({f, left: parseInt(f.style.left||0), top: parseInt(f.style.top||0)}));
+        ficha.classList.add('dragging');
+
+        function onMouseMove(ev){
+            const dx = ev.clientX - startX;
+            const dy = ev.clientY - startY;
+            startPos.forEach(obj => {
+                obj.f.style.left = obj.left + dx + 'px';
+                obj.f.style.top = obj.top + dy + 'px';
+            });
+        }
+
+        function onMouseUp(){
+            ficha.classList.remove('dragging');
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', onMouseUp);
+            pushHistory();
+            saveIDBState(false);
+        }
+
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
     } else if(resizeMode){
       e.preventDefault();
       resizeTarget = ficha;
@@ -294,6 +351,7 @@ function loadFicha(src,left=null,top=null,id=null,isData=false,name=null,width=1
       fichas = fichas.filter(f => f !== ficha);
       selectedFichas = selectedFichas.filter(f => f!==ficha);
       ficha.parentNode?.removeChild(ficha);
+      pushHistory();
       saveIDBState(false);
       showFeedback('Ficha eliminada ❌',1000);
     }
@@ -306,6 +364,7 @@ resizeInput.addEventListener('change',()=>{
     let newSize = Math.max(10, parseInt(resizeInput.value));
     resizeTarget.style.width=newSize+'px';
     resizeTarget.style.height=newSize+'px';
+    pushHistory();
     saveIDBState(false);
     showFeedback('Ficha redimensionada 🔹',1000);
     resizeInput.style.display='none';
@@ -317,15 +376,44 @@ resizeInput.addEventListener('change',()=>{
 fichaDrop.addEventListener('dragover', e=>e.preventDefault());
 fichaDrop.addEventListener('drop', e=>{
   e.preventDefault();
-  const files=Array.from(e.dataTransfer.files).filter(f=>f.type.startsWith('image/'));
+  const files = Array.from(e.dataTransfer.files).filter(f=>f.type.startsWith('image/'));
   if(files.length===0){ alert("Arrastra imágenes válidas"); return; }
+
   files.forEach(file=>{
-    // convertir ruta a localhost
-    const localPath = `http://localhost:8000/${file.name}`;
+    let localPath;
+
+    // Ajustar la ruta según la carpeta donde estén tus fichas
+    // Aquí puedes cambiar la lógica según tu preferencia
+    if(file.name.includes('PJ_')) {
+      localPath = `http://localhost:8000/02. Creación de Tokens/1. PJ/${file.name}`;
+    } else if(file.name.includes('PNJ_')) {
+      localPath = `http://localhost:8000/02. Creación de Tokens/2. PNJ/${file.name}`;
+    } else if(file.name.includes('Obj_')) {
+      localPath = `http://localhost:8000/05. Objetos/${file.name}`;
+    } else {
+      // carpeta genérica FICHAS
+      localPath = `http://localhost:8000/02. Creación de Tokens/FICHAS/${file.name}`;
+    }
+
     loadFicha(localPath,null,null,null,false,file.name);
     saveIDBState(false);
   });
 });
+
+
+mapDrop.addEventListener('dragover', e=>e.preventDefault());
+mapDrop.addEventListener('drop', e=>{
+    e.preventDefault();
+    const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
+    if(files.length === 0){ alert("Arrastra imágenes válidas"); return; }
+    const file = files[0]; // solo un mapa
+    const localPath = `http://localhost:8000/04. Mapas/${file.name}`; // <-- ruta relativa a la carpeta raíz del servidor
+    clearMap();
+    loadMap(localPath, area.clientWidth/2, area.clientHeight/2);
+    pushHistory();
+    saveIDBState(false);
+});
+
 
 // --- Botones ---
 moveMapBtn.addEventListener('click',()=>{ moveMapMode=!moveMapMode; moveMapBtn.classList.toggle('active',moveMapMode); saveIDBState(false); });
@@ -368,6 +456,7 @@ area.onmousedown = (e)=>{
     function onMouseUp(){
       document.removeEventListener('mousemove',onMouseMove);
       document.removeEventListener('mouseup',onMouseUp);
+      pushHistory();
       saveIDBState(false);
     }
     document.addEventListener('mousemove',onMouseMove);
@@ -459,6 +548,9 @@ area.addEventListener('click', (e)=>{
         measureStart=null;
     }
 });
+
+
+
 </script>
 </body>
 </html>

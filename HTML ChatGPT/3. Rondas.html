@@ -82,21 +82,68 @@ h1 {
     <button onclick="cambiar(-1)">-1</button>
     <button onclick="resetear()">Reset</button>
     <button onclick="cambiar(1)">+1</button>
+    <button onclick="guardarRonda()">Guardar</button>
+    <button onclick="exportarJSON()">Exportar JSON</button>
+    <input type="file" id="importFile" style="display:none" onchange="importarJSON(event)">
+    <button onclick="document.getElementById('importFile').click()">Importar JSON</button>
+
   </div>
 
 <script>
   let numero = 1;
   const numeroDiv = document.getElementById("numero");
 
-  // cargar desde localStorage
-  window.onload = () => {
-    const guardado = localStorage.getItem("ronda");
-    if (guardado) {
-      numero = parseInt(guardado);
+  // ---------- IndexedDB ----------
+let db;
+const dbName = "RondasDB";
+const storeName = "rondaStore";
+
+// Abrir/crear base de datos
+const request = indexedDB.open(dbName, 1);
+
+request.onerror = (event) => {
+  console.error("Error al abrir IndexedDB", event);
+};
+
+request.onsuccess = (event) => {
+  db = event.target.result;
+  cargarRonda(); // cargar al iniciar
+};
+
+request.onupgradeneeded = (event) => {
+  db = event.target.result;
+  if (!db.objectStoreNames.contains(storeName)) {
+    db.createObjectStore(storeName, { keyPath: "id" });
+  }
+};
+
+// Exportar a JSON
+function exportarJSON() {
+  const data = { numero };
+  const blob = new Blob([JSON.stringify(data)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "3. Rondas.json"; // nombre según tu HTML
+  a.click();
+}
+
+// Importar desde JSON
+function importarJSON(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const data = JSON.parse(e.target.result);
+    if (data.numero) {
+      numero = data.numero;
       numeroDiv.textContent = numero;
       actualizarColor();
+      animar();
+      guardarRonda();
     }
   };
+  reader.readAsText(file);
+}
 
   // animación al cambiar el número
   function animar() {
@@ -125,12 +172,34 @@ h1 {
   numeroDiv.style.color = "black";
 }
 
+// Guardar ronda en IndexedDB
+function guardarRonda() {
+  const tx = db.transaction(storeName, "readwrite");
+  const store = tx.objectStore(storeName);
+  store.put({ id: 1, numero: numero });
+}
+
+// Cargar ronda desde IndexedDB
+function cargarRonda() {
+  const tx = db.transaction(storeName, "readonly");
+  const store = tx.objectStore(storeName);
+  const getRequest = store.get(1);
+  getRequest.onsuccess = () => {
+    if (getRequest.result) {
+      numero = getRequest.result.numero;
+      numeroDiv.textContent = numero;
+      actualizarColor();
+    }
+  };
+}
+
+
   // sumar/restar rondas
   function cambiar(valor) {
     numero += valor;
     if (numero < 1) numero = 1;
     numeroDiv.textContent = numero;
-    localStorage.setItem("ronda", numero);
+    guardarRonda();
     actualizarColor();
     animar();
   }
@@ -139,7 +208,7 @@ h1 {
   function resetear() {
     numero = 1;
     numeroDiv.textContent = numero;
-    localStorage.setItem("ronda", numero);
+    guardarRonda();
     actualizarColor();
     animar();
   }

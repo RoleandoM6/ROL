@@ -45,6 +45,11 @@
       <button onclick="vaciarTodo()" class="small">Vaciar</button>
       <button onclick="tirarIniciativa()" class="small">Tirar Ini.</button>
       <button onclick="ordenarTabla()" class="small">Ordenar Tabla</button>
+      <button onclick="guardarLista()" class="small">Guardar</button>
+      <button onclick="exportarJSON()" class="small">Exportar JSON</button>
+      <input type="file" id="importFile" style="display:none" onchange="importarJSON(event)">
+      <button onclick="document.getElementById('importFile').click()" class="small">Importar JSON</button>
+
     </div>
 
     <div id="lista"></div>
@@ -61,23 +66,66 @@ let jugadoresBase = [
 
 let participantes = [];
 
-window.onload = function() {
-  let guardados = localStorage.getItem('participantes');
-  if (guardados) {
-    participantes = JSON.parse(guardados);
+// --- INICIO: IndexedDB ---
+let db;
+const request = indexedDB.open("ListadoINI_DB", 1);
+
+request.onerror = function(event) {
+  console.error("IndexedDB error:", event.target.error);
+};
+
+request.onupgradeneeded = function(event) {
+  db = event.target.result;
+  if (!db.objectStoreNames.contains("participantes")) {
+    db.createObjectStore("participantes", { autoIncrement: true });
   }
+};
 
-  // Asegurar que los 4 jugadores estén siempre presentes
-  jugadoresBase.forEach(j => {
-    if (!participantes.some(p => p.nombre === j.nombre)) {
-      participantes.unshift({...j}); // añadir al inicio
-    }
-  });
+request.onsuccess = function(event) {
+  db = event.target.result;
+  cargarListaIndexedDB(); // cargar datos al iniciar
+};
+// --- FIN: IndexedDB ---
 
-  mostrarLista();
+window.onload = function() {
+  // la carga real se hace en request.onsuccess de IndexedDB
+};
+
+
+function guardarLista() {
+  if (!db) return;
+  const transaction = db.transaction(["participantes"], "readwrite");
+  const store = transaction.objectStore("participantes");
+
+  // Limpiar todo antes de guardar
+  store.clear().onsuccess = function() {
+    participantes.forEach(p => store.add(p));
+  };
 }
 
-function guardarLista() { localStorage.setItem('participantes', JSON.stringify(participantes)); }
+function cargarListaIndexedDB() {
+  if (!db) return;
+  const transaction = db.transaction(["participantes"], "readonly");
+  const store = transaction.objectStore("participantes");
+
+  const request = store.getAll();
+  request.onsuccess = function(event) {
+    let guardados = event.target.result;
+    if (guardados && guardados.length > 0) {
+      participantes = guardados.map(p => ({ nombre: p.nombre, bono: p.bono, tirada: p.tirada }));
+    }
+
+    // Asegurar que los 4 jugadores estén presentes
+    jugadoresBase.forEach(j => {
+      if (!participantes.some(p => p.nombre === j.nombre)) {
+        participantes.unshift({...j});
+      }
+    });
+
+    mostrarLista();
+  };
+}
+
 
 function agregarEnemigo() {
   let nombre = document.getElementById('nombre').value.trim();
@@ -154,6 +202,40 @@ function ordenarTabla() {
   mostrarLista();
   guardarLista();
 }
+
+function exportarJSON() {
+  const dataStr = JSON.stringify(participantes, null, 2);
+  const blob = new Blob([dataStr], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+
+  // Nombre del archivo según el HTML
+  let htmlName = document.title || "ListadoINI";
+  a.download = htmlName + ".json";
+  a.click();
+}
+
+function importarJSON(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (Array.isArray(data)) {
+        participantes = data.map(p => ({ nombre: p.nombre, bono: p.bono, tirada: p.tirada }));
+        guardarLista();
+        mostrarLista();
+      } else {
+        alert("Archivo inválido");
+      }
+    } catch (err) {
+      alert("Error leyendo el JSON");
+    }
+  };
+  reader.readAsText(file);
+}
+
 </script>
 </body>
 </html>
