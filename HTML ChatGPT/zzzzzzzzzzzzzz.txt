@@ -1,0 +1,4 @@
+Estoy yendo 1 a 1 por todos los códigos HTML que hemos estado haciendo estos días para hacer que el autoguardado, el botón de guardado, y el botón de Exportar/Importar JSON funcionen con IndexedDB. Si lo tenían, adaptarlo a eso y si no lo tenían, crearlo. Ah, y los archivos exportados deben llevar el nombre del HTML, por ejemplo, si es "1. Barra INI.html" será "1. Barra INI.json". ¿Entendido?
+
+Te paso el código para "1. Barra INI". Revísalo y haz eso que te he dicho.
+Si es posible, dame los fragmentos de código de cada cosa que deba añadir, quitar o sustituir, diciéndome dónde y dándome una referencia para que sepa dónde hacerlo.
