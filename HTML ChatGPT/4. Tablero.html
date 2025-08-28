@@ -5,7 +5,7 @@
 <title>4. Tablero</title>
 <style>
   body { margin: 0; padding: 20px; background-color: #f5f0e1; display: flex; flex-direction: column; align-items: center; font-family: Arial, sans-serif; }
-  .controls { display: flex; gap: 10px; margin-bottom: 20px; position: relative; }
+  .controls { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; position: relative; }
   .button { padding: 10px 20px; background-color: #ffffff; color: #000000; border: 2px solid #8B4513; border-radius: 5px; cursor: pointer; user-select: none; font-weight: bold; transition: all 0.2s; }
   .button.active { background-color: #4CAF50; color: white; border-color: #2E7D32; box-shadow: 0 0 10px #4CAF50; }
   .marco { width: 1940px; height: 1100px; border: 10px solid #8B4513; display: flex; justify-content: center; align-items: center; box-sizing: border-box; margin-top: 20px; position: relative; }
@@ -30,8 +30,15 @@
   <button class="button" id="resizeBtn">Redimensionar</button>
   <button class="button" id="moveBoardBtn">Mover Tablero</button>
   <button class="button" id="measureBtn">Medir</button>
-  <button class="button" id="exportBtn">Guardar Estado (JSON)</button>
-  <button class="button" id="importBtn">Cargar Estado (JSON)</button>
+
+  <!-- Persistencia con IndexedDB -->
+  <button class="button" id="saveBtn">Guardar (IndexedDB)</button>
+  <button class="button" id="loadBtn">Cargar (IndexedDB)</button>
+
+  <!-- Export/Import JSON (archivos) -->
+  <button class="button" id="exportBtn">Exportar JSON</button>
+  <button class="button" id="importBtn">Importar JSON</button>
+
   <div class="feedback" id="feedback"></div>
   <input type="file" id="importFile" accept="application/json">
 </div>
@@ -43,6 +50,53 @@
 <input type="number" id="resizeInput" min="10" placeholder="px">
 
 <script>
+/*************************
+ * IndexedDB helpers
+ *************************/
+const DB_NAME = 'TableroDB';
+const STORE_NAME = 'estados';
+const DB_VERSION = 1;
+const STATE_KEY = 'tablero';
+
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, DB_VERSION);
+    req.onupgradeneeded = (e) => {
+      const db = req.result;
+      if (!db.objectStoreNames.contains(STORE_NAME)) {
+        const store = db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+        store.createIndex('updatedAt', 'updatedAt');
+      }
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+function idbSet(id, data) {
+  return openDB().then(db => new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_NAME, 'readwrite');
+    tx.oncomplete = () => resolve(true);
+    tx.onerror = () => reject(tx.error);
+    const store = tx.objectStore(STORE_NAME);
+    store.put({ id, ...data, updatedAt: new Date().toISOString() });
+  }));
+}
+
+function idbGet(id) {
+  return openDB().then(db => new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_NAME, 'readonly');
+    tx.onerror = () => reject(tx.error);
+    const store = tx.objectStore(STORE_NAME);
+    const req = store.get(id);
+    req.onsuccess = () => resolve(req.result || null);
+    req.onerror = () => reject(req.error);
+  }));
+}
+
+/*************************
+ * Tablero original + cambios a IndexedDB
+ *************************/
 const area = document.getElementById('area');
 const moveMapBtn = document.getElementById('moveMapBtn');
 const fichaBtn = document.getElementById('fichaBtn');
@@ -51,6 +105,8 @@ const moveBoardBtn = document.getElementById('moveBoardBtn');
 const measureBtn = document.getElementById('measureBtn');
 const exportBtn = document.getElementById('exportBtn');
 const importBtn = document.getElementById('importBtn');
+const saveBtn = document.getElementById('saveBtn');
+const loadBtn = document.getElementById('loadBtn');
 const feedback = document.getElementById('feedback');
 const fichaDrop = document.getElementById('fichaDrop');
 const importFile = document.getElementById('importFile');
@@ -75,45 +131,61 @@ let measureStart = null;
 function genId(prefix='id'){ return `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2,9)}`; }
 function showFeedback(msg, dur=1400){ feedback.textContent=msg; feedback.style.display='block'; setTimeout(()=>feedback.style.display='none', dur); }
 
-// --- Guardado local ---
-function saveLocalState(){
-  const state = { map:null, fichas:[], moveMapMode:!!moveMapMode, fichaMode:!!fichaMode, resizeMode:!!resizeMode, moveBoardMode:!!moveBoardMode, metaVersion:1 };
-  if(currentImage) state.map = { src: currentImage.src, left: parseInt(currentImage.style.left||0), top: parseInt(currentImage.style.top||0) };
-  state.fichas = fichas.map(f => ({ src:f.src, left:parseInt(f.style.left||0), top:parseInt(f.style.top||0), width: parseInt(f.style.width||100), height: parseInt(f.style.height||100), name:f.dataset.name||null }));
-  localStorage.setItem('mapState', JSON.stringify(state));
+// --- Guardado (IndexedDB) ---
+function buildState(){
+  const state = {
+    map: null,
+    fichas: [],
+    moveMapMode: !!moveMapMode,
+    fichaMode: !!fichaMode,
+    resizeMode: !!resizeMode,
+    moveBoardMode: !!moveBoardMode,
+    metaVersion: 2
+  };
+  if(currentImage) state.map = {
+    src: currentImage.dataset.localpath||currentImage.src,
+    left: parseInt(currentImage.style.left||0),
+    top: parseInt(currentImage.style.top||0)
+  };
+  state.fichas = fichas.map(f => ({
+    src: f.dataset.localpath||f.src,
+    left: parseInt(f.style.left||0),
+    top: parseInt(f.style.top||0),
+    width: parseInt(f.style.width||100),
+    height: parseInt(f.style.height||100),
+    name: f.dataset.name || null
+  }));
+  return state;
 }
 
-// --- Export completo a JSON ---
+async function saveIDBState(showMsg=true){
+  const state = buildState();
+  await idbSet(STATE_KEY, state);
+  if (showMsg) showFeedback('Guardado en IndexedDB ✅', 1200);
+}
+
+// --- Export completo a JSON (descarga) ---
 function exportStateJSON(){
-  const state = { map:null, fichas:[], metaVersion:1, exportedAt:(new Date()).toISOString() };
-  if(currentImage) state.map = { data: currentImage.src, left:parseInt(currentImage.style.left), top:parseInt(currentImage.style.top) };
-  state.fichas = fichas.map(f => ({ data:f.src, left:parseInt(f.style.left), top:parseInt(f.style.top), width:parseInt(f.style.width), height:parseInt(f.style.height), name:f.dataset.name||null }));
-  const blob = new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
+  const state = buildState();
+  const full = { ...state, exportedAt:(new Date()).toISOString() };
+  const blob = new Blob([JSON.stringify(full,null,2)],{type:'application/json'});
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='estado.json';
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
   showFeedback('Exportado estado ✅',1500);
 }
 
-// --- Importar JSON ---
+// --- Importar JSON desde archivo ---
 function importStateFromFile(file){
   const reader = new FileReader();
-  reader.onload = (e)=>{
+  reader.onload = async (e)=>{
     try {
       const full = JSON.parse(e.target.result);
-      restoreFromExport(full);
+      await restoreFromState(full);
+      await saveIDBState(false);
       showFeedback('Estado importado ✅',1500);
     }catch(err){console.error(err); alert('JSON inválido');}
   };
   reader.readAsText(file);
-}
-
-// --- Restaurar desde export JSON ---
-function restoreFromExport(full){
-  clearAllFichas();
-  if(currentImage){ area.removeChild(currentImage); currentImage=null; }
-  if(full.map) loadMap(full.map.data, full.map.left, full.map.top);
-  if(Array.isArray(full.fichas)) full.fichas.forEach(f=>loadFicha(f.data,f.left,f.top,null,false,f.name,f.width,f.height));
-  saveLocalState();
 }
 
 // --- limpiar fichas ---
@@ -127,19 +199,18 @@ function clearAllFichas(){
 function loadMap(src,left=null,top=null){
   if(currentImage){
     currentImage.src=src;
-    currentImage.style.left=(left!==null)?left+'px':currentImage.style.left;
-    currentImage.style.top=(top!==null)?top+'px':currentImage.style.top;
-    saveLocalState(); return;
+    currentImage.dataset.localpath = src;
+    if(left!==null) currentImage.style.left=left+'px';
+    if(top!==null) currentImage.style.top=top+'px';
+    return;
   }
   const img=document.createElement('img');
-  img.src=src; img.style.zIndex=0;
+  img.src=src; img.dataset.localpath = src; img.style.zIndex=0;
   img.style.left=(left!==null)?left+'px':(area.clientWidth/2)+'px';
   img.style.top=(top!==null)?top+'px':(area.clientHeight/2)+'px';
   img.dataset.ficha=''; 
   area.prepend(img);
   currentImage=img;
-
-  img.onload = ()=>saveLocalState();
 
   img.onmousedown = (e)=>{
     if(moveMapMode && e.button===0){
@@ -149,7 +220,7 @@ function loadMap(src,left=null,top=null){
       img.classList.add('dragging');
 
       function onMouseMove(ev){ img.style.left=(startLeft+ev.clientX-startX)+'px'; img.style.top=(startTop+ev.clientY-startY)+'px'; }
-      function onMouseUp(){ img.classList.remove('dragging'); document.removeEventListener('mousemove',onMouseMove); document.removeEventListener('mouseup',onMouseUp); saveLocalState(); }
+      function onMouseUp(){ img.classList.remove('dragging'); document.removeEventListener('mousemove',onMouseMove); document.removeEventListener('mouseup',onMouseUp); saveIDBState(false); }
       document.addEventListener('mousemove',onMouseMove);
       document.addEventListener('mouseup',onMouseUp);
     }
@@ -160,6 +231,7 @@ function loadMap(src,left=null,top=null){
 function loadFicha(src,left=null,top=null,id=null,isData=false,name=null,width=100,height=100){
   const ficha=document.createElement('img');
   ficha.src=src;
+  ficha.dataset.localpath = src; // <-- ruta desde localhost
   ficha.style.width=width+'px'; ficha.style.height=height+'px';
   ficha.style.left=(left!==null)?left+'px':(area.clientWidth/2-50)+'px';
   ficha.style.top=(top!==null)?top+'px':(area.clientHeight/2-50)+'px';
@@ -200,7 +272,7 @@ function loadFicha(src,left=null,top=null,id=null,isData=false,name=null,width=1
         ficha.classList.remove('dragging');
         document.removeEventListener('mousemove', onMouseMove);
         document.removeEventListener('mouseup', onMouseUp);
-        saveLocalState();
+        saveIDBState(false);
       }
       document.addEventListener('mousemove', onMouseMove);
       document.addEventListener('mouseup', onMouseUp);
@@ -222,7 +294,7 @@ function loadFicha(src,left=null,top=null,id=null,isData=false,name=null,width=1
       fichas = fichas.filter(f => f !== ficha);
       selectedFichas = selectedFichas.filter(f => f!==ficha);
       ficha.parentNode?.removeChild(ficha);
-      saveLocalState();
+      saveIDBState(false);
       showFeedback('Ficha eliminada ❌',1000);
     }
   };
@@ -234,42 +306,46 @@ resizeInput.addEventListener('change',()=>{
     let newSize = Math.max(10, parseInt(resizeInput.value));
     resizeTarget.style.width=newSize+'px';
     resizeTarget.style.height=newSize+'px';
-    saveLocalState();
+    saveIDBState(false);
     showFeedback('Ficha redimensionada 🔹',1000);
     resizeInput.style.display='none';
     resizeTarget=null;
   }
 });
 
-// --- Manejo DROP fichas ---
+// --- Manejo DROP fichas desde PC (localhost) ---
 fichaDrop.addEventListener('dragover', e=>e.preventDefault());
 fichaDrop.addEventListener('drop', e=>{
   e.preventDefault();
   const files=Array.from(e.dataTransfer.files).filter(f=>f.type.startsWith('image/'));
   if(files.length===0){ alert("Arrastra imágenes válidas"); return; }
   files.forEach(file=>{
-    const reader=new FileReader();
-    reader.onload=(evt)=>{
-      loadFicha(evt.target.result,null,null,null,false,file.name);
-      saveLocalState();
-    };
-    reader.readAsDataURL(file);
+    // convertir ruta a localhost
+    const localPath = `http://localhost:8000/${file.name}`;
+    loadFicha(localPath,null,null,null,false,file.name);
+    saveIDBState(false);
   });
 });
 
 // --- Botones ---
-moveMapBtn.addEventListener('click',()=>{ moveMapMode=!moveMapMode; moveMapBtn.classList.toggle('active',moveMapMode); saveLocalState(); });
+moveMapBtn.addEventListener('click',()=>{ moveMapMode=!moveMapMode; moveMapBtn.classList.toggle('active',moveMapMode); saveIDBState(false); });
 fichaBtn.addEventListener('click',()=>{ 
   fichaMode=!fichaMode; 
   fichaBtn.classList.toggle('active',fichaMode); 
   if(!fichaMode){ selectedFichas.forEach(f=>f.classList.remove('selected')); selectedFichas=[]; } 
-  saveLocalState(); 
+  saveIDBState(false); 
 });
-resizeBtn.addEventListener('click',()=>{ resizeMode=!resizeMode; resizeBtn.classList.toggle('active',resizeMode); resizeInput.style.display='none'; resizeTarget=null; saveLocalState(); });
-moveBoardBtn.addEventListener('click',()=>{ moveBoardMode=!moveBoardMode; moveBoardBtn.classList.toggle('active',moveBoardMode); saveLocalState(); });
+resizeBtn.addEventListener('click',()=>{ resizeMode=!resizeMode; resizeBtn.classList.toggle('active',resizeMode); resizeInput.style.display='none'; resizeTarget=null; saveIDBState(false); });
+moveBoardBtn.addEventListener('click',()=>{ moveBoardMode=!moveBoardMode; moveBoardBtn.classList.toggle('active',moveBoardMode); saveIDBState(false); });
 exportBtn.addEventListener('click',()=>exportStateJSON());
 importBtn.addEventListener('click',()=>importFile.click());
 importFile.addEventListener('change',(ev)=>{ const file=ev.target.files[0]; if(file) importStateFromFile(file); importFile.value=''; });
+saveBtn.addEventListener('click',()=>{ saveIDBState(true); });
+loadBtn.addEventListener('click', async ()=>{
+  const saved = await idbGet(STATE_KEY);
+  if(saved){ await restoreFromState(saved); showFeedback('Cargado desde IndexedDB ✅', 1200); }
+  else { showFeedback('No hay estado guardado en IndexedDB', 1400); }
+});
 
 // --- Mover tablero ---
 area.onmousedown = (e)=>{
@@ -292,31 +368,45 @@ area.onmousedown = (e)=>{
     function onMouseUp(){
       document.removeEventListener('mousemove',onMouseMove);
       document.removeEventListener('mouseup',onMouseUp);
-      saveLocalState();
+      saveIDBState(false);
     }
     document.addEventListener('mousemove',onMouseMove);
     document.addEventListener('mouseup',onMouseUp);
   }
 };
 
-// --- Restaurar al inicio ---
-window.addEventListener('load',()=>{
-  const saved = localStorage.getItem('mapState');
-  if(saved){
-    try{
-      const state = JSON.parse(saved);
-      if(state.map) loadMap(state.map.src,state.map.left,state.map.top);
-      if(Array.isArray(state.fichas)) state.fichas.forEach(f=>loadFicha(f.data,f.left,f.top,null,false,f.name,f.width,f.height));
-      fichaMode=!!state.fichaMode;
-      resizeMode=!!state.resizeMode;
-      moveMapMode=!!state.moveMapMode;
-      moveBoardMode=!!state.moveBoardMode;
-      moveMapBtn.classList.toggle('active',moveMapMode);
-      fichaBtn.classList.toggle('active',fichaMode);
-      resizeBtn.classList.toggle('active',resizeMode);
-      moveBoardBtn.classList.toggle('active',moveBoardMode);
-    }catch(err){ console.error(err); loadMap("Mapa_Posada_Sótano.jpg"); }
-  }else loadMap("Mapa_Posada_Sótano.jpg");
+// --- Restaurar desde estado (objeto) ---
+async function restoreFromState(state){
+  clearAllFichas();
+  if(currentImage){ area.removeChild(currentImage); currentImage=null; }
+  if(state.map) loadMap(state.map.src, state.map.left, state.map.top);
+  if(Array.isArray(state.fichas)) state.fichas.forEach(f=>loadFicha(f.src, f.left, f.top, null, false, f.name, f.width, f.height));
+  // modos
+  fichaMode=!!state.fichaMode;
+  resizeMode=!!state.resizeMode;
+  moveMapMode=!!state.moveMapMode;
+  moveBoardMode=!!state.moveBoardMode;
+  moveMapBtn.classList.toggle('active',moveMapMode);
+  fichaBtn.classList.toggle('active',fichaMode);
+  resizeBtn.classList.toggle('active',resizeMode);
+  moveBoardBtn.classList.toggle('active',moveBoardMode);
+}
+
+// --- Carga al inicio (desde IndexedDB, con fallback) ---
+window.addEventListener('load', async ()=>{
+  try{
+    const saved = await idbGet(STATE_KEY);
+    if(saved){
+      await restoreFromState(saved);
+    } else {
+      // Fallback a un mapa por defecto si no hay estado
+      loadMap('Mapa_Posada_Sótano.jpg');
+      await saveIDBState(false);
+    }
+  }catch(err){
+    console.error('Error cargando IndexedDB', err);
+    loadMap('Mapa_Posada_Sótano.jpg');
+  }
 });
 
 // --- Botón medir ---
@@ -331,7 +421,6 @@ measureBtn.addEventListener('click', ()=>{
         measureStart = null;
     }
 });
-
 
 // --- Manejo clicks para medición ---
 area.addEventListener('click', (e)=>{
@@ -370,7 +459,6 @@ area.addEventListener('click', (e)=>{
         measureStart=null;
     }
 });
-
 </script>
 </body>
 </html>
