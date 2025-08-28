@@ -3,13 +3,17 @@ $chrome = "C:\Program Files\Google\Chrome\Application\chrome.exe"
 
 # Lista de ventanas (cada una con su perfil y archivo local)
 $ventanas = @(
-    @{ Profile = "C:\ChromeProfiles\Perfil1"; FilePath = "C:\Users\monsi\Desktop\ROL\HTML ChatGPT\1. Barra de Iniciativa.html" },
-    @{ Profile = "C:\ChromeProfiles\Perfil2"; FilePath = "C:\Users\monsi\Desktop\ROL\HTML ChatGPT\2. Listado de Iniciativa.html" },
+    @{ Profile = "C:\ChromeProfiles\Perfil1"; FilePath = "C:\Users\monsi\Desktop\ROL\HTML ChatGPT\1. Barra INI.html" },
+    @{ Profile = "C:\ChromeProfiles\Perfil2"; FilePath = "C:\Users\monsi\Desktop\ROL\HTML ChatGPT\2. Listado INI.html" },
     @{ Profile = "C:\ChromeProfiles\Perfil3"; FilePath = "C:\Users\monsi\Desktop\ROL\HTML ChatGPT\3. Rondas.html" },
     @{ Profile = "C:\ChromeProfiles\Perfil5"; FilePath = "C:\Users\monsi\Desktop\ROL\HTML ChatGPT\4. Tablero.html" }
-    @{ Profile = "C:\ChromeProfiles\Perfil4"; FilePath = "C:\Users\monsi\Desktop\ROL\HTML ChatGPT\5. Calendario y Tiempo.html" }
-    @{ Profile = "C:\ChromeProfiles\Perfil6"; FilePath = "C:\Users\monsi\Desktop\ROL\HTML ChatGPT\6. Diario de Misiones.html" }
-)
+    @{ Profile = "C:\ChromeProfiles\Perfil4"; FilePath = "C:\Users\monsi\Desktop\ROL\HTML ChatGPT\5. Calendario.html" }
+    @{ Profile = "C:\ChromeProfiles\Perfil6"; FilePath = "C:\Users\monsi\Desktop\ROL\HTML ChatGPT\6. Diario.html" }
+    @{ Profile = "C:\ChromeProfiles\Perfil7"; FilePath = "C:\Users\monsi\Desktop\ROL\HTML ChatGPT\7. Mapamundi.html" }
+    @{ Profile = "C:\ChromeProfiles\Perfil8"; FilePath = "C:\Users\monsi\Desktop\ROL\HTML ChatGPT\8. Condiciones.html" }
+    @{ Profile = "C:\ChromeProfiles\Perfil9"; FilePath = "C:\Users\monsi\Desktop\ROL\HTML ChatGPT\9. Tienda.html" }
+
+    )
 
 foreach ($v in $ventanas) {
     $dir = $v.Profile
