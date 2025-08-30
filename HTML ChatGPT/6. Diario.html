@@ -8,8 +8,8 @@
   /* (tu CSS original intacto) */
   @import url('https://fonts.googleapis.com/css2?family=IM+Fell+English&display=swap');
   :root{ --bg:#24190f; --panel:#f6eee3; --ink:#1b120c; --accent:#7a4b2b; --danger:#7b1d1d; --muted:#6b5a4a; }
-  html,body{height:100%;margin:0;padding:0;font-family: 'IM Fell English', serif;background: #a032e9; color:var(--ink);overflow:hidden; /* evita scroll */}
-  .centered-wrapper { width:100vw;height:100vh;display:flex;justify-content:center;align-items:flex-start;background:#a032e9;overflow:hidden;padding-top:10px;}
+  html,body{height:100%;margin:0;padding:0;font-family: 'IM Fell English', serif;background: #281236; color:var(--ink);overflow:hidden; /* evita scroll */}
+  .centered-wrapper { width:100vw;height:100vh;display:flex;justify-content:center;align-items:flex-start;background:#1f0c2c;overflow:hidden;padding-top:10px;}
 .wrap {
   width: 1920px;
   height: 1080px;
@@ -137,13 +137,95 @@
   .info { font-size:20px; color:#e9dfd3; opacity:0.95; }
   @media (max-width:980px){ .grid{ grid-template-columns:1fr; } .side{ height:auto; } .main{ min-height:auto; } .columns{ flex-direction:column; } }
   #btnExportNow,#btnImportNow,#lastSaved{ display:none; }
+
+  #toggleModo {
+  margin: 10px;
+  padding: 10px 20px;
+  background: #654321;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+#tablon {
+  position: relative;
+  width: 1920px;
+  height: 1080px;
+  margin: 0 auto;
+  border: 5px solid #654321;
+  background: url("C:/Users/monsi/Desktop/ROL/7. Misiones/Banners/Tablón de anuncios.png") center/cover no-repeat;
+  overflow: hidden;
+  display: none;
+}
+
+.draggable {
+  position: absolute;
+  cursor: grab;
+  z-index: 1;
+}
+
+.note-img {
+  width: 120px;
+  height: auto;
+  user-select: none;
+}
+
+#modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  justify-content: center;
+  align-items: center;
+}
+
+#modal img {
+  max-width: 90%;
+  max-height: 90%;
+  border: 5px solid white;
+  border-radius: 10px;
+}
+
+#closeModal {
+  position: absolute;
+  top: 20px;
+  right: 30px;
+  font-size: 40px;
+  color: white;
+  cursor: pointer;
+}
+
 </style>
 </head>
 <body>
+
+
+
+<!-- CONTENEDOR DIARIO (tus 3 columnas) -->
+<div id="diario">
+  <!-- Aquí van tus 3 columnas actuales -->
+</div>
+
+
+<!-- MODAL PARA NOTAS -->
+<div id="modal">
+  <span id="closeModal">✖</span>
+  <img id="modal-img">
+</div>
+
+
   <div class="centered-wrapper">
     <div class="wrap">
       <header>
         <div class="controls">
+           <!-- BOTÓN PARA CAMBIAR DE MODO -->
+<button id="toggleModo">Cambiar a Modo Tablón</button>
+<label class="btn small alt" for="fileImageTablon">
+  <input id="fileImageTablon" type="file" accept="image/*" style="display:none" />
+  Importar Imagen al Tablón
+</label>
+
           <button class="btn" id="btnAdd">+ Añadir Misión</button>
           <button class="btn alt" id="btnSave">Guardar (Local)</button>
           <button class="btn small" id="btnExport">Exportar JSON</button>
@@ -214,23 +296,35 @@
             </form>
           </div>
 
-          <!-- Columns -->
-          <div class="columns-wrapper">
-            <div class="columns">
-              <div class="col" id="colActiva">
-                <h2>Misiones Activas</h2>
-                <div id="listActiva"></div>
-              </div>
-              <div class="col" id="colRumor">
-                <h2>Rumores</h2>
-                <div id="listRumor"></div>
-              </div>
-              <div class="col" id="colCompletada">
-                <h2>Completadas</h2>
-                <div id="listCompletada"></div>
-              </div>
-            </div>
-          </div>
+        
+         <!-- Columns Wrapper -->
+<div class="columns-wrapper">
+
+  <!-- CONTENEDOR de las 3 columnas (se oculta al cambiar de modo) -->
+  <div id="contenedor" class="columns">
+    <div class="col" id="colActiva">
+      <h2>Misiones Activas</h2>
+      <div id="listActiva"></div>
+    </div>
+    <div class="col" id="colRumor">
+      <h2>Rumores</h2>
+      <div id="listRumor"></div>
+    </div>
+    <div class="col" id="colCompletada">
+      <h2>Completadas</h2>
+      <div id="listCompletada"></div>
+    </div>
+  </div>
+
+  <!-- CONTENEDOR TABLÓN (oculto al inicio) -->
+  <div id="tablon" style="display: none;">
+    <div class="draggable"><img src="images/nota1.png" class="note-img"></div>
+    <div class="draggable"><img src="images/nota2.png" class="note-img"></div>
+    <div class="draggable"><img src="images/nota3.png" class="note-img"></div>
+  </div>
+
+</div>
+
 
         </section>
 
@@ -737,7 +831,340 @@ window.addEventListener('unload', () => {
   Object.values(tempPreviews).forEach(u => { try{ URL.revokeObjectURL(u); }catch(e){} });
   if(form.dataset.imageObjectUrl) try{ URL.revokeObjectURL(form.dataset.imageObjectUrl); }catch(e){}
 });
-</script>
 
+
+// Tablón //
+
+// === BOTÓN PARA CAMBIAR ENTRE DIARIO Y TABLÓN ===
+const tablon = document.getElementById('tablon');
+const modal = document.getElementById("modal");
+const modalImg = document.getElementById("modal-img");
+const closeModal = document.getElementById("closeModal");
+const toggleBtn = document.getElementById("toggleModo");
+const diario = document.getElementById("diario");
+
+
+let enTablon = false;
+
+toggleBtn.addEventListener("click", () => {
+  enTablon = !enTablon;
+
+  if (enTablon) {
+    diario.style.display = "none";
+    tablon.style.display = "block";
+    toggleBtn.textContent = "Cambiar a Modo Diario";
+  } else {
+    diario.style.display = "block";
+    tablon.style.display = "none";
+    toggleBtn.textContent = "Cambiar a Modo Tablón";
+  }
+});
+
+// === DRAG & DROP CON GUARDADO ===
+let selected = null, offsetX = 0, offsetY = 0;
+
+// ------------------------------
+// Tablón: drag & drop + autoguardado
+// ------------------------------
+
+// Guardar posiciones de las notas usando ID único
+function saveTablonPositions() {
+  tablon.querySelectorAll('.draggable').forEach(el => {
+    const id = el.dataset.id || (el.dataset.id = 'note_' + Date.now() + Math.random().toString(36).slice(2,6));
+    const pos = { left: el.offsetLeft, top: el.offsetTop };
+    localStorage.setItem('note-pos-' + id, JSON.stringify(pos));
+  });
+}
+
+// Cargar posiciones guardadas
+function loadTablonPositions() {
+  tablon.querySelectorAll('.draggable').forEach(el => {
+    const id = el.dataset.id || (el.dataset.id = 'note_' + Date.now() + Math.random().toString(36).slice(2,6));
+    const saved = localStorage.getItem('note-pos-' + id);
+    if (saved) {
+      const { left, top } = JSON.parse(saved);
+      el.style.left = left + 'px';
+      el.style.top = top + 'px';
+    } else {
+      el.style.left = el.offsetLeft + 'px';
+      el.style.top = el.offsetTop + 'px';
+    }
+    el.style.position = 'absolute';
+  });
+}
+
+// Activar drag & drop
+function enableTablonDrag() {
+  let selected = null, offsetX = 0, offsetY = 0;
+  tablon.querySelectorAll('.draggable').forEach(el => {
+    el.style.cursor = 'grab';
+    el.addEventListener('mousedown', e => {
+      selected = el;
+      offsetX = e.clientX - el.offsetLeft;
+      offsetY = e.clientY - el.offsetTop;
+      el.style.cursor = 'grabbing';
+      el.style.zIndex = 1000;
+    });
+  });
+
+  document.addEventListener('mousemove', e => {
+    if (selected) {
+      selected.style.left = (e.clientX - offsetX) + 'px';
+      selected.style.top = (e.clientY - offsetY) + 'px';
+    }
+  });
+
+  document.addEventListener('mouseup', () => {
+    if (selected) {
+      saveTablonPositions();
+      selected.style.cursor = 'grab';
+      selected.style.zIndex = 1;
+      selected = null;
+    }
+  });
+}
+
+// Inicializar al cargar
+window.addEventListener('load', () => {
+  loadTablonPositions();
+  enableTablonDrag();
+});
+
+
+// Guardar posición
+function savePosition(el, index) {
+  localStorage.setItem("note-pos-" + index, JSON.stringify({
+    left: el.style.left,
+    top: el.style.top
+  }));
+}
+
+// Habilitar arrastre
+document.querySelectorAll('.draggable').forEach((el, index) => {
+  el.addEventListener('mousedown', (e) => {
+    selected = { el, index };
+    offsetX = e.clientX - el.offsetLeft;
+    offsetY = e.clientY - el.offsetTop;
+    el.style.zIndex = 1000;
+  });
+});
+
+// Mientras mueves
+document.addEventListener('mousemove', (e) => {
+  if (selected) {
+    selected.el.style.left = (e.clientX - offsetX) + "px";
+    selected.el.style.top = (e.clientY - offsetY) + "px";
+  }
+});
+
+// Soltar -> guardar
+document.addEventListener('mouseup', () => {
+  if (selected) {
+    savePosition(selected.el, selected.index);
+    selected.el.style.zIndex = 1;
+    selected = null;
+  }
+});
+
+document.querySelectorAll('.note-img').forEach(img => {
+  img.addEventListener('dblclick', () => {
+    modal.style.display = "flex";
+    modalImg.src = img.src;
+  });
+});
+
+// === Importar imágenes dinámicamente ===
+let tablonNotes = []; // cada nota = { id, src, x, y }
+
+const fileImageTablon = document.getElementById('fileImageTablon');
+
+fileImageTablon.addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    const div = document.createElement('div');
+    div.className = 'draggable';
+    div.style.left = '100px';
+    div.style.top = '100px';
+
+    const img = document.createElement('img');
+    img.src = ev.target.result;
+    img.className = 'note-img';
+
+    div.appendChild(img);
+    tablon.appendChild(div);
+
+    const id = 'note_' + Date.now() + '_' + Math.random().toString(36).slice(2,5);
+    div.dataset.id = id;
+
+    tablonNotes.push({ id, src: ev.target.result, x: 100, y: 100 });
+
+    makeDraggable(div);
+    enableImageZoom();
+    scheduleTablonSave(); // 👈 agenda guardado
+  };
+  reader.readAsDataURL(file);
+});
+
+closeModal.onclick = () => modal.style.display = "none";
+modal.onclick = (e) => { if (e.target === modal) modal.style.display = "none"; };
+
+function cambiarModo() {
+  const contenedor = document.getElementById('contenedor');
+  const tablon = document.getElementById('tablon');
+
+  if (contenedor.style.display !== 'none') {
+    contenedor.style.display = 'none';
+    tablon.style.display = 'flex'; // o 'block', según cómo quieras que se muestre
+  } else {
+    contenedor.style.display = 'flex'; // suponiendo que tus columnas usan flex
+    tablon.style.display = 'none';
+  }
+}
+
+
+// === Función para habilitar zoom (doble clic) ===
+function enableImageZoom() {
+  document.querySelectorAll("#tablon .note-img").forEach(img => {
+    img.addEventListener("dblclick", () => {
+      modalImg.src = img.src;
+      modal.style.display = "flex";
+    });
+  });
+}
+
+closeModal.addEventListener("click", () => {
+  modal.style.display = "none";
+});
+window.addEventListener("click", (e) => {
+  if (e.target === modal) modal.style.display = "none";
+});
+
+// === Drag optimizado ===
+function makeDraggable(el) {
+  let offsetX = 0, offsetY = 0;
+
+  el.addEventListener('mousedown', (e) => {
+    offsetX = e.clientX - el.offsetLeft;
+    offsetY = e.clientY - el.offsetTop;
+
+    function onMouseMove(e) {
+      el.style.left = (e.clientX - offsetX) + 'px';
+      el.style.top = (e.clientY - offsetY) + 'px';
+    }
+
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', () => {
+      document.removeEventListener('mousemove', onMouseMove);
+      saveTablon(); // guardamos en cada drop
+    }, {once:true});
+
+    e.preventDefault();
+  });
+}
+
+// === Alternar entre modo Diario y modo Tablón ===
+document.getElementById('toggleModo').addEventListener('click', () => {
+  const contenedor = document.getElementById('contenedor');
+
+  if (contenedor.style.display === 'none') {
+    contenedor.style.display = 'flex';
+    tablon.style.display = 'none';
+    document.getElementById('toggleModo').textContent = 'Cambiar a Modo Tablón';
+  } else {
+    contenedor.style.display = 'none';
+    tablon.style.display = 'block';
+    document.getElementById('toggleModo').textContent = 'Cambiar a Modo Diario';
+  }
+});
+
+// Inicializar drag y zoom para imágenes ya presentes
+document.querySelectorAll('#tablon .draggable').forEach(el => makeDraggable(el));
+enableImageZoom();
+
+async function saveTablon() {
+  await initDB();
+  const tx = db.transaction('misiones', 'readwrite');
+  const store = tx.objectStore('misiones');
+
+  // Guardar notas
+  const notesData = tablonNotes.map(note => ({
+    type: 'note',
+    content: note.content,
+    x: note.x,
+    y: note.y
+  }));
+
+  // Guardar imágenes
+  const imageElems = document.querySelectorAll('.draggable img');
+  const imagesData = Array.from(imageElems).map(img => ({
+    type: 'image',
+    content: img.src,
+    x: parseFloat(img.style.left) || 0,
+    y: parseFloat(img.style.top) || 0
+  }));
+
+  store.put({ id: 'tablon', items: [...notesData, ...imagesData] });
+}
+
+async function loadTablon() {
+  await initDB();
+  const tx = db.transaction('misiones', 'readonly');
+  const store = tx.objectStore('misiones');
+  const req = store.get('tablon');
+  req.onsuccess = () => {
+    if (req.result && req.result.items) {
+      tablonNotes = [];
+      // Limpiar tablon actual
+      document.getElementById('tablon').innerHTML = '';
+
+      req.result.items.forEach(item => {
+        if (item.type === 'note') {
+          tablonNotes.push(item);
+          renderNote(item); // función que ya tenías para notas
+        } else if (item.type === 'image') {
+          const img = document.createElement('img');
+          img.src = item.content;
+          img.classList.add('draggable');
+          img.style.position = 'absolute';
+          img.style.left = item.x + 'px';
+          img.style.top = item.y + 'px';
+          document.getElementById('tablon').appendChild(img);
+          makeDraggable(img); // tu función de drag
+        }
+      });
+    }
+  };
+}
+
+function renderTablon() {
+  tablon.innerHTML = '';
+  tablonNotes.forEach(n => {
+    const div = document.createElement('div');
+    div.className = 'draggable';
+    div.style.left = n.x + 'px';
+    div.style.top = n.y + 'px';
+    div.dataset.id = n.id;
+
+    const img = document.createElement('img');
+    img.src = n.src;
+    img.className = 'note-img';
+
+    div.appendChild(img);
+    tablon.appendChild(div);
+    makeDraggable(div);
+  });
+}
+
+function scheduleTablonSave(){
+  clearTimeout(window.tablonSaveTimer);
+  window.tablonSaveTimer = setTimeout(saveTablon, 500);
+}
+
+window.addEventListener('load', loadTablon);
+
+</script>
 </body>
 </html>
