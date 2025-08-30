@@ -9,3 +9,4 @@ echo Ejecutando tercer script...
 START "" "C:\Users\monsi\Desktop\ROL\HTML ChatGPT\x AbrirChromeMax.bat"
 
 echo Todos los scripts ejecutados.
+exit

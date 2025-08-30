@@ -9,4 +9,4 @@ if not exist "%dest%" mkdir "%dest%"
 move /Y "%source%\*.json" "%dest%"
 
 echo Todos los archivos JSON se han movido a "%dest%" y sobrescrito si era necesario.
-pause
+exit
