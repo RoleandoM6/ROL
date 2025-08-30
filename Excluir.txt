@@ -1,14 +1,5 @@
 0. Dados
 3. Ronda
-Condiciones
-Iniciativa
-Barra INI
-Diario
-Tienda
-Mapamundi
-Tablero
-Calendario
-
 OST
 X. Fondo
 
