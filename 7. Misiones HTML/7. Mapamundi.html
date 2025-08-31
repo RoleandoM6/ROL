@@ -384,18 +384,9 @@ fichaDrop.addEventListener('drop', e=>{
     const nameLower = file.name.toLowerCase();
     let localPath;
 
-    if (nameLower.includes('pj_') || nameLower.startsWith('pj')) {
-    localPath = encodeURI(`http://localhost:8000/02. Creación de Tokens/1. PJ/${file.name}`);
-  } else if (nameLower.includes('pnj_') || nameLower.startsWith('pnj')) {
-    localPath = encodeURI(`http://localhost:8000/02. Creación de Tokens/2. PNJ/${file.name}`);
-  } else if (nameLower.includes('obj_') || nameLower.includes('objeto_')) {
-    localPath = encodeURI(`http://localhost:8000/05. Objetos/${file.name}`);
-  } else if (nameLower.includes('mapamundi_') || nameLower.includes('mapa_')) {
-    localPath = encodeURI(`http://localhost:8000/04. Mapas/${file.name}`);
-  } else {
     // carpeta genérica FICHAS
-    localPath = encodeURI(`http://localhost:8000/02. Creación de Tokens/FICHAS/${file.name}`);
-  }
+    localPath = encodeURI(`http://localhost:8000/04. Mapas/${file.name}`);
+  
 
     console.log('=> localPath =', localPath);
   loadFicha(localPath, null, null, null, false, file.name);
