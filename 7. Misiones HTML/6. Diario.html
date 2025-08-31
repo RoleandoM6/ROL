@@ -9,7 +9,7 @@
   @import url('https://fonts.googleapis.com/css2?family=IM+Fell+English&display=swap');
   :root{ --bg:#24190f; --panel:#f6eee3; --ink:#1b120c; --accent:#7a4b2b; --danger:#7b1d1d; --muted:#6b5a4a; }
   html,body{height:100%;margin:0;padding:0;font-family: 'IM Fell English', serif;background: #281236; color:var(--ink);overflow:hidden; /* evita scroll */}
-  .centered-wrapper { width:100vw;height:100vh;display:flex;justify-content:center;align-items:flex-start;background:#1f0c2c;overflow:hidden;padding-top:10px;}
+  .centered-wrapper { width:100vw;height:100vh;display:flex;justify-content:center;align-items:flex-start;background:#1f0c2c;overflow:visible;padding-top:10px;}
 .wrap {
   width: 1920px;
   height: 1080px;
@@ -42,11 +42,15 @@
   border-radius: 12px;
   padding: 12px;
   height: 520px;
-  overflow:auto;
-  width: 300px;
-  min-width: 200px;   /* opcional, ancho mínimo */
-  overflow-x: hidden; /* evita que elementos sobresalgan horizontalmente */
-  }
+  overflow-y: auto;
+  overflow-x: visible;  /* ya estaba */
+  min-width: 250px;     /* asegura que nunca se haga más estrecho */
+  max-width: 100%;      /* evita que se salga del viewport */
+  box-sizing: border-box;
+  position: relative;
+  z-index: 10;
+}
+
   .side input[type="text"],
 .side textarea,
 .side select {
@@ -55,14 +59,19 @@
   max-width: 100%;         /* asegura que no se pase del contenedor */
 }
 
-  .category-row { display:flex; gap:10px; align-items:center; margin-bottom:8px; }
+  .category-row { 
+    display:flex; 
+    gap:10px; 
+    flex-direction: column; /* mejor en columna que en fila para no empujar checkbox fuera */
+    align-items:center; 
+    margin-bottom:8px; }
   .filter { padding:8px; border-radius:8px; border:2px solid rgba(0,0,0,0.12); background:#fff6ed; }
 
-  .columns-wrapper { width:100%; max-width:1920px; margin:0 auto; aspect-ratio:16/9; display:flex; justify-content:center; align-items:center; overflow:hidden; transform-origin:top left; }
+  .columns-wrapper { width:100%; max-width:1920px; margin:0 auto; aspect-ratio:16/9; display:flex; justify-content:center; align-items:center; overflow:visible; transform-origin:top left; }
   .columns-wrapper .columns { width:1920px; height:1080px; }
   @media (max-width:1920px) { .columns-wrapper { transform: scale(calc(100vw / 1920)); } }
   @media (max-height:1080px) { .columns-wrapper { transform: scale(calc(100vh / 1080)); } }
-
+  
   .columns{ display:flex; gap:12px; }
 .col {
   flex: 1 1 0;
@@ -138,100 +147,20 @@
   @media (max-width:980px){ .grid{ grid-template-columns:1fr; } .side{ height:auto; } .main{ min-height:auto; } .columns{ flex-direction:column; } }
   #btnExportNow,#btnImportNow,#lastSaved{ display:none; }
 
-  #toggleModo {
-  margin: 10px;
-  padding: 10px 20px;
-  background: #654321;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-}
-
-#tablon {
-  position: relative;
-  width: 1920px;
-  height: 1080px;
-  margin: 0 auto;
-  border: 5px solid #654321;
-  background: url("C:/Users/monsi/Desktop/ROL/7. Misiones/Banners/Tablón de anuncios.png") center/cover no-repeat;
-  overflow: hidden;
-  display: none;
-}
-
-.draggable {
-  position: absolute;
-  cursor: grab;
-  z-index: 1;
-}
-
-.note-img {
-  width: 120px;
-  height: auto;
-  user-select: none;
-}
-
-#modal {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.7);
-  justify-content: center;
-  align-items: center;
-}
-
-#modal img {
-  max-width: 90%;
-  max-height: 90%;
-  border: 5px solid white;
-  border-radius: 10px;
-}
-
-#closeModal {
-  position: absolute;
-  top: 20px;
-  right: 30px;
-  font-size: 40px;
-  color: white;
-  cursor: pointer;
-}
-
 </style>
 </head>
 <body>
-
-
-
-<!-- CONTENEDOR DIARIO (tus 3 columnas) -->
-<div id="diario">
-  <!-- Aquí van tus 3 columnas actuales -->
-</div>
-
-
-<!-- MODAL PARA NOTAS -->
-<div id="modal">
-  <span id="closeModal">✖</span>
-  <img id="modal-img">
-</div>
-
-
   <div class="centered-wrapper">
     <div class="wrap">
       <header>
         <div class="controls">
-           <!-- BOTÓN PARA CAMBIAR DE MODO -->
-<button id="toggleModo">Cambiar a Modo Tablón</button>
-<label class="btn small alt" for="fileImageTablon">
-  <input id="fileImageTablon" type="file" accept="image/*" style="display:none" />
-  Importar Imagen al Tablón
-</label>
-
           <button class="btn" id="btnAdd">+ Añadir Misión</button>
           <button class="btn alt" id="btnSave">Guardar (Local)</button>
           <button class="btn small" id="btnExport">Exportar JSON</button>
           <label class="btn small alt" for="fileImport" style="margin:0">
             <input id="fileImport" type="file" accept="application/json" style="display:none" />Importar JSON
           </label>
+          <button class="btn small" id="btnPickImagesFolder">Carpeta imágenes</button>
           <button class="btn warn small" id="btnClear">Borrar todo</button>
         </div>
       </header>
@@ -240,7 +169,7 @@
         <section class="main">
           <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:10px;">
             <div style="display:inline-flex; align-items:center;">
-<img src="file:///C:/Users/monsi/Desktop/ROL/7.%20Misiones/Banners/Icono%20Diario%20de%20Misiones.png" alt="Logo" style="width:54px; height:54px; border-radius:8px; object-fit:contain; margin-right:8px;">
+<img src="images/Icono%20Diario%20de%20Misiones.png" alt="Logo" style="width:54px; height:54px; border-radius:8px; object-fit:contain; margin-right:8px;">
               <span style="font-size:20px; opacity:0.9; color:rgb(0,0,0); font-weight:bold;">Diario de Misiones — La Marca del Errante</span>
             </div>
             <div style="display:flex;gap:8px;align-items:center;">
@@ -264,6 +193,7 @@
                     <option value="activa">Activa</option>
                     <option value="rumor">Rumor</option>
                     <option value="completada">Completada</option>
+                    <option value="ocultas">Ocultas</option>
                   </select>
                 </div>
               </div>
@@ -285,10 +215,7 @@
               <label>Imagen (solo al crear/editar)</label>
               <input type="file" id="imageFile" accept="image/*" />
               <div id="imagePreview" style="margin-top:6px;"></div>
-              <div class="smallmuted" style="font-size:12px;margin-top:6px;">
-                Nota: para que la imagen persista después de recargar debes colocar el archivo en <code>./images/</code> con el mismo nombre. (Actualmente guardamos solo el nombre del archivo.)
-              </div>
-
+             
               <div style="display:flex;gap:8px;justify-content:flex-end;">
                 <button type="button" class="btn alt" id="btnCancel">Cancelar</button>
                 <button type="submit" class="btn">Guardar Misión</button>
@@ -296,36 +223,27 @@
             </form>
           </div>
 
-        
-         <!-- Columns Wrapper -->
-<div class="columns-wrapper">
-
-  <!-- CONTENEDOR de las 3 columnas (se oculta al cambiar de modo) -->
-  <div id="contenedor" class="columns">
-    <div class="col" id="colActiva">
-      <h2>Misiones Activas</h2>
-      <div id="listActiva"></div>
-    </div>
-    <div class="col" id="colRumor">
-      <h2>Rumores</h2>
-      <div id="listRumor"></div>
-    </div>
-    <div class="col" id="colCompletada">
-      <h2>Completadas</h2>
-      <div id="listCompletada"></div>
-    </div>
-  </div>
-
-  <!-- CONTENEDOR TABLÓN (oculto al inicio) -->
-  <div id="tablon" style="display: none;">
-    <div class="draggable"><img src="images/nota1.png" class="note-img"></div>
-    <div class="draggable"><img src="images/nota2.png" class="note-img"></div>
-    <div class="draggable"><img src="images/nota3.png" class="note-img"></div>
-  </div>
-
-</div>
-
-
+          <!-- Columns -->
+          <div class="columns-wrapper">
+            <div class="columns">
+              <div class="col" id="colActiva">
+                <h2>Misiones Activas</h2>
+                <div id="listActiva"></div>
+              </div>
+              <div class="col" id="colRumor">
+                <h2>Rumores</h2>
+                <div id="listRumor"></div>
+              </div>
+              <div class="col" id="colCompletada">
+                <h2>Completadas</h2>
+                <div id="listCompletada"></div>
+              </div>
+              <div class="col" id="colOcultas">
+                <h2>Ocultas</h2>
+                <div id="listOcultas"></div>
+              </div>
+            </div>
+          </div>
         </section>
 
         <aside class="side">
@@ -335,6 +253,7 @@
               <label class="filter"><input type="checkbox" id="hideActive" /> Ocultar Activas</label>
               <label class="filter"><input type="checkbox" id="hideRumor" /> Ocultar Rumores</label>
               <label class="filter"><input type="checkbox" id="hideCompleted" /> Ocultar Completadas</label>
+              <label class="filter"><input type="checkbox" id="hideOcultas" /> Ocultar Ocultas</label>
             </div>
 
             <div style="margin-top:10px;">
@@ -369,11 +288,11 @@ function initDB() {
     const request = indexedDB.open('DiarioMisionesDB', 1);
 
     request.onupgradeneeded = function(e) {
-      db = e.target.result;
-      if (!db.objectStoreNames.contains('misiones')) {
-        db.createObjectStore('misiones', { keyPath: 'id' });
-      }
-    };
+  db = e.target.result;
+  if (!db.objectStoreNames.contains('misiones')) {
+    db.createObjectStore('misiones', { keyPath: 'id' });
+  }
+};
 
     request.onsuccess = function(e) {
       db = e.target.result;
@@ -392,7 +311,6 @@ const filenameBase = 'Estado Diario de Misiones.json';
 let missions = [];
 let autosaveEnabled = true;
 let autosaveDebounceTimer = null;
-const tempPreviews = {};
 
 function uid(){ return 'm_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,8); }
 
@@ -455,13 +373,67 @@ function flashStatus(msg){
 const hideActiveCheckbox = document.getElementById('hideActive');
 const hideRumorCheckbox = document.getElementById('hideRumor');
 const hideCompletedCheckbox = document.getElementById('hideCompleted');
+const hideOcultasCheckbox = document.getElementById('hideOcultas');
 
-hideActiveCheckbox.addEventListener('change', () => renderAll());
-hideRumorCheckbox.addEventListener('change', () => renderAll());
-hideCompletedCheckbox.addEventListener('change', () => renderAll());
+function saveFilters() {
+  const filtersState = {
+    hideActive: hideActiveCheckbox.checked,
+    hideRumor: hideRumorCheckbox.checked,
+    hideCompleted: hideCompletedCheckbox.checked,
+    hideOcultas: hideOcultasCheckbox.checked
+  };
+  localStorage.setItem('filtersState', JSON.stringify(filtersState));
+}
+
+function loadFilters() {
+  const stored = localStorage.getItem('filtersState');
+  if(stored){
+    const f = JSON.parse(stored);
+    hideActiveCheckbox.checked = f.hideActive;
+    hideRumorCheckbox.checked = f.hideRumor;
+    hideCompletedCheckbox.checked = f.hideCompleted;
+    hideOcultasCheckbox.checked = f.hideOcultas;
+  }
+}
+
+hideActiveCheckbox.addEventListener('change', () => { renderAll(); saveFilters(); });
+hideRumorCheckbox.addEventListener('change', () => { renderAll(); saveFilters(); });
+hideCompletedCheckbox.addEventListener('change', () => { renderAll(); saveFilters(); });
+hideOcultasCheckbox.addEventListener('change', () => { renderAll(); saveFilters(); });
+
+window.addEventListener('DOMContentLoaded', async () => {
+  try {
+    const storedHandle = await loadDirHandle();
+    if (storedHandle) {
+      // Pedir permiso para lectura/escritura
+      const perm = await storedHandle.requestPermission({mode:'readwrite'});
+      if (perm === 'granted') {
+        imagesDirHandle = storedHandle;
+        document.getElementById('storageInfo').textContent = 'Carpeta de imágenes restaurada ✔';
+      } else {
+        console.warn('Permiso denegado para la carpeta de imágenes.');
+        imagesDirHandle = null;
+      }
+    }
+  } catch (e) {
+    console.warn('No se pudo restaurar la carpeta de imágenes:', e);
+    imagesDirHandle = null;
+  }
+
+  // Luego cargamos las misiones
+  const loaded = await loadIndexedDB();
+  if (!loaded) renderAll();
+
+
+loadFilters();
+renderAll();
+
+
+
+});
 
 function renderAll(){
-  ['listActiva','listRumor','listCompletada'].forEach(id => {
+  ['listActiva','listRumor','listCompletada','listOcultas'].forEach(id => {
     document.getElementById(id).innerHTML = '';
   });
 
@@ -469,88 +441,16 @@ function renderAll(){
   const hideActive = hideActiveCheckbox.checked;
   const hideRumor = hideRumorCheckbox.checked;
   const hideCompleted = hideCompletedCheckbox.checked;
+  const hideOcultas = hideOcultasCheckbox.checked;
 
-  function createCard(m) {
-    const card = document.createElement('div');
-    card.className = `card ${m.category}`;
-    card.dataset.id = m.id;
-
-    card.innerHTML = `
-      <div class="card-content" style="display:flex; flex-direction:column; height:100%;">
-        <div class="meta" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; flex:0 0 auto;">
-          <h3 style="margin:0; font-size:20px;">${m.title}</h3>
-          ${m.reward ? `<span style="font-size:20px;">💰 ${m.reward} BTC</span>` : ''}
-        </div>
-
-        <p style="margin:0 0 6px 0; font-size:18px; line-height:1.4; flex:0 0 auto;">${m.description || ''}</p>
-
-${m.imageName ? `<img src="file:///C:/Users/monsi/Desktop/ROL/7.%20Misiones/Banners/${m.imageName}" alt="Imagen misión" style="width:100%; object-fit:contain; border-radius:4px;">` : ''}
-
-        <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-top:auto; flex:0 0 auto;">
-          <div style="font-size:16px; color:#6b5a4a;">${m.notes || ''}</div>
-          <div class="actions" style="display:flex; gap:6px;"></div>
-        </div>
-      </div>
-    `;
-
-    // Ajuste automático del alto de la imagen
-    const img = card.querySelector('img');
-    if(img){
-      const adjustImageHeight = () => {
-        const cardHeight = card.clientHeight;
-        const metaHeight = card.querySelector('.meta')?.offsetHeight || 0;
-        const descHeight = card.querySelector('p')?.offsetHeight || 0;
-        const actionsHeight = card.querySelector('.actions')?.offsetHeight || 0;
-        const paddingTop = parseFloat(getComputedStyle(card).paddingTop) || 0;
-        const paddingBottom = parseFloat(getComputedStyle(card).paddingBottom) || 0;
-
-        const maxImgHeight = cardHeight - metaHeight - descHeight - actionsHeight - paddingTop - paddingBottom - 10;
-        img.style.maxHeight = maxImgHeight + 'px';
-      };
-
-      adjustImageHeight();
-      window.removeEventListener('resize', adjustImageHeight);
-      window.addEventListener('resize', adjustImageHeight);
-    }
-
-    const actionsEl = card.querySelector('.actions');
-
-    const btnEdit = document.createElement('button');
-    btnEdit.className = 'btn small';
-    btnEdit.textContent = 'Editar';
-    btnEdit.addEventListener('click', () => openForm(m.id));
-    actionsEl.appendChild(btnEdit);
-
-    const btnComplete = document.createElement('button');
-    btnComplete.className = 'btnComplete small';
-    btnComplete.textContent = m.category === 'completada' ? 'Reactivar' : 'Completar';
-    btnComplete.addEventListener('click', () => {
-      m.category = m.category === 'completada' ? 'activa' : 'completada';
-      renderAll();
-      scheduleSave();
-    });
-    actionsEl.appendChild(btnComplete);
-
-    const btnDelete = document.createElement('button');
-    btnDelete.className = 'btn.warn small';
-    btnDelete.textContent = 'Eliminar';
-    btnDelete.addEventListener('click', () => {
-      if(confirm('¿Eliminar esta misión?')){
-        missions = missions.filter(mm => mm.id !== m.id);
-        renderAll();
-        scheduleSave();
-      }
-    });
-    actionsEl.appendChild(btnDelete);
-
-    return card;
-  }
-
-  ['activa','rumor','completada'].forEach(category => {
+  ['activa','rumor','completada','ocultas'].forEach(category => {
   const colEl = document.getElementById('col' + capitalize(category));
-  const shouldHide = (category === 'activa' && hideActive) ||
-                     (category === 'rumor' && hideRumor) ||
-                     (category === 'completada' && hideCompleted);
+  let shouldHide = false;
+
+  if(category === 'activa') shouldHide = hideActive;
+  else if(category === 'rumor') shouldHide = hideRumor;
+  else if(category === 'completada') shouldHide = hideCompleted;
+  else if(category === 'ocultas') shouldHide = hideOcultas;
 
   if(shouldHide){
     colEl.style.maxWidth = '0';
@@ -558,18 +458,19 @@ ${m.imageName ? `<img src="file:///C:/Users/monsi/Desktop/ROL/7.%20Misiones/Bann
     colEl.style.opacity = '0';
     colEl.style.pointerEvents = 'none';
   } else {
-    colEl.style.maxWidth = '1000px'; // o el ancho que quieras
+    colEl.style.maxWidth = '1000px'; 
     colEl.style.padding = '10px';
     colEl.style.opacity = '1';
     colEl.style.pointerEvents = 'auto';
   }
-    const listEl = document.getElementById('list' + capitalize(category));
-    missions
-      .filter(m => m.category === category)
-      .filter(m => !q || (m.title+m.description+m.notes+(m.reward||'')).toLowerCase().includes(q))
-      .sort((a,b) => a.order - b.order)
-      .forEach(m => listEl.appendChild(createCard(m)));
-  });
+
+  const listEl = document.getElementById('list' + capitalize(category));
+  missions
+  .filter(m => m.category === category)
+  .filter(m => !q || (m.title+m.description+m.notes+(m.reward||'')).toLowerCase().includes(q))
+  .sort((a,b) => a.order - b.order)
+  .forEach(m => listEl.appendChild(createCard(m)));
+});
 
   markCardsDraggable();
   enableDragAndDrop();
@@ -602,7 +503,7 @@ function getDragAfterElement(container, y){
 }
 
 function enableDragAndDrop(){
-  ['listActiva','listRumor','listCompletada'].forEach(listId => {
+  ['listActiva','listRumor','listCompletada', 'listOcultas'].forEach(listId => {
     const listEl = document.getElementById(listId);
     let placeholder; // <- ahora placeholder es LOCAL a cada lista
 
@@ -636,7 +537,7 @@ function enableDragAndDrop(){
 }
 
 function updateMissionOrder(){
-  ['listActiva','listRumor','listCompletada'].forEach(listId => {
+  ['listActiva','listRumor','listCompletada', 'listOcultas'].forEach(listId => {
     const listEl = document.getElementById(listId);
     [...listEl.children].forEach((card, index) => {
       const m = missions.find(mm => mm.id === card.dataset.id);
@@ -659,14 +560,95 @@ const form = document.getElementById('missionForm');
 const imageFileInput = document.getElementById('imageFile');
 const imagePreviewEl = document.getElementById('imagePreview');
 
-// limpiar preview en formulario
+// === NUEVO: File System Access API (para copiar imagenes en la carpeta /images del servidor) ===
+let imagesDirHandle = null;
+
+const DB_HANDLES = "HandlesDB";
+const STORE_HANDLES = "dirHandles";
+const KEY_IMAGES_DIR = "imagesDirHandle";
+
+function openHandlesDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_HANDLES, 1);
+    req.onupgradeneeded = e => {
+      const dbh = e.target.result;
+      if (!dbh.objectStoreNames.contains(STORE_HANDLES)) {
+        dbh.createObjectStore(STORE_HANDLES);
+      }
+    };
+    req.onsuccess = e => resolve(e.target.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function saveDirHandle(handle) {
+  const dbh = await openHandlesDB();
+  return new Promise((resolve, reject) => {
+    const tx = dbh.transaction(STORE_HANDLES, "readwrite");
+    tx.objectStore(STORE_HANDLES).put(handle, KEY_IMAGES_DIR);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+async function loadDirHandle() {
+  const dbh = await openHandlesDB();
+  return new Promise((resolve, reject) => {
+    const tx = dbh.transaction(STORE_HANDLES, "readonly");
+    const req = tx.objectStore(STORE_HANDLES).get(KEY_IMAGES_DIR);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+function sanitizeFileName(name){
+  return name
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'') // quita acentos
+    .replace(/[^\w.\- ]+/g,'')                       // limpia raros
+    .replace(/\s+/g,' ')                             // colapsa espacios
+    .trim();
+}
+
+async function pickImagesFolder(){
+  if(!window.showDirectoryPicker){
+    alert('Tu navegador no soporta File System Access API. Usa Chrome/Edge recientes.');
+    return;
+  }
+  try{
+    const dir = await window.showDirectoryPicker({ mode:'readwrite' });
+    imagesDirHandle = dir;
+    await saveDirHandle(dir); // persistir
+    document.getElementById('storageInfo').textContent = 'Carpeta de imágenes vinculada ✔';
+  }catch(e){
+    // cancelado por usuario o error
+  }
+}
+
+
+async function copyFileToImagesDir(sourceFile){
+  if(!imagesDirHandle) throw new Error('Primero elige la "Carpeta imágenes".');
+  const safeName = sanitizeFileName(sourceFile.name);
+  const uniqueName = `${Date.now()}_${safeName}`;
+  const fileHandle = await imagesDirHandle.getFileHandle(uniqueName, { create:true });
+  const writable = await fileHandle.createWritable();
+  await writable.write(await sourceFile.arrayBuffer());
+  await writable.close();
+  return uniqueName;
+}
+
+// ================================================================
+
 function clearFormPreview(){
+  // limpiar preview de la imagen
   if(form.dataset.imageObjectUrl){
     try{ URL.revokeObjectURL(form.dataset.imageObjectUrl); }catch(e){}
     delete form.dataset.imageObjectUrl;
   }
   delete form.dataset.imageFileName;
   imagePreviewEl.innerHTML = '';
+
+  // limpiar input file
+  imageFileInput.value = ''; 
 }
 
 // abrir formulario
@@ -683,16 +665,19 @@ function openForm(id){
     document.getElementById('reward').value = m.reward || '';
     document.getElementById('notes').value = m.notes || '';
     // mostrar preview existente (archivo en ./images/)
-    if(tempPreviews[m.id]){
-      imagePreviewEl.innerHTML = `<img src="${tempPreviews[m.id]}" style="max-width:120px;border-radius:4px;">`;
-    } else if(m.imageName){
-imagePreviewEl.innerHTML = `<img src="file:///C:/Users/monsi/Desktop/ROL/7.%20Misiones/Banners/${m.imageName}" style="max-width:120px;border-radius:4px;">`;
+    const fileInput = imageFileInput.files[0];
+    if(fileInput){ // imagen nueva desde formulario
+      const obj = URL.createObjectURL(fileInput);
+      imagePreviewEl.innerHTML = `<img src="${obj}" style="max-width:120px;border-radius:4px;">`;
+    } else if(m.imagePath){ // cargar desde ruta relativa (servida por localhost)
+      imagePreviewEl.innerHTML = `<img src="${m.imagePath}" style="max-width:120px;border-radius:4px;">`;
     } else {
       imagePreviewEl.innerHTML = '';
     }
   } else {
     form.reset();
     document.getElementById('missionId').value = '';
+    clearFormPreview();
   }
   window.scrollTo({top:0,behavior:'smooth'});
 }
@@ -719,42 +704,11 @@ imageFileInput.addEventListener('change', (e) => {
   imagePreviewEl.innerHTML = `<img src="${obj}" style="max-width:120px;border-radius:4px;">`;
 });
 
-form.addEventListener('submit', (e) => {
-  e.preventDefault();
-  const id = document.getElementById('missionId').value || uid();
-  const existingIndex = missions.findIndex(m => m.id === id);
-  const imageNameFromForm = form.dataset.imageFileName || null;
-
-// ------------------- MODIFICACIONES PARA GUARDAR ORDEN -------------------
-
-const payload = {
-  id,
-  title: document.getElementById('title').value.trim(),
-  category: document.getElementById('category').value,
-  description: document.getElementById('description').value.trim(),
-  reward: document.getElementById('reward').value.trim(),
-  notes: document.getElementById('notes').value.trim(),
-  imageName: imageNameFromForm !== null ? imageNameFromForm :
-             (existingIndex >= 0 ? missions[existingIndex].imageName || 'default.png' : 'default.png'),
-  order: existingIndex >= 0 ? missions[existingIndex].order : Date.now(),
-};
-
-  if (existingIndex >= 0) {
-    missions[existingIndex] = payload;
-  } else {
-    missions.push(payload);
-  }
-
-  scheduleSave();
-  renderAll();
-  document.getElementById('formContainer').style.display = 'none';
-  clearFormPreview();
-});
-
 // ---------------- botones y utilidades ----------------
 
 document.getElementById('btnAdd').addEventListener('click', () => openForm());
 document.getElementById('btnSave').addEventListener('click', () => saveIndexedDB(true));
+document.getElementById('btnPickImagesFolder').addEventListener('click', pickImagesFolder);
 
 document.getElementById('btnExport').addEventListener('click', () => {
   const blob = new Blob([JSON.stringify({missions}, null, 2)], {type: 'application/json'});
@@ -813,6 +767,10 @@ function debounce(fn, wait=300){
   }
 }
 
+
+
+
+
 // keyboard shortcut
 window.addEventListener('keydown', function(e){
   if((e.ctrlKey||e.metaKey) && e.key.toLowerCase() === 's'){ e.preventDefault(); saveIndexedDB(true); }
@@ -826,344 +784,176 @@ window.addEventListener('load', () => {
   });
 });
 
-// cleanup object URLs on unload
-window.addEventListener('unload', () => {
-  Object.values(tempPreviews).forEach(u => { try{ URL.revokeObjectURL(u); }catch(e){} });
-  if(form.dataset.imageObjectUrl) try{ URL.revokeObjectURL(form.dataset.imageObjectUrl); }catch(e){}
-});
+const columnsWrapper = document.querySelector('.columns-wrapper');
 
 
-// Tablón //
+async function renderCard(m) {
+  const card = document.createElement('div');
+  card.className = `card ${m.category}`;
+  card.dataset.id = m.id;
 
-// === BOTÓN PARA CAMBIAR ENTRE DIARIO Y TABLÓN ===
-const tablon = document.getElementById('tablon');
-const modal = document.getElementById("modal");
-const modalImg = document.getElementById("modal-img");
-const closeModal = document.getElementById("closeModal");
-const toggleBtn = document.getElementById("toggleModo");
-const diario = document.getElementById("diario");
+  const imgHtml = document.createElement('img');
 
-
-let enTablon = false;
-
-toggleBtn.addEventListener("click", () => {
-  enTablon = !enTablon;
-
-  if (enTablon) {
-    diario.style.display = "none";
-    tablon.style.display = "block";
-    toggleBtn.textContent = "Cambiar a Modo Diario";
-  } else {
-    diario.style.display = "block";
-    tablon.style.display = "none";
-    toggleBtn.textContent = "Cambiar a Modo Tablón";
+  if(m.imagePath){
+    const txImg = db.transaction('images', 'readonly');
+    const storeImg = txImg.objectStore('images');
+    const req = storeImg.get(m.imagePath);
+    req.onsuccess = function(ev){
+      const data = ev.target.result;
+      if(data?.blob){
+        const url = URL.createObjectURL(data.blob);
+        imgHtml.src = url;
+      }
+    };
   }
-});
 
-// === DRAG & DROP CON GUARDADO ===
-let selected = null, offsetX = 0, offsetY = 0;
-
-// ------------------------------
-// Tablón: drag & drop + autoguardado
-// ------------------------------
-
-// Guardar posiciones de las notas usando ID único
-function saveTablonPositions() {
-  tablon.querySelectorAll('.draggable').forEach(el => {
-    const id = el.dataset.id || (el.dataset.id = 'note_' + Date.now() + Math.random().toString(36).slice(2,6));
-    const pos = { left: el.offsetLeft, top: el.offsetTop };
-    localStorage.setItem('note-pos-' + id, JSON.stringify(pos));
-  });
+  card.appendChild(imgHtml);
+  // ... resto de la construcción de la card (meta, descripción, botones)
+  return card;
 }
 
-// Cargar posiciones guardadas
-function loadTablonPositions() {
-  tablon.querySelectorAll('.draggable').forEach(el => {
-    const id = el.dataset.id || (el.dataset.id = 'note_' + Date.now() + Math.random().toString(36).slice(2,6));
-    const saved = localStorage.getItem('note-pos-' + id);
-    if (saved) {
-      const { left, top } = JSON.parse(saved);
-      el.style.left = left + 'px';
-      el.style.top = top + 'px';
-    } else {
-      el.style.left = el.offsetLeft + 'px';
-      el.style.top = el.offsetTop + 'px';
-    }
-    el.style.position = 'absolute';
-  });
-}
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const id = document.getElementById('missionId').value || uid();
+  const existingIndex = missions.findIndex(m => m.id === id);
 
-// Activar drag & drop
-function enableTablonDrag() {
-  let selected = null, offsetX = 0, offsetY = 0;
-  tablon.querySelectorAll('.draggable').forEach(el => {
-    el.style.cursor = 'grab';
-    el.addEventListener('mousedown', e => {
-      selected = el;
-      offsetX = e.clientX - el.offsetLeft;
-      offsetY = e.clientY - el.offsetTop;
-      el.style.cursor = 'grabbing';
-      el.style.zIndex = 1000;
-    });
-  });
-
-  document.addEventListener('mousemove', e => {
-    if (selected) {
-      selected.style.left = (e.clientX - offsetX) + 'px';
-      selected.style.top = (e.clientY - offsetY) + 'px';
-    }
-  });
-
-  document.addEventListener('mouseup', () => {
-    if (selected) {
-      saveTablonPositions();
-      selected.style.cursor = 'grab';
-      selected.style.zIndex = 1;
-      selected = null;
-    }
-  });
-}
-
-// Inicializar al cargar
-window.addEventListener('load', () => {
-  loadTablonPositions();
-  enableTablonDrag();
-});
-
-
-// Guardar posición
-function savePosition(el, index) {
-  localStorage.setItem("note-pos-" + index, JSON.stringify({
-    left: el.style.left,
-    top: el.style.top
-  }));
-}
-
-// Habilitar arrastre
-document.querySelectorAll('.draggable').forEach((el, index) => {
-  el.addEventListener('mousedown', (e) => {
-    selected = { el, index };
-    offsetX = e.clientX - el.offsetLeft;
-    offsetY = e.clientY - el.offsetTop;
-    el.style.zIndex = 1000;
-  });
-});
-
-// Mientras mueves
-document.addEventListener('mousemove', (e) => {
-  if (selected) {
-    selected.el.style.left = (e.clientX - offsetX) + "px";
-    selected.el.style.top = (e.clientY - offsetY) + "px";
+  // Si se selecciona un archivo, solo usamos su nombre
+  let imagePath = null;
+  const fileInput = imageFileInput.files[0];
+  if(fileInput){
+    imagePath = `images/${encodeURIComponent(fileInput.name)}`;
+  } else if(existingIndex >= 0){
+    imagePath = missions[existingIndex].imagePath;
   }
-});
 
-// Soltar -> guardar
-document.addEventListener('mouseup', () => {
-  if (selected) {
-    savePosition(selected.el, selected.index);
-    selected.el.style.zIndex = 1;
-    selected = null;
-  }
-});
-
-document.querySelectorAll('.note-img').forEach(img => {
-  img.addEventListener('dblclick', () => {
-    modal.style.display = "flex";
-    modalImg.src = img.src;
-  });
-});
-
-// === Importar imágenes dinámicamente ===
-let tablonNotes = []; // cada nota = { id, src, x, y }
-
-const fileImageTablon = document.getElementById('fileImageTablon');
-
-fileImageTablon.addEventListener('change', (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-
-  const reader = new FileReader();
-  reader.onload = function(ev) {
-    const div = document.createElement('div');
-    div.className = 'draggable';
-    div.style.left = '100px';
-    div.style.top = '100px';
-
-    const img = document.createElement('img');
-    img.src = ev.target.result;
-    img.className = 'note-img';
-
-    div.appendChild(img);
-    tablon.appendChild(div);
-
-    const id = 'note_' + Date.now() + '_' + Math.random().toString(36).slice(2,5);
-    div.dataset.id = id;
-
-    tablonNotes.push({ id, src: ev.target.result, x: 100, y: 100 });
-
-    makeDraggable(div);
-    enableImageZoom();
-    scheduleTablonSave(); // 👈 agenda guardado
+  const payload = {
+    id,
+    title: document.getElementById('title').value.trim(),
+    category: document.getElementById('category').value,
+    description: document.getElementById('description').value.trim(),
+    reward: document.getElementById('reward').value.trim(),
+    notes: document.getElementById('notes').value.trim(),
+    imagePath,  // ruta relativa
+    order: existingIndex >= 0 ? missions[existingIndex].order : Date.now(),
   };
-  reader.readAsDataURL(file);
+
+  if (existingIndex >= 0) missions[existingIndex] = payload;
+  else missions.push(payload);
+
+  scheduleSave();
+  renderAll();
+  document.getElementById('formContainer').style.display = 'none';
+  clearFormPreview();
 });
 
-closeModal.onclick = () => modal.style.display = "none";
-modal.onclick = (e) => { if (e.target === modal) modal.style.display = "none"; };
 
-function cambiarModo() {
-  const contenedor = document.getElementById('contenedor');
-  const tablon = document.getElementById('tablon');
 
-  if (contenedor.style.display !== 'none') {
-    contenedor.style.display = 'none';
-    tablon.style.display = 'flex'; // o 'block', según cómo quieras que se muestre
-  } else {
-    contenedor.style.display = 'flex'; // suponiendo que tus columnas usan flex
-    tablon.style.display = 'none';
+// En renderAll(), al crear card, carga la imagen desde IndexedDB
+function createCard(m) {
+  const card = document.createElement('div');
+  card.className = `card ${m.category}`;
+  card.dataset.id = m.id;
+
+  const contentDiv = document.createElement('div');
+  contentDiv.className = 'card-content';
+  contentDiv.style.display = 'flex';
+  contentDiv.style.flexDirection = 'column';
+  contentDiv.style.height = '100%';
+
+  // Meta
+  const metaDiv = document.createElement('div');
+  metaDiv.className = 'meta';
+  metaDiv.style.display = 'flex';
+  metaDiv.style.justifyContent = 'space-between';
+  metaDiv.style.alignItems = 'center';
+  metaDiv.style.marginBottom = '6px';
+
+  const h3 = document.createElement('h3');
+  h3.textContent = m.title;
+  metaDiv.appendChild(h3);
+
+  if(m.reward){
+    const rewardSpan = document.createElement('span');
+    rewardSpan.textContent = `💰 ${m.reward} BTC`;
+    metaDiv.appendChild(rewardSpan);
   }
+
+  contentDiv.appendChild(metaDiv);
+
+  // Descripción
+  const p = document.createElement('p');
+  p.textContent = m.description || '';
+  contentDiv.appendChild(p);
+
+const img = document.createElement('img');
+img.style.maxWidth = '100%';
+img.style.borderRadius = '4px';
+
+if(m.imagePath){
+  img.src = m.imagePath; // carga directa desde ruta relativa (servida por localhost)
 }
 
+contentDiv.appendChild(img);
 
-// === Función para habilitar zoom (doble clic) ===
-function enableImageZoom() {
-  document.querySelectorAll("#tablon .note-img").forEach(img => {
-    img.addEventListener("dblclick", () => {
-      modalImg.src = img.src;
-      modal.style.display = "flex";
-    });
+
+  // Notas y acciones
+  const bottomDiv = document.createElement('div');
+  bottomDiv.style.display = 'flex';
+  bottomDiv.style.justifyContent = 'space-between';
+  bottomDiv.style.alignItems = 'flex-end';
+  bottomDiv.style.marginTop = 'auto';
+
+  const notesDiv = document.createElement('div');
+  notesDiv.style.fontSize = '16px';
+  notesDiv.style.color = '#6b5a4a';
+  notesDiv.textContent = m.notes || '';
+  bottomDiv.appendChild(notesDiv);
+
+  const actionsDiv = document.createElement('div');
+  actionsDiv.className = 'actions';
+  actionsDiv.style.display = 'flex';
+  actionsDiv.style.gap = '6px';
+
+  // Botones
+  const btnEdit = document.createElement('button');
+  btnEdit.className = 'btn small';
+  btnEdit.textContent = 'Editar';
+  btnEdit.addEventListener('click', () => openForm(m.id));
+  actionsDiv.appendChild(btnEdit);
+
+  const btnComplete = document.createElement('button');
+  btnComplete.className = 'btnComplete small';
+  btnComplete.textContent = m.category === 'completada' ? 'Reactivar' : 'Completar';
+  btnComplete.addEventListener('click', () => {
+    m.category = m.category === 'completada' ? 'activa' : 'completada';
+    renderAll();
+    scheduleSave();
   });
-}
+  actionsDiv.appendChild(btnComplete);
 
-closeModal.addEventListener("click", () => {
-  modal.style.display = "none";
-});
-window.addEventListener("click", (e) => {
-  if (e.target === modal) modal.style.display = "none";
-});
-
-// === Drag optimizado ===
-function makeDraggable(el) {
-  let offsetX = 0, offsetY = 0;
-
-  el.addEventListener('mousedown', (e) => {
-    offsetX = e.clientX - el.offsetLeft;
-    offsetY = e.clientY - el.offsetTop;
-
-    function onMouseMove(e) {
-      el.style.left = (e.clientX - offsetX) + 'px';
-      el.style.top = (e.clientY - offsetY) + 'px';
+  const btnDelete = document.createElement('button');
+  btnDelete.className = 'btn.warn small';
+  btnDelete.textContent = 'Eliminar';
+  btnDelete.addEventListener('click', () => {
+    if(confirm('¿Eliminar esta misión?')){
+      missions = missions.filter(mm => mm.id !== m.id);
+      renderAll();
+      scheduleSave();
     }
-
-    document.addEventListener('mousemove', onMouseMove);
-    document.addEventListener('mouseup', () => {
-      document.removeEventListener('mousemove', onMouseMove);
-      saveTablon(); // guardamos en cada drop
-    }, {once:true});
-
-    e.preventDefault();
   });
+  actionsDiv.appendChild(btnDelete);
+
+  bottomDiv.appendChild(actionsDiv);
+  contentDiv.appendChild(bottomDiv);
+
+  card.appendChild(contentDiv);
+  return card;
 }
 
-// === Alternar entre modo Diario y modo Tablón ===
-document.getElementById('toggleModo').addEventListener('click', () => {
-  const contenedor = document.getElementById('contenedor');
 
-  if (contenedor.style.display === 'none') {
-    contenedor.style.display = 'flex';
-    tablon.style.display = 'none';
-    document.getElementById('toggleModo').textContent = 'Cambiar a Modo Tablón';
-  } else {
-    contenedor.style.display = 'none';
-    tablon.style.display = 'block';
-    document.getElementById('toggleModo').textContent = 'Cambiar a Modo Diario';
-  }
-});
 
-// Inicializar drag y zoom para imágenes ya presentes
-document.querySelectorAll('#tablon .draggable').forEach(el => makeDraggable(el));
-enableImageZoom();
 
-async function saveTablon() {
-  await initDB();
-  const tx = db.transaction('misiones', 'readwrite');
-  const store = tx.objectStore('misiones');
 
-  // Guardar notas
-  const notesData = tablonNotes.map(note => ({
-    type: 'note',
-    content: note.content,
-    x: note.x,
-    y: note.y
-  }));
-
-  // Guardar imágenes
-  const imageElems = document.querySelectorAll('.draggable img');
-  const imagesData = Array.from(imageElems).map(img => ({
-    type: 'image',
-    content: img.src,
-    x: parseFloat(img.style.left) || 0,
-    y: parseFloat(img.style.top) || 0
-  }));
-
-  store.put({ id: 'tablon', items: [...notesData, ...imagesData] });
-}
-
-async function loadTablon() {
-  await initDB();
-  const tx = db.transaction('misiones', 'readonly');
-  const store = tx.objectStore('misiones');
-  const req = store.get('tablon');
-  req.onsuccess = () => {
-    if (req.result && req.result.items) {
-      tablonNotes = [];
-      // Limpiar tablon actual
-      document.getElementById('tablon').innerHTML = '';
-
-      req.result.items.forEach(item => {
-        if (item.type === 'note') {
-          tablonNotes.push(item);
-          renderNote(item); // función que ya tenías para notas
-        } else if (item.type === 'image') {
-          const img = document.createElement('img');
-          img.src = item.content;
-          img.classList.add('draggable');
-          img.style.position = 'absolute';
-          img.style.left = item.x + 'px';
-          img.style.top = item.y + 'px';
-          document.getElementById('tablon').appendChild(img);
-          makeDraggable(img); // tu función de drag
-        }
-      });
-    }
-  };
-}
-
-function renderTablon() {
-  tablon.innerHTML = '';
-  tablonNotes.forEach(n => {
-    const div = document.createElement('div');
-    div.className = 'draggable';
-    div.style.left = n.x + 'px';
-    div.style.top = n.y + 'px';
-    div.dataset.id = n.id;
-
-    const img = document.createElement('img');
-    img.src = n.src;
-    img.className = 'note-img';
-
-    div.appendChild(img);
-    tablon.appendChild(div);
-    makeDraggable(div);
-  });
-}
-
-function scheduleTablonSave(){
-  clearTimeout(window.tablonSaveTimer);
-  window.tablonSaveTimer = setTimeout(saveTablon, 500);
-}
-
-window.addEventListener('load', loadTablon);
 
 </script>
 </body>

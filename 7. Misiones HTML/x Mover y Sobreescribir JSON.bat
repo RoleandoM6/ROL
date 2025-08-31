@@ -1,6 +1,6 @@
 @echo off
 set "source=C:\Users\monsi\Downloads"
-set "dest=C:\Users\monsi\Desktop\ROL\HTML ChatGPT"
+set "dest=C:\Users\monsi\Desktop\ROL\7. Misiones HTML"
 
 :: Crear carpeta destino si no existe
 if not exist "%dest%" mkdir "%dest%"
