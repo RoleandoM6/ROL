@@ -1,0 +1,695 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>3. Hoja de PJ</title>
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:wght@400;600;700&family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#f6ead6; 
+  --edge:#b2743a; 
+  --ink:#3b1f0f; 
+  --muted:#6b4f3a; 
+  --accent:#7a2b20;
+  --card-pad:14px; 
+  --radius:6px;
+}
+
+html, body {
+  height:100%;
+  margin:0;
+  font-family:'Open Sans', Arial, Helvetica, sans-serif;
+  background:radial-gradient(circle at 20% 10%, rgba(0,0,0,0.03), transparent 20%), var(--paper);
+  color:var(--ink);
+  line-height:1.5;
+}
+
+.page {
+  width: 1200px;          /* ancho A4 */
+  height: 1123px;        /* alto A4 */
+  margin: 20px auto;
+  padding: 24px;
+  box-sizing: border-box;
+  background: linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0.55));
+  border:6px solid var(--edge);
+  border-radius:8px;
+  box-shadow: 0 6px 30px rgba(0,0,0,0.25);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Escalado responsivo */
+@media(max-width:1200px){
+  .page {
+    width: 100%;
+    height: auto;
+    transform: scale(0.9); 
+    transform-origin: top center;
+  }
+}
+
+.page * {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.field, .title, .sub, .sectext {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.header {display:flex;align-items:center;justify-content:space-between}
+
+.title {
+  font-family:'Crimson Text', serif;
+  font-size:36px;
+  color:var(--accent);
+  font-weight:900;
+  letter-spacing:1px;
+}
+
+.sub {
+  font-size:14px;
+  color:var(--muted);
+  margin-top:4px;
+}
+
+.layout {
+  display:grid;
+  grid-template-columns:1fr 360px;
+  gap:18px;
+  margin-top:14px;
+}
+
+.panel {
+  background:linear-gradient(180deg, rgba(255,255,255,0.15), rgba(255,255,255,0.06));
+  padding:16px;
+  border-radius:6px;
+  border:1px solid rgba(0,0,0,0.06);
+}
+
+/* Section title */
+.section {margin-bottom:12px}
+
+.sectitle {
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.bar {
+  width:100%;
+  height:3px;
+  background: linear-gradient(90deg, rgba(0,0,0,0.1), rgba(0,0,0,0));
+  border-radius:4px;
+  display:none;
+}
+
+.sectext {
+  font-family:'Crimson Text', serif;
+  color:var(--accent);
+  font-weight:900;
+  font-size:16px;
+}
+
+.row {display:flex; gap:10px; align-items:center}
+.col {display:flex; flex-direction:column}
+
+/* Campos editables */
+.field {
+  background: transparent;
+  border-bottom: 1px dashed rgba(59,31,15,0.15);
+  padding: 6px 6px;
+  min-height:24px;
+  font-size:15px;
+  font-weight:600;
+  font-family: 'Crimson Text', serif;
+  color: var(--ink);
+  line-height:1.4;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+[contenteditable] {outline:none;}
+
+/* Left column */
+.left-grid {display:grid; grid-template-columns:1fr 1fr; gap:8px}
+
+.abilities {
+  display:grid;
+  grid-template-columns:repeat(6,1fr);
+  gap:8px;
+  margin-top:8px;
+}
+
+.ability {
+  background:rgba(0,0,0,0.02);
+  padding:10px;
+  border-radius:4px;
+  text-align:center;
+  border:1px solid rgba(0,0,0,0.03);
+}
+
+.ability .score {
+  font-weight:900;
+  font-size:16px;
+}
+
+.ability .mod {
+  font-size:13px;
+  color:var(--muted);
+  margin-top:6px;
+}
+
+/* Skills */
+.skills-table {
+  width:100%;
+  border-collapse:collapse;
+  margin-top:8px;
+}
+
+.skills-table td {
+  padding:6px;
+  font-size:14px;
+}
+
+.skills-table .skill {width:70%}
+.skills-table .bonus {width:30%; text-align:right}
+
+.skills-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+/* Right panel */
+.actions .action {margin-bottom:10px}
+.muted-box {
+  background:rgba(0,0,0,0.02);
+  padding:8px;
+  border-left:4px solid var(--edge);
+  border-radius:3px;
+}
+
+.controls {
+  margin: 0 auto 20px auto; /* solo margen inferior */
+  width: 1200px;            /* igual que la hoja */
+  padding: 8px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  background: rgba(255,255,255,0.6);
+  border-radius: 6px;
+  border: 1px solid var(--edge);
+}
+
+button {
+  background:var(--edge);
+  color:white;
+  border:none;
+  padding:8px 10px;
+  border-radius:6px;
+  cursor:pointer;
+  font-weight:700;
+}
+
+.small {padding:6px 8px; font-size:13px;}
+
+/* Notes box */
+.notes {
+  border:2px solid rgba(0,0,0,0.06);
+  background:linear-gradient(180deg, #fffef8, #fbf3df);
+  padding:12px;
+  border-radius:6px;
+  font-size:15px;
+  font-weight:600;
+}
+
+/* Hojas */
+#listaHojas {
+  display: flex;
+  gap: 6px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  padding: 4px 0;
+}
+
+#listaHojas::-webkit-scrollbar {height: 6px;}
+#listaHojas::-webkit-scrollbar-thumb {background: var(--edge); border-radius: 3px;}
+
+#listaHojas div.hoja-tab {
+  flex: 0 0 auto;
+  padding: 4px 8px;
+  font-size:12px;
+  border: 1px solid var(--edge);
+  border-radius: 6px;
+  background: rgba(255,255,255,0.6);
+  cursor: pointer;
+  min-width: 60px;
+  text-align: center;
+  font-weight:700;
+}
+
+#listaHojas div.hoja-tab.activa {
+  background: var(--edge);
+  color: white;
+  font-weight:900;
+}
+
+#listaHojas div.hoja-tab input {
+  border:none;
+  background:transparent;
+  text-align:center;
+  width:100%;
+  outline:none;
+  color:inherit;
+  font-weight:900;
+  font-family: 'Crimson Text', serif;
+  font-size:12px;
+}
+
+/* Botones más pequeños */
+button.small, #btnExport, #btnImport, #btnNuevaHoja {
+  padding:4px 6px;
+  font-size:12px;
+  border-radius:4px;
+}
+
+#listaHojas div.hoja-tab button {
+  padding:1px 4px;
+  font-size:10px;
+}
+
+</style>
+
+</head>
+<body>
+
+        <div class="page"><!-- página principal -->
+
+        <!-- HEADER -->
+        <div class="header"><!-- header --></div>
+
+        <!-- TÍTULO Y SUBTÍTULO -->
+        <div><!-- título y subtítulo -->
+          <div class="title" contenteditable data-field="nombre">Nombre PJ</div>
+          <div class="sub" style="margin-top:6px">
+            <span contenteditable data-field="clase">Clase</span> • 
+            <span contenteditable data-field="raza">Raza</span> • 
+            <span contenteditable data-field="alineamiento">Alineamiento</span>
+          </div>
+        </div><!-- fin título y subtítulo -->
+
+        <!-- LAYOUT PRINCIPAL -->
+        <div class="layout"><!-- layout -->
+
+          <!-- COLUMNA IZQUIERDA -->
+          <div class="panel"><!-- panel columna izquierda -->
+
+            <!-- DETALLES -->
+            <div class="section">
+              <div class="sectitle"><div class="bar"></div><div class="sectext">Detalles</div></div>
+              <div class="row" style="margin-top:8px">
+                <div style="flex:1">
+                  <div>
+                    <label style="font-size:12px;color:var(--muted)">Jugador</label>
+                    <div class="field" contenteditable data-field="jugador">Nombre jugador</div>
+                  </div>
+                  <div style="margin-top:8px">
+                    <label style="font-size:12px;color:var(--muted)">Nivel</label>
+                    <div class="field" contenteditable data-field="nivel">1</div>
+                  </div>
+                </div>
+                <div style="width:140px">
+                  <label style="font-size:12px;color:var(--muted)">CA</label>
+                  <div class="field" contenteditable data-field="ca">15</div>
+                  <label style="font-size:12px;color:var(--muted);margin-top:8px">PV</label>
+                  <div class="field" contenteditable data-field="pv">10</div>
+                </div>
+              </div>
+            </div><!-- fin detalles -->
+
+            <!-- ATRIBUTOS -->
+            <div class="section">
+              <div class="sectitle"><div class="bar"></div><div class="sectext">Atributos</div></div>
+              <div class="abilities">
+                <div class="ability">
+                  <div style="font-size:12px;color:var(--muted)">FUE</div>
+                  <div class="score" contenteditable data-field="fue">18</div>
+                  <div class="mod" contenteditable data-field="mod_fue">+4</div>
+                </div>
+                <div class="ability">
+                  <div style="font-size:12px;color:var(--muted)">DES</div>
+                  <div class="score" contenteditable data-field="des">12</div>
+                  <div class="mod" contenteditable data-field="mod_des">+1</div>
+                </div>
+                <div class="ability">
+                  <div style="font-size:12px;color:var(--muted)">CON</div>
+                  <div class="score" contenteditable data-field="con">16</div>
+                  <div class="mod" contenteditable data-field="mod_con">+3</div>
+                </div>
+                <div class="ability">
+                  <div style="font-size:12px;color:var(--muted)">INT</div>
+                  <div class="score" contenteditable data-field="int">10</div>
+                  <div class="mod" contenteditable data-field="mod_int">+0</div>
+                </div>
+                <div class="ability">
+                  <div style="font-size:12px;color:var(--muted)">SAB</div>
+                  <div class="score" contenteditable data-field="sab">11</div>
+                  <div class="mod" contenteditable data-field="mod_sab">+0</div>
+                </div>
+                <div class="ability">
+                  <div style="font-size:12px;color:var(--muted)">CAR</div>
+                  <div class="score" contenteditable data-field="car">13</div>
+                  <div class="mod" contenteditable data-field="mod_car">+1</div>
+                </div>
+              </div>
+            </div><!-- fin atributos -->
+
+            <!-- SALVACIONES Y HABILIDADES -->
+            <div class="section">
+              <div class="sectitle"><div class="bar"></div><div class="sectext">Salvaciones y Habilidades</div></div>
+              <table class="skills-table">
+                <tr><td class="skill">Salvaciones</td><td class="bonus"><div class="field" contenteditable data-field="salvaciones">Fuerza +7, Constitución +6</div></td></tr>
+                <tr><td class="skill">Habilidades destacadas</td><td class="bonus"><div class="field" contenteditable data-field="habilidades">Atletismo +7, Percepción pasiva 10</div></td></tr>
+                <tr><td class="skill">Idiomas</td><td class="bonus"><div class="field" contenteditable data-field="idiomas">Común, Gnomo</div></td></tr>
+                <tr><td class="skill">Rasgos raciales</td><td class="bonus"><div class="field" contenteditable data-field="rasgos_raciales">Marca del Errante (nivel 2), Visión en la oscuridad</div></td></tr>
+              </table>
+            </div><!-- fin salvaciones y habilidades -->
+
+
+        <!-- HABILIDADES COMPLETAS -->
+            <div class="section skills-grid">
+              <div class="sectitle"><div class="bar"></div><div class="sectext">Habilidades Completas</div></div>
+              <div class="skills-columns">
+                <table class="skills-table"> <!-- Columna 1 de habilidades -->
+              <tr><td class="skill">Acrobacias (DES)</td><td class="bonus"><div class="field" contenteditable data-field="habil_acrobacias">+7</div></td></tr>
+              <tr><td class="skill">Arcanos (INT)</td><td class="bonus"><div class="field" contenteditable data-field="habil_arcanos">+3</div></td></tr>
+              <tr><td class="skill">Atletismo (FUE)</td><td class="bonus"><div class="field" contenteditable data-field="habil_atletismo">+5</div></td></tr>
+              <tr><td class="skill">Engaño (CAR)</td><td class="bonus"><div class="field" contenteditable data-field="habil_engaño">+0</div></td></tr>
+              <tr><td class="skill">Historia (INT)</td><td class="bonus"><div class="field" contenteditable data-field="habil_historia">+4</div></td></tr>
+              <tr><td class="skill">Interpretación (CAR)</td><td class="bonus"><div class="field" contenteditable data-field="habil_interpretacion">+7</div></td></tr>
+              <tr><td class="skill">Intimidación (CAR)</td><td class="bonus"><div class="field" contenteditable data-field="habil_intimidación">+3</div></td></tr>
+              <tr><td class="skill">Investigación (INT)</td><td class="bonus"><div class="field" contenteditable data-field="habil_investigación">+5</div></td></tr>
+              <tr><td class="skill">Juego de Manos (DES)</td><td class="bonus"><div class="field" contenteditable data-field="habil_juegodemanos">+3</div></td></tr>
+            </table>
+            <table class="skills-table"> <!-- Columna 2 de habilidades -->
+              <tr><td class="skill">Medicina (SAB)</td><td class="bonus"><div class="field" contenteditable data-field="habil_medicina">+0</div></td></tr>
+              <tr><td class="skill">Naturaleza (INT)</td><td class="bonus"><div class="field" contenteditable data-field="habil_naturaleza">+4</div></td></tr>
+              <tr><td class="skill">Percepción (SAB)</td><td class="bonus"><div class="field" contenteditable data-field="habil_percepcion">+7</div></td></tr>
+              <tr><td class="skill">Perspicacia (SAB)</td><td class="bonus"><div class="field" contenteditable data-field="habil_perpicacia">+3</div></td></tr>
+              <tr><td class="skill">Persuasión (CAR)</td><td class="bonus"><div class="field" contenteditable data-field="habil_persuasion">+5</div></td></tr>
+              <tr><td class="skill">Religión (INT)</td><td class="bonus"><div class="field" contenteditable data-field="habil_religion">+0</div></td></tr>
+              <tr><td class="skill">Sigilo (DES)</td><td class="bonus"><div class="field" contenteditable data-field="habil_sigilo">+4</div></td></tr>
+              <tr><td class="skill">Supervivencia (SAB)</td><td class="bonus"><div class="field" contenteditable data-field="habil_supervivencia">+7</div></td></tr>
+              <tr><td class="skill">Trato con animales (SAB)</td><td class="bonus"><div class="field" contenteditable data-field="habil_tratoconanimales">+3</div></td></tr>
+            </table>
+            </div>
+            </div><!-- fin habilidades completas -->
+            </div><!-- fin panel columna izquierda -->
+
+      <!-- COLUMNA DERECHA -->
+          <div class="panel"><!-- panel columna derecha -->
+
+            <!-- ACCIONES -->
+            <div class="section actions">
+              <div class="sectitle"><div class="bar"></div><div class="sectext">Acciones</div></div>
+              <div style="margin-top:8px">
+                <div class="action muted-box" contenteditable data-field="accion_1"><strong>Ataque con Espadón.</strong> Cuerpo a cuerpo: +7 al ataque, alcance 1,5 m. 2d6 + 4 cortante.</div>
+                <div class="action muted-box" contenteditable data-field="accion_2"><strong>Ataque con Lanza Retornable.</strong> A distancia: +6 al ataque, alcance 6/18 m. 1d8 + 4 perforante. La lanza regresa automáticamente.</div>
+              </div>
+            </div><!-- fin acciones -->
+
+            <!-- RASGOS Y PODERES -->
+            <div class="section">
+              <div class="sectitle"><div class="bar"></div><div class="sectext">Rasgos y Poderes</div></div>
+              <div style="margin-top:8px"><div class="field" contenteditable data-field="rasgos_poderes">Estilo de Combate: Defensa. Acción adicional: Segundo Aliento, etc.</div></div>
+            </div><!-- fin rasgos y poderes -->
+
+            <!-- EQUIPO -->
+            <div class="section">
+              <div class="sectitle"><div class="bar"></div><div class="sectext">Equipo</div></div>
+              <div style="margin-top:8px"><div class="field" contenteditable data-field="equipo">Espadón, Cota de malla + escudo, Mochila con equipo de aventurero, 120 bitconios</div></div>
+            </div><!-- fin equipo -->
+
+            <!-- NOTAS -->
+            <div class="section">
+              <div class="sectitle"><div class="bar"></div><div class="sectext">Notas</div></div>
+              <div style="margin-top:8px" class="notes" contenteditable data-field="notas">Aquí puedes poner notas importantes del PJ</div>
+            </div><!-- fin notas -->
+
+          </div><!-- fin panel derecha -->
+
+          
+
+  </div><!-- fin layout -->
+
+</div> <!-- fin .page -->
+
+<!-- FOOTER CONTROLES FUERA DE LA HOJA -->
+<div class="controls" style="margin:20px auto; padding:12px; max-width:980px; display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-start; background:rgba(255,255,255,0.6); border-radius:6px; border:1px solid var(--edge);">
+  <button id="btnExport" class="small">Exportar</button>
+  <button id="btnImport" class="small">Importar</button>
+  <button onclick="nuevaHoja()">Nueva Hoja</button>
+  <div id="listaHojas" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
+  
+</div>
+
+      
+
+<script>
+
+let db;
+const request = indexedDB.open("hojaPJ_DB", 1);
+let hojaActiva = "hoja_1"; // valor inicial
+
+
+request.onupgradeneeded = e => {
+  db = e.target.result;
+  db.createObjectStore("hoja", { keyPath: "id" });
+};
+
+request.onsuccess = e => {
+  db = e.target.result;
+  cargarDatos();
+};
+
+request.onerror = e => {
+  console.error("IndexedDB error:", e.target.error);
+};
+
+// botones
+document.getElementById('btnExport').addEventListener('click',exportJSON);
+document.getElementById('btnImport').addEventListener('click',importJSON);
+
+function cargarListaHojas() {
+  if (!db) return;
+  const tx = db.transaction("hoja", "readonly");
+  const store = tx.objectStore("hoja");
+  const req = store.getAll();
+  req.onsuccess = () => {
+    const lista = document.getElementById('listaHojas');
+    lista.innerHTML = '';
+    lista.style.display = 'flex';
+    lista.style.gap = '6px';
+    lista.style.flexWrap = 'nowrap';
+    lista.style.overflowX = 'auto';
+    
+    req.result.forEach(reg => {
+      const cont = document.createElement('div');
+      cont.classList.add('hoja-tab');
+      if(hojaActiva === reg.id) cont.classList.add('activa');
+
+      // nombre editable
+      const nombreInput = document.createElement('input');
+      nombreInput.value = reg.nombre || (reg.campos && reg.campos.nombre) || reg.id;
+      nombreInput.addEventListener('input', () => {
+        const tx2 = db.transaction("hoja", "readwrite");
+        const store2 = tx2.objectStore("hoja");
+        store2.get(reg.id).onsuccess = e => {
+          const data = e.target.result;
+          data.nombre = nombreInput.value;
+          store2.put(data);
+        };
+      });
+      cont.appendChild(nombreInput);
+
+      // botón eliminar
+      const btnEliminar = document.createElement('button');
+      btnEliminar.textContent = '×';
+      btnEliminar.style.marginLeft = '6px';
+      btnEliminar.style.padding = '2px 6px';
+      btnEliminar.style.fontSize = '12px';
+      btnEliminar.style.cursor = 'pointer';
+      btnEliminar.addEventListener('click', (ev) => {
+        ev.stopPropagation(); // evitar abrir la hoja al hacer click en el botón
+        eliminarHoja(reg.id);
+      });
+      cont.appendChild(btnEliminar);
+
+      // click para abrir hoja
+      cont.addEventListener('click', () => {
+        hojaActiva = reg.id;
+        cargarDatos();
+        cargarListaHojas(); // refresca la clase activa
+      });
+
+      lista.appendChild(cont);
+    });
+  };
+}
+
+function eliminarHoja(id) {
+  if (!db) return;
+  const tx = db.transaction("hoja", "readwrite");
+  const store = tx.objectStore("hoja");
+  store.delete(id).onsuccess = () => {
+    // Si eliminamos la hoja activa, pasamos a la primera disponible
+    if (hojaActiva === id) {
+      const getAllReq = store.getAll();
+      getAllReq.onsuccess = () => {
+        hojaActiva = getAllReq.result.length > 0 ? getAllReq.result[0].id : '';
+        cargarDatos();
+        cargarListaHojas();
+      };
+    } else {
+      cargarListaHojas();
+    }
+  };
+}
+
+// llamar al cargar la página para que la lista se muestre desde el inicio
+request.onsuccess = e => {
+  db = e.target.result;
+  cargarListaHojas(); // 🔹 aquí cargamos la lista
+  cargarDatos();       // 🔹 y cargamos la hoja activa
+};
+
+function nuevaHoja() {
+  hojaActiva = "hoja_" + Date.now();
+  const ejemplo = {
+    nombre: "Nombre PJ",
+    jugador: "Nombre jugador",
+    clase: "Clase",
+    raza: "Raza",
+    alineamiento: "Alineamiento",
+    nivel: "1",
+    ca: "15",
+    pv: "10",
+    fue: "18", mod_fue: "+4",
+    des: "12", mod_des: "+1",
+    con: "16", mod_con: "+3",
+    int: "10", mod_int: "+0",
+    sab: "11", mod_sab: "+0",
+    car: "13", mod_car: "+1",
+    salvaciones: "Fuerza +7, Constitución +6",
+    habilidades: "Atletismo +7, Percepción pasiva 10",
+    idiomas: "Común, Gnomo",
+    rasgos_raciales: "Marca del Errante (nivel 2), Visión en la oscuridad",
+    habil_acrobacias: "+7",
+    habil_arcanos: "+3",
+    habil_atletismo: "+5",
+    habil_engaño: "+0",
+    habil_historia: "+4",
+    habil_interpretacion: "+7",
+    habil_intimidación: "+3",
+    habil_investigación: "+5",
+    habil_juegodemanos: "+3",
+    habil_medicina: "+0",
+    habil_naturaleza: "+4",
+    habil_percepcion: "+7",
+    habil_perpicacia: "+3",
+    habil_persuasion: "+5",
+    habil_religion: "+0",
+    habil_sigilo: "+4",
+    habil_supervivencia: "+7",
+    habil_tratoconanimales: "+3",
+    accion_1: "Ataque con Espadón. Cuerpo a cuerpo: +7 al ataque, alcance 1,5 m. 2d6 + 4 cortante.",
+    accion_2: "Ataque con Lanza Retornable. A distancia: +6 al ataque, alcance 6/18 m. 1d8 + 4 perforante. La lanza regresa automáticamente.",
+    rasgos_poderes: "Estilo de Combate: Defensa. Acción adicional: Segundo Aliento, etc.",
+    equipo: "Espadón, Cota de malla + escudo, Mochila con equipo de aventurero, 120 bitconios",
+    notas: "Aquí puedes poner notas importantes del PJ"
+  };
+
+  // Rellenar los campos con los valores de ejemplo
+  document.querySelectorAll('[data-field]').forEach(f => {
+    const key = f.dataset.field;
+    f.textContent = ejemplo[key] || '';
+  });
+
+  guardarDatos();
+  cargarListaHojas();
+}
+
+function exportJSON() {
+  const page = document.querySelector('.page');
+  const data = {};
+  page.querySelectorAll('[data-field]').forEach(f => {
+    data[f.dataset.field] = f.textContent;
+  });
+
+  // Usar el título del documento
+  let fileName = document.title.trim() || "hoja";
+  
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.download = fileName + '.json';
+  a.href = URL.createObjectURL(blob);
+  a.click();
+}
+
+
+function importJSON(){
+  const input = document.createElement('input');
+  input.type='file';
+  input.accept='.json';
+  input.onchange = e=>{
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    reader.onload = ()=> {
+      const obj = JSON.parse(reader.result);
+      const page = document.querySelector('.page');
+      page.querySelectorAll('[data-field]').forEach(f=>{
+        if(obj[f.dataset.field]!==undefined) f.textContent = obj[f.dataset.field];
+      });
+    }
+    reader.readAsText(file);
+  }
+  input.click();
+}
+
+function guardarDatos() {
+  if (!db) return;
+  const page = document.querySelector('.page');
+  const data = { id: hojaActiva, campos: {} };
+  page.querySelectorAll('[data-field]').forEach(f => {
+    data.campos[f.dataset.field] = f.textContent;
+  });
+  const tx = db.transaction("hoja", "readwrite");
+  tx.objectStore("hoja").put(data);
+}
+
+function cargarDatos() {
+  if (!db) return;
+  const tx = db.transaction("hoja", "readonly");
+  const req = tx.objectStore("hoja").get(hojaActiva); // ✅ usar hojaActiva
+  req.onsuccess = () => {
+    if (req.result) {
+      const page = document.querySelector('.page');
+      Object.entries(req.result.campos).forEach(([k,v])=>{
+        const f = page.querySelector(`[data-field="${k}"]`);
+        if (f) f.textContent = v;
+      });
+    }
+  };
+}
+
+document.querySelectorAll('[data-field]').forEach(f => {
+  f.addEventListener('input', guardarDatos);
+});
+
+</script>
+</body>
+</html>

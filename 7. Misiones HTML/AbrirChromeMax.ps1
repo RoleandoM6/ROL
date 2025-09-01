@@ -5,7 +5,13 @@ $chrome = "C:\Program Files\Google\Chrome\Application\chrome.exe"
 $ventanas = @(
     @{ Profile = "C:\ChromeProfiles\Perfil1"; FilePath = "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\1. Barra INI.html" },
     @{ Profile = "C:\ChromeProfiles\Perfil2"; FilePath = "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\2. Listado INI.html" },
-    @{ Profile = "C:\ChromeProfiles\Perfil3"; FilePath = "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\3. ALGO.html" },
+
+    @{ Profile = "C:\ChromeProfiles\Perfil3"; FilePath = "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\1. Hoja PJ 01.lnk" },
+    @{ Profile = "C:\ChromeProfiles\Perfil3"; FilePath = "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\1. Hoja PJ 02.lnk" },
+    @{ Profile = "C:\ChromeProfiles\Perfil3"; FilePath = "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\1. Hoja PJ 03.lnk" },
+    @{ Profile = "C:\ChromeProfiles\Perfil3"; FilePath = "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\1. Hoja PJ 04.lnk" },
+    @{ Profile = "C:\ChromeProfiles\Perfil3"; FilePath = "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\1. Hoja PJ 05.lnk" },
+
     @{ Profile = "C:\ChromeProfiles\Perfil5"; FilePath = "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\4. Tablero.html" }
     @{ Profile = "C:\ChromeProfiles\Perfil4"; FilePath = "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\5. Calendario.html" }
     @{ Profile = "C:\ChromeProfiles\Perfil6"; FilePath = "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\6. Diario.html" }
