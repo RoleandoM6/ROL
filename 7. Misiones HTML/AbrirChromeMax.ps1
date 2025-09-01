@@ -6,21 +6,15 @@ $ventanas = @(
     @{ Profile = "C:\ChromeProfiles\Perfil1"; FilePath = "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\1. Barra INI.html" },
     @{ Profile = "C:\ChromeProfiles\Perfil2"; FilePath = "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\2. Listado INI.html" },
 
-    @{ Profile = "C:\ChromeProfiles\Perfil3"; FilePath = "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\1. Hoja PJ 01.lnk" },
-    @{ Profile = "C:\ChromeProfiles\Perfil3"; FilePath = "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\1. Hoja PJ 02.lnk" },
-    @{ Profile = "C:\ChromeProfiles\Perfil3"; FilePath = "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\1. Hoja PJ 03.lnk" },
-    @{ Profile = "C:\ChromeProfiles\Perfil3"; FilePath = "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\1. Hoja PJ 04.lnk" },
-    @{ Profile = "C:\ChromeProfiles\Perfil3"; FilePath = "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\1. Hoja PJ 05.lnk" },
-
-    @{ Profile = "C:\ChromeProfiles\Perfil5"; FilePath = "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\4. Tablero.html" }
-    @{ Profile = "C:\ChromeProfiles\Perfil4"; FilePath = "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\5. Calendario.html" }
-    @{ Profile = "C:\ChromeProfiles\Perfil6"; FilePath = "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\6. Diario.html" }
-    @{ Profile = "C:\ChromeProfiles\Perfil7"; FilePath = "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\7. Mapamundi.html" }
-    @{ Profile = "C:\ChromeProfiles\Perfil8"; FilePath = "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\8. Condiciones.html" }
+    @{ Profile = "C:\ChromeProfiles\Perfil5"; FilePath = "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\4. Tablero.html" },
+    @{ Profile = "C:\ChromeProfiles\Perfil4"; FilePath = "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\5. Calendario.html" },
+    @{ Profile = "C:\ChromeProfiles\Perfil6"; FilePath = "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\6. Diario.html" },
+    @{ Profile = "C:\ChromeProfiles\Perfil7"; FilePath = "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\7. Mapamundi.html" },
+    @{ Profile = "C:\ChromeProfiles\Perfil8"; FilePath = "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\8. Condiciones.html" },
     @{ Profile = "C:\ChromeProfiles\Perfil9"; FilePath = "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\9. Tienda.html" }
+)
 
-    )
-
+# --- ABRIR HTMLS EN CHROME ---
 foreach ($v in $ventanas) {
     $dir = $v.Profile
     $path = $v.FilePath
@@ -40,4 +34,18 @@ foreach ($v in $ventanas) {
         Start-Process -FilePath $chrome -ArgumentList @("--user-data-dir=""$dir""","--new-window","$uri","--start-maximized") | Out-Null
         Start-Sleep -Milliseconds 200
     }
+}
+
+# --- ABRIR ACCESOS DIRECTOS ---
+$links = @(
+    "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\1. Hoja PJ 01.lnk",
+    "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\1. Hoja PJ 02.lnk",
+    "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\1. Hoja PJ 03.lnk",
+    "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\1. Hoja PJ 04.lnk",
+    "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\1. Hoja PJ 05.lnk"
+)
+
+foreach ($link in $links) {
+    Start-Process -FilePath $link
+    Start-Sleep -Milliseconds 200   # pequeña pausa opcional
 }

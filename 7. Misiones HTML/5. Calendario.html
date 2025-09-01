@@ -2,10 +2,15 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative&family=Uncial+Antiqua&family=Almendra&family=Black+Chancery&family=Pirata+One&display=swap" rel="stylesheet">
+
 <title>5. Calendario</title>
 <style>
 body {
-  font-family: "Trebuchet MS", sans-serif;
+  font-family: 'Almendra', serif;
+  font-weight: 900;
   display: flex;
   flex-direction: row;
   justify-content: center;
@@ -66,9 +71,17 @@ h1 { margin-bottom: 10px; font-size: 20px; }
   gap: 20px; /* espacio entre hora y luz */
 }
 
-.clock {
+#day, #clock, #luz {
+  font-family: 'Uncial Antiqua', 'Almendra', 'Cinzel Decorative', serif;
   font-weight: bold;
-  font-size: 48px; /* más grande si quieres */
+  color: #fff;
+  text-shadow: 1px 1px 4px #000; /* opcional, efecto mágico */
+}
+
+#luz {
+  transition: all 1s ease-in-out; /* transición suave */
+  padding: 5px 10px;
+  border-radius: 6px;
 }
 
 .clock-luz.unified {
@@ -105,21 +118,6 @@ h1 { margin-bottom: 10px; font-size: 20px; }
 .clock, .luz {
   font-weight: bold;
   font-size: 24px;
-}
-
-.day {
-  text-align: center;
-  font-weight: bold;
-  font-size: 24px;
-  margin-bottom: 10px;
-  text-decoration: underline;
-}
-
-.luz {
-  display: flex;
-  align-items: center;
-  font-weight: bold;
-  font-size: 24px; /* texto normal */
 }
 
 .luz-icon {
@@ -211,6 +209,37 @@ select, input, button { padding: 6px; font-size: 14px; }
   <input type="number" id="eventMinutes" placeholder="m" min="0" style="width:50px;">
 </div>
     <button onclick="applyEvent()">Aplicar</button>
+
+    <!-- Selector de Fuente -->
+<div style="margin:10px 0;">
+  <label for="fontSelector"><strong>Fuente del Calendario:</strong></label>
+  <select id="fontSelector" onchange="changeFont(this.value)">
+    <option value="'Cinzel Decorative', serif">Clásico Medieval</option>
+    <option value="'Uncial Antiqua', serif">Manuscrito Antiguo</option>
+    <option value="'Almendra', serif">Caligráfica Mágica</option>
+    <option value="'Black Chancery', cursive">Gótica Dramática</option>
+    <option value="'Pirata One', cursive">Aventurero / Pirata</option>
+  </select>
+</div>
+
+<div style="margin-bottom:10px;">
+  <label>Filtrar eventos: </label>
+  <select id="logFilter" onchange="renderLog()">
+    <option value="All">Todos</option>
+    <option value="Combate">Combate</option>
+    <option value="Descanso Largo">Descanso Largo</option>
+    <option value="Descanso Corto">Descanso Corto</option>
+    <option value="Viaje">Viaje</option>
+    <option value="Investigación">Investigación</option>
+    <option value="Evento">Evento</option>
+  </select>
+</div>
+
+<div style="margin-top:10px;">
+  <button onclick="startAutoTime()">▶ Avanzar tiempo</button>
+  <button onclick="stopAutoTime()">⏸ Detener tiempo</button>
+</div>
+
   </div>
 </div>
 
@@ -231,9 +260,33 @@ let logData = JSON.parse(localStorage.getItem('logData')) || [];
 let lastDirectoryHandle = null;
 let db;
 
+let autoTimeInterval = null;
+
+function startAutoTime() {
+  if(autoTimeInterval) return;
+  autoTimeInterval = setInterval(() => {
+    advanceTime({minutes: 10}); // avanza 10 min cada ciclo
+  }, 1000); // 1 segundo = 10 minutos en juego
+}
+
+function stopAutoTime() {
+  clearInterval(autoTimeInterval);
+  autoTimeInterval = null;
+}
+
 const DB_NAME = "CalendarioDB";
 const STORE_NAME = "estadoJuego";
 const dayColors = ["#3498db", "#27ae60", "#8e44ad", "#d35400", "#c0392b", "#16a085"];
+
+function changeFont(font) {
+  document.getElementById('day').style.fontFamily = font;
+  document.getElementById('clock').style.fontFamily = font;
+  document.getElementById('luz').style.fontFamily = font;
+  console.log('Fuente cambiada a:', font);
+}
+
+// Inicializar con la primera fuente
+changeFont("'Cinzel Decorative', serif");
 
 function openDB() {
   return new Promise((resolve, reject) => {
@@ -295,17 +348,17 @@ function updateDisplay() {
 function updateLuz() {
   const luzDiv = document.getElementById('luz');
   const minutesTotal = currentHour*60 + currentMinute;
-  let texto = '';
-  let icono = '';
-  
-  if(minutesTotal >= 300 && minutesTotal < 360){ texto='Amaneciendo'; icono='🌅'; }
-  else if(minutesTotal >= 360 && minutesTotal < 480){ texto='Mañana'; icono='☀️'; }
-  else if(minutesTotal >= 480 && minutesTotal < 1080){ texto='Día'; icono='🌞'; }
-  else if(minutesTotal >= 1080 && minutesTotal < 1200){ texto='Atardecer'; icono='🌇'; }
-  else if(minutesTotal >= 1200 && minutesTotal < 1320){ texto='Crepúsculo'; icono='🌆'; }
-  else { texto='Noche'; icono='🌙'; }
+  let texto = '', icono = '', color = '';
+
+  if(minutesTotal >= 300 && minutesTotal < 360){ texto='Amaneciendo'; icono='🌅'; color='#FFA500'; }
+  else if(minutesTotal >= 360 && minutesTotal < 480){ texto='Mañana'; icono='☀️'; color='#FFFACD'; }
+  else if(minutesTotal >= 480 && minutesTotal < 1080){ texto='Día'; icono='🌞'; color='#FFD700'; }
+  else if(minutesTotal >= 1080 && minutesTotal < 1200){ texto='Atardecer'; icono='🌇'; color='#FF8C00'; }
+  else if(minutesTotal >= 1200 && minutesTotal < 1320){ texto='Crepúsculo'; icono='🌆'; color='#FF69B4'; }
+  else { texto='Noche'; icono='🌙'; color='#1E1E2F'; }
 
   luzDiv.innerHTML = `${texto} <span class="luz-icon">${icono}</span>`;
+  luzDiv.style.background = `linear-gradient(90deg, ${color}, #00000050)`; // efecto mágico
 }
 
 async function saveToIndexedDB(state) {
@@ -346,6 +399,22 @@ function advanceTime({weeks = 0, days = 0, hours = 0, minutes = 0} = {}) {
   currentDay += days + (weeks * 7);
 
   updateDisplay();
+}
+
+function updateLuz() {
+  const luzDiv = document.getElementById('luz');
+  const minutesTotal = currentHour*60 + currentMinute;
+  let texto = '', icono = '', color = '';
+
+  if(minutesTotal >= 300 && minutesTotal < 360){ texto='Amaneciendo'; icono='🌅'; color='#FFA500'; }
+  else if(minutesTotal >= 360 && minutesTotal < 480){ texto='Mañana'; icono='☀️'; color='#FFFF99'; }
+  else if(minutesTotal >= 480 && minutesTotal < 1080){ texto='Día'; icono='🌞'; color='#FFD700'; }
+  else if(minutesTotal >= 1080 && minutesTotal < 1200){ texto='Atardecer'; icono='🌇'; color='#FF4500'; }
+  else if(minutesTotal >= 1200 && minutesTotal < 1320){ texto='Crepúsculo'; icono='🌆'; color='#FF69B4'; }
+  else { texto='Noche'; icono='🌙'; color='#1E1E2F'; }
+
+  luzDiv.innerHTML = `${texto} <span class="luz-icon">${icono}</span>`;
+  luzDiv.style.backgroundColor = color;
 }
 
 function applyEvent() {
@@ -393,12 +462,15 @@ document.getElementById("eventMinutes").value = "";
 function renderLog() {
   const logDiv = document.getElementById("log");
   logDiv.innerHTML = "";
+  const filter = document.getElementById('logFilter').value;
+
   logData.forEach(entry => {
-  const div = document.createElement("div");
-  div.className = "log-entry";
-  div.innerHTML = `<span class="day-tag" style="background:${entry.color};">[Día ${entry.day}]</span>${entry.text}`;
-  logDiv.prepend(div); // se añade al inicio
-});
+    if(filter !== "All" && !entry.text.startsWith(filter)) return; // filtra por tipo
+    const div = document.createElement("div");
+    div.className = "log-entry";
+    div.innerHTML = `<span class="day-tag" style="background:${entry.color};">[Día ${entry.day}]</span>${entry.text}`;
+    logDiv.prepend(div);
+  });
 }
 
 function resetTime() {
@@ -424,20 +496,37 @@ async function getDirectoryHandle() {
   return lastDirectoryHandle;
 }
 
-async function exportData() {
+function exportData() {
   try {
-    const dirHandle = await getDirectoryHandle();
-    const fileName = `Dia_${currentDay}_${String(currentHour).padStart(2,'0')}-${String(currentMinute).padStart(2,'0')}.json`;
-    const fileHandle = await dirHandle.getFileHandle(fileName, { create: true });
-    const writable = await fileHandle.createWritable();
-    await writable.write(JSON.stringify({hour: currentHour, minute: currentMinute, day: currentDay, log: logData}, null, 2));
-    await writable.close();
-    alert("Archivo exportado correctamente: "+fileName);
-  } catch(e) {
-    console.error(e);
-    alert("Error al exportar. Debes usar Chrome/Edge y permitir acceso a la carpeta.");
+    const title = document.title.replace(/[\\/:*?"<>|]/g, "");
+    const now = new Date();
+    const timestamp = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}-${String(now.getMinutes()).padStart(2,'0')}`;
+    const fileName = `${title} ${timestamp}.json`;
+
+
+    const blob = new Blob([JSON.stringify({
+      hour: currentHour,
+      minute: currentMinute,
+      day: currentDay,
+      log: logData
+    }, null, 2)], { type: "application/json" });
+
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = fileName;
+    link.style.display = "none";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(link.href);
+
+    console.log("Archivo exportado automáticamente a Descargas:", fileName);
+  } catch (e) {
+    console.error("Error al exportar:", e);
+    alert("Error al exportar archivo.");
   }
 }
+
 
 function importData() {
   const input = document.createElement('input');
