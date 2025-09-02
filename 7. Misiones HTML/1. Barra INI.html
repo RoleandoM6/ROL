@@ -477,20 +477,6 @@ let selectedCells = new Set();
 let conditionsMode = false;
 let activeCell = null;
 
-/*function setConditionsMode(on){
-  conditionsMode = on;
-  toggleConditionsBtn.classList.toggle("active", on);
-  gridWrapper.classList.toggle("conditions-mode", on);
-  [...grid.children].forEach(cell => {
-    const condDiv = cell.querySelector(".conditions");
-    if(!condDiv) return;
-    [...condDiv.querySelectorAll(".special-btn")].forEach(btn=>{
-      btn.style.display = on ? "inline-block" : "none";
-    });
-  });
-}
-*/
-
 function setConditionsMode(on){
   conditionsMode = on;
   toggleConditionsBtn.classList.toggle("active", on);
@@ -505,7 +491,7 @@ function setConditionsMode(on){
     // mostrar/ocultar botones
     specialBtns.forEach(btn=>{
       btn.style.display = on ? "inline-block" : "none";
-      if(!on) btn.classList.remove("active"); // <- esto resetea el estado
+      if(!on) btn.classList.remove("active"); // <- resetea el estado
     });
 
     // cerrar panel abierto si hay
@@ -513,11 +499,23 @@ function setConditionsMode(on){
       const panel = condDiv.querySelector(".panel-condiciones");
       if(panel) panel.style.display = "none";
     }
+
+    // ⚡ Forzar actualización visual de PV/PD
+if(!on){
+  const pvBtn = condDiv.querySelector(".special-btn");
+  if(pvBtn){
+    renderCellConditions(cell);
+
+    // forzar re-render como con display:none
+    cell.style.display = 'none';
+    cell.offsetHeight; // fuerza recalculo
+    cell.style.display = '';
+  }
+}
   });
 
   if(!on) activeCell = null;
 }
-
 
 toggleConditionsBtn.addEventListener("click", () => setConditionsMode(!conditionsMode));
 
@@ -879,7 +877,10 @@ function insertImageAt(index, src) {
   const cell = grid.children[index];
   cell.innerHTML = `<img src="${src}">`;
   cell.conditions = [];
-  cell.dataset.pv = "10";
+  let pv = parseInt(prompt("Introduce los PV iniciales de la unidad:", "10"));
+if (isNaN(pv) || pv < 0) pv = 10;
+cell.dataset.pv = String(pv);
+
   cell.dataset.dano = "0";
   cell.dataset.conditions = JSON.stringify([]);
   renderCellConditions(cell);

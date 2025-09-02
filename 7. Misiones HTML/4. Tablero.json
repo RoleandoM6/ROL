@@ -1,169 +1,177 @@
 {
   "map": {
     "src": "http://localhost:8000/04. Mapas/Mapa Posada a las afueras SÓTANO_100 x 100_8000x8000_DPI_80_GridOn.jpg",
-    "left": -619,
-    "top": -834
+    "left": -1526,
+    "top": -1058
   },
   "fichas": [
     {
       "src": "http://localhost:8000/02. Creación de Fichas, Recortes, Tarjetas, PJ, PNJ/FICHAS/Acuático Cangrejo Bailongo Ficha 01.png",
-      "left": 1197,
-      "top": 353,
+      "left": 288,
+      "top": 136,
       "width": 100,
       "height": 100,
       "name": "Acuático Cangrejo Bailongo Ficha 01.png"
     },
     {
       "src": "http://localhost:8000/02. Creación de Fichas, Recortes, Tarjetas, PJ, PNJ/FICHAS/Acuático Cangrejo Bailongo Ficha 02.png",
-      "left": 1203,
-      "top": 271,
+      "left": 294,
+      "top": 54,
       "width": 100,
       "height": 100,
       "name": "Acuático Cangrejo Bailongo Ficha 02.png"
     },
     {
       "src": "http://localhost:8000/02. Creación de Fichas, Recortes, Tarjetas, PJ, PNJ/FICHAS/Acuático Cangrejo Bailongo Ficha 03.png",
-      "left": 1101,
-      "top": 360,
+      "left": 291,
+      "top": 205,
       "width": 100,
       "height": 100,
       "name": "Acuático Cangrejo Bailongo Ficha 03.png"
     },
     {
       "src": "http://localhost:8000/02. Creación de Fichas, Recortes, Tarjetas, PJ, PNJ/FICHAS/Acuático Cangrejo Bailongo Ficha 04.png",
-      "left": 1097,
-      "top": 269,
+      "left": 303,
+      "top": -33,
       "width": 100,
       "height": 100,
       "name": "Acuático Cangrejo Bailongo Ficha 04.png"
     },
     {
       "src": "http://localhost:8000/02. Creación de Fichas, Recortes, Tarjetas, PJ, PNJ/FICHAS/Acuático Cangrejo Bailongo Ficha 05.png",
-      "left": 999,
-      "top": 361,
+      "left": 207,
+      "top": 201,
       "width": 100,
       "height": 100,
       "name": "Acuático Cangrejo Bailongo Ficha 05.png"
     },
     {
       "src": "http://localhost:8000/02. Creación de Fichas, Recortes, Tarjetas, PJ, PNJ/FICHAS/Acuático Cangrejo Bailongo Ficha 06.png",
-      "left": 996,
-      "top": 274,
+      "left": 221,
+      "top": -29,
       "width": 100,
       "height": 100,
       "name": "Acuático Cangrejo Bailongo Ficha 06.png"
     },
     {
       "src": "http://localhost:8000/02. Creación de Fichas, Recortes, Tarjetas, PJ, PNJ/FICHAS/Acuático Cangrejo Bailongo Ficha 07.png",
-      "left": 907,
-      "top": 364,
+      "left": 203,
+      "top": 124,
       "width": 100,
       "height": 100,
       "name": "Acuático Cangrejo Bailongo Ficha 07.png"
     },
     {
       "src": "http://localhost:8000/02. Creación de Fichas, Recortes, Tarjetas, PJ, PNJ/FICHAS/Acuático Cangrejo Bailongo Ficha 08.png",
-      "left": 901,
-      "top": 272,
+      "left": 218,
+      "top": 45,
       "width": 100,
       "height": 100,
       "name": "Acuático Cangrejo Bailongo Ficha 08.png"
     },
     {
       "src": "http://localhost:8000/02. Creación de Fichas, Recortes, Tarjetas, PJ, PNJ/FICHAS/Acuático Cangrejo Bailongo Ficha 09.png",
-      "left": 827,
-      "top": 371,
+      "left": 130,
+      "top": 165,
       "width": 100,
       "height": 100,
       "name": "Acuático Cangrejo Bailongo Ficha 09.png"
     },
     {
       "src": "http://localhost:8000/02. Creación de Fichas, Recortes, Tarjetas, PJ, PNJ/FICHAS/Acuático Cangrejo Bailongo Ficha 10.png",
-      "left": 815,
-      "top": 283,
+      "left": 140,
+      "top": 70,
       "width": 100,
       "height": 100,
       "name": "Acuático Cangrejo Bailongo Ficha 10.png"
     },
     {
       "src": "http://localhost:8000/02. Creación de Fichas, Recortes, Tarjetas, PJ, PNJ/FICHAS/Skaven Esclavo Ficha 01.png",
-      "left": 1565,
-      "top": 887,
+      "left": 458,
+      "top": 56,
       "width": 100,
       "height": 100,
       "name": "Skaven Esclavo Ficha 01.png"
     },
     {
       "src": "http://localhost:8000/02. Creación de Fichas, Recortes, Tarjetas, PJ, PNJ/FICHAS/Skaven Esclavo Ficha 02.png",
-      "left": 1768,
-      "top": 919,
+      "left": 455,
+      "top": 137,
       "width": 100,
       "height": 100,
       "name": "Skaven Esclavo Ficha 02.png"
     },
     {
       "src": "http://localhost:8000/02. Creación de Fichas, Recortes, Tarjetas, PJ, PNJ/FICHAS/Skaven Esclavo Ficha 03.png",
-      "left": 1708,
-      "top": 788,
+      "left": 540,
+      "top": 56,
       "width": 100,
       "height": 100,
       "name": "Skaven Esclavo Ficha 03.png"
     },
     {
       "src": "http://localhost:8000/02. Creación de Fichas, Recortes, Tarjetas, PJ, PNJ/FICHAS/Skaven Esclavo Ficha 04.png",
-      "left": 1640,
-      "top": 686,
+      "left": 538,
+      "top": 136,
       "width": 100,
       "height": 100,
       "name": "Skaven Esclavo Ficha 04.png"
     },
     {
       "src": "http://localhost:8000/02. Creación de Fichas, Recortes, Tarjetas, PJ, PNJ/FICHAS/Skaven Esclavo Ficha 05.png",
-      "left": 1519,
-      "top": 540,
+      "left": 623,
+      "top": 54,
       "width": 100,
       "height": 100,
       "name": "Skaven Esclavo Ficha 05.png"
     },
     {
       "src": "http://localhost:8000/02. Creación de Fichas, Recortes, Tarjetas, PJ, PNJ/FICHAS/Skaven Esclavo Ficha 06.png",
-      "left": 1437,
-      "top": 431,
+      "left": 623,
+      "top": 133,
       "width": 100,
       "height": 100,
       "name": "Skaven Esclavo Ficha 06.png"
     },
     {
       "src": "http://localhost:8000/02. Creación de Fichas, Recortes, Tarjetas, PJ, PNJ/FICHAS/Skaven Esclavo Ficha 07.png",
-      "left": 1436,
-      "top": 301,
+      "left": 460,
+      "top": 223,
       "width": 100,
       "height": 100,
       "name": "Skaven Esclavo Ficha 07.png"
     },
     {
       "src": "http://localhost:8000/02. Creación de Fichas, Recortes, Tarjetas, PJ, PNJ/FICHAS/Skaven Esclavo Ficha 08.png",
-      "left": 1552,
-      "top": 237,
+      "left": 463,
+      "top": -27,
       "width": 100,
       "height": 100,
       "name": "Skaven Esclavo Ficha 08.png"
     },
     {
       "src": "http://localhost:8000/02. Creación de Fichas, Recortes, Tarjetas, PJ, PNJ/FICHAS/Skaven Esclavo Ficha 09.png",
-      "left": 1653,
-      "top": 201,
+      "left": 540,
+      "top": 217,
       "width": 100,
       "height": 100,
       "name": "Skaven Esclavo Ficha 09.png"
     },
     {
       "src": "http://localhost:8000/02. Creación de Fichas, Recortes, Tarjetas, PJ, PNJ/FICHAS/Skaven Esclavo Ficha 10.png",
-      "left": 1775,
-      "top": 190,
+      "left": 537,
+      "top": -25,
       "width": 100,
       "height": 100,
       "name": "Skaven Esclavo Ficha 10.png"
+    },
+    {
+      "src": "http://localhost:8000/02. Creación de Tokens/FICHAS/Skaven Rata Ogro 2 Ficha 01.png",
+      "left": 766,
+      "top": -15,
+      "width": 300,
+      "height": 300,
+      "name": "Skaven Rata Ogro 2 Ficha 01.png"
     }
   ],
   "moveMapMode": false,
@@ -171,5 +179,5 @@
   "resizeMode": false,
   "moveBoardMode": false,
   "metaVersion": 2,
-  "exportedAt": "2025-08-28T20:04:18.290Z"
+  "exportedAt": "2025-09-02T12:50:28.850Z"
 }

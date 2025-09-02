@@ -19,6 +19,31 @@ body {
   background: #f5e0c3;
 }
 
+body {
+  margin: 0;
+  height: 100vh;
+  transition: background 1s linear;
+  background: linear-gradient(270deg, #1e3c72, #2a5298);
+  background-size: 400% 400%;
+  animation: moverGradiente 15s ease infinite;
+}
+
+.luz {
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: moverDegradado 10s ease-in-out infinite alternate;
+  transition: background 1s ease;
+}
+
+@keyframes moverDegradado {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
 .left-panel, .right-panel {
   border-radius: 8px;
   padding: 15px;
@@ -54,14 +79,22 @@ body {
 }
 
 .right-panel {
-  width: fit-content;
-  max-width: 90vw;
-  background-color: #00ff00; /* verde croma */
-  background-image: none;     /* quitar pergamino */
+  width: 800px;
+  height: 700px;
+  background-color: #00ff00;
+  background-image: none;
   padding: 15px;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  overflow: hidden;
+  box-sizing: border-box;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
+
 
 h1 { margin-bottom: 10px; font-size: 20px; }
 
@@ -76,12 +109,6 @@ h1 { margin-bottom: 10px; font-size: 20px; }
   font-weight: bold;
   color: #fff;
   text-shadow: 1px 1px 4px #000; /* opcional, efecto mágico */
-}
-
-#luz {
-  transition: all 1s ease-in-out; /* transición suave */
-  padding: 5px 10px;
-  border-radius: 6px;
 }
 
 .clock-luz.unified {
@@ -135,8 +162,8 @@ select, input, button { padding: 6px; font-size: 14px; }
 
 .log {
   width: 100%;          /* Ocupa todo el ancho del pergamino */
-  max-width: 100%;      /* No excede el ancho del contenedor */
-  max-height: 400px;    /* Altura máxima */
+  max-width: 800px;      /* No excede el ancho del contenedor */
+  max-height: 570px;    /* Altura máxima */
   overflow-y: auto;  /* scroll vertical cuando sea necesario */
   overflow-x: hidden; /* opcional, para que no aparezca scroll horizontal */
   transition: max-height 0.5s ease; /* Animación suave */
@@ -265,7 +292,7 @@ let autoTimeInterval = null;
 function startAutoTime() {
   if(autoTimeInterval) return;
   autoTimeInterval = setInterval(() => {
-    advanceTime({minutes: 10}); // avanza 10 min cada ciclo
+    advanceTime({minutes: 60}); // avanza 10 min cada ciclo
   }, 1000); // 1 segundo = 10 minutos en juego
 }
 
@@ -498,11 +525,17 @@ async function getDirectoryHandle() {
 
 function exportData() {
   try {
-    const title = document.title.replace(/[\\/:*?"<>|]/g, "");
+    const title = document.title.replace(/[\\/:*?"<>|]/g, ""); // título HTML limpio
     const now = new Date();
-    const timestamp = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}-${String(now.getMinutes()).padStart(2,'0')}`;
-    const fileName = `${title} ${timestamp}.json`;
 
+    // fecha y hora actual
+    const timestamp = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}-${String(now.getMinutes()).padStart(2,'0')}`;
+
+    // Día de juego
+    const gameDay = currentDay;
+
+    // Nombre del archivo
+    const fileName = `${title} - Día ${gameDay} - ${timestamp}.json`;
 
     const blob = new Blob([JSON.stringify({
       hour: currentHour,
@@ -580,6 +613,32 @@ loadState().then(() => {
   updateDisplay();
   renderLog();
 });
+
+function actualizarLuz() {
+  const luz = document.querySelector('.luz');
+  const hora = new Date().getHours();
+
+  let color1, color2;
+
+  if (hora >= 6 && hora < 12) { // Mañana
+    color1 = '#FFD700';
+    color2 = '#FFA500';
+  } else if (hora >= 12 && hora < 18) { // Tarde
+    color1 = '#FF8C00';
+    color2 = '#FF4500';
+  } else { // Noche
+    color1 = '#1E90FF';
+    color2 = '#00008B';
+  }
+
+  luz.style.background = `linear-gradient(45deg, ${color1}, ${color2})`;
+  luz.style.backgroundSize = '200% 200%';
+}
+window.onload = function () {
+  actualizarLuz();
+  setInterval(actualizarLuz, 60000);
+};
+
 
 </script>
 

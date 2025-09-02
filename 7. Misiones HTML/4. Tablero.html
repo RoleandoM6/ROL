@@ -10,8 +10,17 @@
   .button.active { background-color: #4CAF50; color: white; border-color: #2E7D32; box-shadow: 0 0 10px #4CAF50; }
   .marco { width: 1940px; height: 1100px; border: 10px solid #000000; display: flex; justify-content: center; align-items: center; box-sizing: border-box; margin-top: 20px; position: relative; }
   .area { width: 1920px; height: 1080px; background-color: #ffffff; position: relative; overflow: hidden; }
-  .area img { position: absolute; cursor: grab; user-select: none; }
-  .area img.dragging { cursor: grabbing; }
+  .area img,
+.area video {
+  position: absolute;
+  cursor: grab;
+  user-select: none;
+}
+.area img.dragging,
+.area video.dragging {
+  cursor: grabbing;
+}
+
   .feedback { position: absolute; top: -40px; left: 50%; transform: translateX(-50%); background-color: #4CAF50; color: white; padding: 5px 15px; border-radius: 5px; font-size: 14px; display: none; z-index: 1000; box-shadow: 0 0 5px #00000066; }
   .ficha-drop { padding: 10px; width: 200px; height: 60px; border: 2px dashed #8B4513; border-radius: 5px; display: flex; align-items: center; justify-content: center; margin-right: 10px; color: #8B4513; cursor: pointer; font-weight: bold; }
   #mapDrop { background-color: #ffebcd; color: #8B4513; }
@@ -208,10 +217,19 @@ function exportStateJSON(){
   const state = buildState();
   const full = { ...state, exportedAt:(new Date()).toISOString() };
   const blob = new Blob([JSON.stringify(full,null,2)],{type:'application/json'});
-  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='estado.json';
-  document.body.appendChild(a); a.click(); document.body.removeChild(a);
-  showFeedback('Exportado estado ✅',1500);
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+
+  // 🔹 Usar título tal cual, solo limpiando espacios al inicio/final
+  let filename = document.title.trim() + ".json";
+  a.download = filename;
+
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  showFeedback(`Exportado como ${filename} ✅`,1500);
 }
+
 
 // --- Importar JSON desde archivo ---
 function importStateFromFile(file){
@@ -274,17 +292,49 @@ function loadMap(src,left=null,top=null){
   };
 }
 
-// --- cargar ficha ---
+// --- cargar ficha y video---
 function loadFicha(src,left=null,top=null,id=null,isData=false,name=null,width=100,height=100){
-  const ficha=document.createElement('img');
-  ficha.src=src;
-  ficha.dataset.localpath = src; // <-- ruta desde localhost
-  ficha.style.width=width+'px'; ficha.style.height=height+'px';
-  ficha.style.left=(left!==null)?left+'px':(area.clientWidth/2-50)+'px';
-  ficha.style.top=(top!==null)?top+'px':(area.clientHeight/2-50)+'px';
-  ficha.style.zIndex=2; ficha.dataset.ficha='true';
+  let ficha;
+
+  if(src.endsWith('.webm')) {
+  ficha = document.createElement('video');
+  ficha.src = src;
+  ficha.autoplay = true;
+  ficha.loop = true;
+  ficha.muted = true;
+  ficha.playsInline = true;
+  ficha.controls = true;        // 🔹 visible aunque no arranque
+  ficha.style.background = "#000"; // 🔹 cuadro negro por defecto
+  console.log("Añadiendo ficha:", src, ficha);
+
+
+    // 🔹 Forzar reproducción en Chrome
+    ficha.addEventListener('canplay', () => {
+      const p = ficha.play();
+      if(p !== undefined){
+        p.catch(err => {
+          console.warn("Chrome bloqueó autoplay, esperando interacción:", err);
+        });
+      }
+    });
+
+  } else {
+    ficha = document.createElement('img');
+    ficha.src = src;
+  }
+
+  ficha.dataset.localpath = src;
+  ficha.style.width = width+'px';
+  ficha.style.height = height+'px';
+  ficha.style.left = (left!==null)?left+'px':(area.clientWidth/2-50)+'px';
+  ficha.style.top = (top!==null)?top+'px':(area.clientHeight/2-50)+'px';
+  ficha.style.position = 'absolute';
+  ficha.style.zIndex = 2;
+  ficha.dataset.ficha='true';
   if(name) ficha.dataset.name=name;
-  area.appendChild(ficha); fichas.push(ficha);
+
+  area.appendChild(ficha);
+  fichas.push(ficha);
 
   ficha.onmousedown = (e)=>{
     if(fichaMode && e.button===0 && !resizeMode){
@@ -372,33 +422,29 @@ resizeInput.addEventListener('change',()=>{
   }
 });
 
-// --- Manejo DROP fichas desde PC (localhost) ---
-fichaDrop.addEventListener('dragover', e=>e.preventDefault());
-fichaDrop.addEventListener('drop', e=>{
+// --- Manejo DROP fichas desde PC (localhost o cualquier carpeta) ---
+fichaDrop.addEventListener('dragover', e => e.preventDefault());
+
+fichaDrop.addEventListener('drop', e => {
   e.preventDefault();
-  const files = Array.from(e.dataTransfer.files).filter(f=>f.type.startsWith('image/'));
-  if(files.length===0){ alert("Arrastra imágenes válidas"); return; }
 
-  files.forEach(file=>{
-    let localPath;
+  const files = Array.from(e.dataTransfer.files).filter(f =>
+    f.type.startsWith('image/')
+  );
+  if(files.length === 0){ alert("Arrastra imágenes válidas"); return; }
 
-    // Ajustar la ruta según la carpeta donde estén tus fichas
-    // Aquí puedes cambiar la lógica según tu preferencia
-    if(file.name.includes('PJ_')) {
-      localPath = `http://localhost:8000/02. Creación de Tokens/1. PJ/${file.name}`;
-    } else if(file.name.includes('PNJ_')) {
-      localPath = `http://localhost:8000/02. Creación de Tokens/2. PNJ/${file.name}`;
-    } else if(file.name.includes('Obj_')) {
-      localPath = `http://localhost:8000/05. Objetos/${file.name}`;
-    } else {
-      // carpeta genérica FICHAS
-      localPath = `http://localhost:8000/02. Creación de Tokens/FICHAS/${file.name}`;
-    }
-
-    loadFicha(localPath,null,null,null,false,file.name);
-    saveIDBState(false);
+  files.forEach(async file => {
+    // Leer archivo como base64
+    const reader = new FileReader();
+    reader.onload = async (ev) => {
+      const dataURL = ev.target.result; // contiene el blob como base64
+      loadFicha(dataURL, null, null, null, false, file.name);
+      await saveIDBState(false); // persiste inmediatamente
+    };
+    reader.readAsDataURL(file);
   });
 });
+
 
 
 mapDrop.addEventListener('dragover', e=>e.preventDefault());
@@ -549,7 +595,13 @@ area.addEventListener('click', (e)=>{
     }
 });
 
-
+document.addEventListener("click", ()=>{
+  fichas.forEach(f=>{
+    if(f.tagName === "VIDEO"){
+      f.play().catch(()=>{});
+    }
+  });
+},{once:true});
 
 </script>
 </body>
