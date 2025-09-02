@@ -1,5 +1,13 @@
 0. Dados
-3. Ronda
+Hojas de PJ
+Diario
+Mapamundi
+Condiciones
+Calendario
+Tiendas
+Listado de Iniciativa
+Barra de Iniciativa
+Tablero
 OST
 X. Fondo
 
