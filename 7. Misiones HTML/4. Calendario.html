@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative&family=Uncial+Antiqua&family=Almendra&family=Black+Chancery&family=Pirata+One&display=swap" rel="stylesheet">
+
+<title>4. Calendario</title>
+<style>
+body {
+  font-family: 'Almendra', serif;
+  font-weight: 900;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  padding: 20px;
+  gap: 40px;
+  background: #f5e0c3;
+  margin: 0;
+  height: 100vh;
+  transition: background 1s linear;
+  background: linear-gradient(270deg, #1e3c72, #2a5298);
+  background-size: 400% 400%;
+  animation: moverGradiente 15s ease infinite;
+}
+
+.luz {
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: moverDegradado 10s ease-in-out infinite alternate;
+  transition: background 1s ease;
+}
+
+@keyframes moverDegradado {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.left-panel, .right-panel {
+  border-radius: 8px;
+  padding: 15px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.left-panel {
+  width: 300px;
+  background: #fff;
+}
+
+.info-capsula {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #856944;
+  padding: 10px 20px;
+  border-radius: 8px;
+  color: #fff;
+  font-weight: bold;
+  font-size: 28px;
+  line-height: 1.5;  /* mejora alineación */
+}
+
+.info-capsula span {
+  display: flex;            /* Fuerza que contenido interno se alinee */
+  align-items: center;       /* Centra verticalmente icono y texto */
+  padding: 0 10px;
+}
+
+.info-capsula span:not(:last-child) {
+  border-right: 2px solid #d2b48c; /* Barra divisoria color arena */
+}
+
+.right-panel {
+  width: 800px;
+  height: 700px;
+  background-color: #00ff00;
+  background-image: none;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  overflow: hidden;
+  box-sizing: border-box;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+
+h1 { margin-bottom: 10px; font-size: 20px; }
+
+.clock-line {
+  display: flex;
+  align-items: center;
+  gap: 20px; /* espacio entre hora y luz */
+}
+
+#day, #clock, #luz {
+  font-family: 'Uncial Antiqua', 'Almendra', 'Cinzel Decorative', serif;
+  font-weight: bold;
+  color: #fff;
+  text-shadow: 1px 1px 4px #000; /* opcional, efecto mágico */
+}
+
+.clock-luz.unified {
+  display: flex;
+  flex-direction: row;       /* Mantener en línea horizontal */
+  align-items: center;       /* Alinear verticalmente todos los elementos */
+  justify-content: center;   /* Centrar horizontalmente dentro de la cápsula */
+  gap: 25px;                 /* Espacio entre fecha y hora/luz */
+  padding: 15px 20px;
+  border: 2px solid #444;
+  border-radius: 6px;
+  background-color: #8B5E3C; /* Marrón sólido */
+  font-weight: bold;
+  color: #fff;
+}
+.clock-luz.unified .day {
+  margin: 0;                 /* Eliminar márgenes extra */
+  padding: 0;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 24px;
+  line-height: 1;            /* Para mejor alineación vertical */
+}
+
+.clock-luz {
+  display: flex;
+  gap: 10px;
+  padding: 8px 12px;
+  border: 2px solid #444;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.7);
+}
+
+.clock, .luz {
+  font-weight: bold;
+  font-size: 24px;
+}
+
+.luz-icon {
+  font-size: 64px; /* emoji grande */
+  margin-left: 8px; /* separación del texto */
+}
+
+.controls, .event-creator {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+select, input, button { padding: 6px; font-size: 14px; }
+
+.log {
+  width: 100%;          /* Ocupa todo el ancho del pergamino */
+  max-width: 800px;      /* No excede el ancho del contenedor */
+  max-height: 570px;    /* Altura máxima */
+  overflow-y: auto;  /* scroll vertical cuando sea necesario */
+  overflow-x: hidden; /* opcional, para que no aparezca scroll horizontal */
+  transition: max-height 0.5s ease; /* Animación suave */
+  border-radius: 6px;
+  padding: 10px;
+  background: rgba(255,255,255,0.85); /* Fondo blanco translúcido */
+  backdrop-filter: blur(2px);
+  border: 1px solid rgba(0,0,0,0.2);
+  box-sizing: border-box; /* Importante para que padding no haga crecer el ancho */
+}
+.log.collapsed {
+  max-height: 0;       
+  padding: 0;          /* eliminar padding */
+  margin-bottom: 0;
+  border: 0;           /* eliminar borde */
+  background: transparent; /* quitar fondo */
+}
+.log::-webkit-scrollbar {
+  width: 8px;
+}
+.log::-webkit-scrollbar-track {
+  background: rgba(0,0,0,0.1);
+  border-radius: 4px;
+}
+.log::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.3);
+  border-radius: 4px;
+}
+.log-entry { margin-bottom: 5px; font-size: 20px; }
+.day-tag {
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: white;
+  margin-right: 5px;
+}
+</style>
+</head>
+<body>
+
+<div class="left-panel">
+  <h1>Calendario</h1>
+
+  <div class="controls">
+    <button id="toggleLogBtn" onclick="toggleLog()" style="margin-bottom:10px;">Ocultar Registro</button>
+    <button onclick="resetTime()">Resetear Hora</button>
+    <button onclick="resetLog()">Resetear Registro</button>
+    <button onclick="saveState()">Guardar</button>
+    <button onclick="exportData()">Exportar</button>
+    <button onclick="importData()">Importar</button>
+  </div>
+
+  <div class="event-creator">
+    <select id="eventType">
+      <option value="Combate">Rondas de Combate contra</option>
+      <option value="Descanso Largo">Descanso largo en</option>
+      <option value="Descanso Corto">Descanso corto en</option>
+      <option value="Descanso">Descanso X en</option>
+      <option value="Viaje">Viaje a</option>
+      <option value="Investigación">Investigación de</option>
+      <option value="Pasa el tiempo">Pasa el tiempo</option>
+      <option value="Esperan a que">Esperan a que</option>
+      <option value="Evento">Evento:</option>
+    </select>
+    <input type="text" id="eventDetail" placeholder="Detalle">
+    <div style="display:flex; gap:5px;">
+  <input type="number" id="eventWeeks" placeholder="sem" min="0" style="width:50px;">
+  <input type="number" id="eventDays" placeholder="d" min="0" style="width:50px;">
+  <input type="number" id="eventHours" placeholder="h" min="0" style="width:50px;">
+  <input type="number" id="eventMinutes" placeholder="m" min="0" style="width:50px;">
+</div>
+    <button onclick="applyEvent()">Aplicar</button>
+
+    <!-- Selector de Fuente -->
+<div style="margin:10px 0;">
+  <label for="fontSelector"><strong>Fuente del Calendario:</strong></label>
+  <select id="fontSelector" onchange="changeFont(this.value)">
+    <option value="'Cinzel Decorative', serif">Clásico Medieval</option>
+    <option value="'Uncial Antiqua', serif">Manuscrito Antiguo</option>
+    <option value="'Almendra', serif">Caligráfica Mágica</option>
+    <option value="'Black Chancery', cursive">Gótica Dramática</option>
+    <option value="'Pirata One', cursive">Aventurero / Pirata</option>
+  </select>
+</div>
+
+<div style="margin-bottom:10px;">
+  <label>Filtrar eventos: </label>
+  <select id="logFilter" onchange="renderLog()">
+    <option value="All">Todos</option>
+    <option value="Combate">Combate</option>
+    <option value="Descanso Largo">Descanso Largo</option>
+    <option value="Descanso Corto">Descanso Corto</option>
+    <option value="Viaje">Viaje</option>
+    <option value="Investigación">Investigación</option>
+    <option value="Evento">Evento</option>
+  </select>
+</div>
+
+<div style="margin-top:10px;">
+  <button onclick="startAutoTime()">▶ Avanzar tiempo</button>
+  <button onclick="stopAutoTime()">⏸ Detener tiempo</button>
+</div>
+
+  </div>
+</div>
+
+<div class="right-panel">
+  <div class="info-capsula">
+  <span id="day">01/01/2025</span>
+  <span id="clock">08:00H</span>
+  <span id="luz">Día <span class="luz-icon">🌞</span></span>
+</div>
+  <div class="log" id="log"></div>
+</div>
+
+<script>
+let currentHour = parseInt(localStorage.getItem('currentHour')) || 8;
+let currentMinute = parseInt(localStorage.getItem('currentMinute')) || 0;
+let currentDay = parseInt(localStorage.getItem('currentDay')) || 1;
+let logData = JSON.parse(localStorage.getItem('logData')) || [];
+let lastDirectoryHandle = null;
+let db;
+
+let autoTimeInterval = null;
+
+function startAutoTime() {
+  if(autoTimeInterval) return;
+  autoTimeInterval = setInterval(() => {
+    advanceTime({minutes: 60}); // avanza 10 min cada ciclo
+  }, 1000); // 1 segundo = 10 minutos en juego
+}
+
+function stopAutoTime() {
+  clearInterval(autoTimeInterval);
+  autoTimeInterval = null;
+}
+
+const DB_NAME = "CalendarioDB";
+const STORE_NAME = "estadoJuego";
+const dayColors = ["#3498db", "#27ae60", "#8e44ad", "#d35400", "#c0392b", "#16a085"];
+
+function changeFont(font) {
+  document.getElementById('day').style.fontFamily = font;
+  document.getElementById('clock').style.fontFamily = font;
+  document.getElementById('luz').style.fontFamily = font;
+  console.log('Fuente cambiada a:', font);
+}
+
+// Inicializar con la primera fuente
+changeFont("'Cinzel Decorative', serif");
+
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, 1);
+
+    request.onupgradeneeded = (e) => {
+      db = e.target.result;
+      if (!db.objectStoreNames.contains(STORE_NAME)) {
+        db.createObjectStore(STORE_NAME, { keyPath: "id" });
+      }
+    };
+
+    request.onsuccess = (e) => {
+      db = e.target.result;
+      resolve(db);
+    };
+
+    request.onerror = (e) => reject(e);
+  });
+}
+
+async function loadState() {
+  const dbInstance = db || await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = dbInstance.transaction(STORE_NAME, "readonly");
+    const store = tx.objectStore(STORE_NAME);
+    const req = store.get(1);
+    req.onsuccess = (e) => {
+      const data = e.target.result;
+      if (data) {
+        currentHour = data.currentHour;
+        currentMinute = data.currentMinute;
+        currentDay = data.currentDay;
+        logData = data.logData;
+      }
+      resolve();
+    };
+    req.onerror = (e) => reject(e);
+  });
+}
+
+// Fecha base del juego
+const baseDate = new Date(2025, 0, 1); // 1 de enero de 2025
+
+function updateDisplay() {
+  // Calcular fecha actual según currentDay
+  const currentDate = new Date(baseDate);
+  currentDate.setDate(baseDate.getDate() + (currentDay - 1));
+
+  const dayStr = String(currentDate.getDate()).padStart(2, '0');
+  const monthStr = String(currentDate.getMonth() + 1).padStart(2, '0'); // +1 porque enero=0
+  const yearStr = currentDate.getFullYear();
+
+  document.getElementById("day").textContent = `${dayStr}/${monthStr}/${yearStr}`;
+  document.getElementById("clock").textContent = `${String(currentHour).padStart(2,'0')}:${String(currentMinute).padStart(2,'0')}H`;
+  updateLuz();
+}
+
+function updateLuz() {
+  const luzDiv = document.getElementById('luz');
+  const minutesTotal = currentHour*60 + currentMinute;
+  let texto = '', icono = '', color = '';
+
+  if(minutesTotal >= 300 && minutesTotal < 360){ texto='Amaneciendo'; icono='🌅'; color='#FFA500'; }
+  else if(minutesTotal >= 360 && minutesTotal < 480){ texto='Mañana'; icono='☀️'; color='#FFFACD'; }
+  else if(minutesTotal >= 480 && minutesTotal < 1080){ texto='Día'; icono='🌞'; color='#FFD700'; }
+  else if(minutesTotal >= 1080 && minutesTotal < 1200){ texto='Atardecer'; icono='🌇'; color='#FF8C00'; }
+  else if(minutesTotal >= 1200 && minutesTotal < 1320){ texto='Crepúsculo'; icono='🌆'; color='#FF69B4'; }
+  else { texto='Noche'; icono='🌙'; color='#1E1E2F'; }
+
+  luzDiv.innerHTML = `${texto} <span class="luz-icon">${icono}</span>`;
+  luzDiv.style.background = `linear-gradient(90deg, ${color}, #00000050)`; // efecto mágico
+}
+
+async function saveToIndexedDB(state) {
+  const dbInstance = db || await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = dbInstance.transaction(STORE_NAME, "readwrite");
+    const store = tx.objectStore(STORE_NAME);
+    store.put({ id: 1, ...state });
+    tx.oncomplete = () => resolve();
+    tx.onerror = (e) => reject(e);
+  });
+}
+
+function saveState() {
+  localStorage.setItem('currentHour', currentHour);
+  localStorage.setItem('currentMinute', currentMinute);
+  localStorage.setItem('currentDay', currentDay);
+  localStorage.setItem('logData', JSON.stringify(logData));
+
+  saveToIndexedDB({
+    currentHour,
+    currentMinute,
+    currentDay,
+    logData
+  });
+}
+
+
+function advanceTime({weeks = 0, days = 0, hours = 0, minutes = 0} = {}) {
+  // Sumar minutos y horas
+  currentMinute += minutes;
+  currentHour += hours;
+
+  while(currentMinute >= 60){ currentMinute -= 60; currentHour++; }
+  while(currentHour >= 24){ currentHour -= 24; currentDay++; }
+
+  // Sumar días y semanas directamente
+  currentDay += days + (weeks * 7);
+
+  updateDisplay();
+}
+
+function applyEvent() {
+  const type = document.getElementById("eventType").value;
+  const detail = document.getElementById("eventDetail").value.trim();
+  const weeks = parseInt(document.getElementById("eventWeeks").value) || 0;
+const days = parseInt(document.getElementById("eventDays").value) || 0;
+const hours = parseInt(document.getElementById("eventHours").value) || 0;
+const minutes = parseInt(document.getElementById("eventMinutes").value) || 0;
+
+if(weeks===0 && days===0 && hours===0 && minutes===0){ alert("Introduce una duración válida."); return; }
+
+const startHour = currentHour;
+const startMinute = currentMinute;
+const startDay = currentDay;
+
+advanceTime({weeks, days, hours, minutes});
+
+  const endHour = currentHour;
+  const endMinute = currentMinute;
+
+  const eventText = `${type} ${detail}`;
+  const startTime = `${String(startHour).padStart(2,'0')}:${String(startMinute).padStart(2,'0')}`;
+  const endTime = `${String(endHour).padStart(2,'0')}:${String(endMinute).padStart(2,'0')}`;
+
+  const entry = {
+    day: currentDay,
+    text: `${eventText} (${startTime} → ${endTime})`,
+    color: dayColors[(currentDay-1) % dayColors.length]
+  };
+
+  logData.push(entry);
+  renderLog();
+  saveState();
+
+  document.getElementById("eventDetail").value = "";
+
+// Limpiar todas las casillas de tiempo y duración
+document.getElementById("eventWeeks").value = "";
+document.getElementById("eventDays").value = "";
+document.getElementById("eventHours").value = "";
+document.getElementById("eventMinutes").value = "";
+}
+
+function renderLog() {
+  const logDiv = document.getElementById("log");
+  logDiv.innerHTML = "";
+  const filter = document.getElementById('logFilter').value;
+
+  logData.forEach(entry => {
+    if(filter !== "All" && !entry.text.startsWith(filter)) return; // filtra por tipo
+    const div = document.createElement("div");
+    div.className = "log-entry";
+    div.innerHTML = `<span class="day-tag" style="background:${entry.color};">[Día ${entry.day}]</span>${entry.text}`;
+    logDiv.prepend(div);
+  });
+}
+
+function resetTime() {
+  if(confirm("¿Resetear hora y día al inicio?")){
+    currentHour=8; currentMinute=0; currentDay=1;
+    updateDisplay();
+    saveState();
+  }
+}
+
+function resetLog() {
+  if(confirm("¿Borrar todo el registro?")){
+    logData = [];
+    renderLog();
+    saveState();
+  }
+}
+
+// EXPORT / IMPORT
+async function getDirectoryHandle() {
+  if (lastDirectoryHandle) return lastDirectoryHandle;
+  lastDirectoryHandle = await window.showDirectoryPicker();
+  return lastDirectoryHandle;
+}
+
+function exportData() {
+  try {
+    const title = document.title.replace(/[\\/:*?"<>|]/g, ""); // título HTML limpio
+    const now = new Date();
+
+    // fecha y hora actual
+    const timestamp = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}-${String(now.getMinutes()).padStart(2,'0')}`;
+
+    // Día de juego
+    const gameDay = currentDay;
+
+    // Nombre del archivo
+    const fileName = `${title} - Día ${gameDay} - ${timestamp}.json`;
+
+    const blob = new Blob([JSON.stringify({
+      hour: currentHour,
+      minute: currentMinute,
+      day: currentDay,
+      log: logData
+    }, null, 2)], { type: "application/json" });
+
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = fileName;
+    link.style.display = "none";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(link.href);
+
+    console.log("Archivo exportado automáticamente a Descargas:", fileName);
+  } catch (e) {
+    console.error("Error al exportar:", e);
+    alert("Error al exportar archivo.");
+  }
+}
+
+
+function importData() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  input.onchange = e => {
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = function(event) {
+      const data = JSON.parse(event.target.result);
+      currentHour = data.hour;
+      currentMinute = data.minute;
+      currentDay = data.day;
+      logData = data.log;
+      updateDisplay();
+      renderLog();
+      saveState();
+      alert("Archivo importado correctamente.");
+    }
+    reader.readAsText(file);
+  }
+  input.click();
+}
+
+// Estado del log plegado
+let logCollapsed = JSON.parse(localStorage.getItem('logCollapsed')) || false;
+
+function toggleLog() {
+  const logDiv = document.getElementById('log');
+  const btn = document.getElementById('toggleLogBtn');
+  logCollapsed = !logCollapsed;
+
+  if(logCollapsed){
+    logDiv.classList.add('collapsed');
+    btn.textContent = 'Mostrar Registro';
+  } else {
+    logDiv.classList.remove('collapsed');
+    btn.textContent = 'Ocultar Registro';
+  }
+  localStorage.setItem('logCollapsed', logCollapsed);
+}
+
+// Aplicar estado guardado al cargar
+if(logCollapsed){
+  document.getElementById('log').classList.add('collapsed');
+  document.getElementById('toggleLogBtn').textContent = 'Mostrar Registro';
+}
+
+loadState().then(() => {
+  updateDisplay();
+  renderLog();
+});
+
+</script>
+
+</body>
+</html>
