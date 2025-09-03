@@ -11,6 +11,7 @@ $ventanas = @(
     @{ Profile = "C:\ChromeProfiles\Perfil6"; FilePath = "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\6. ListaINI.html" },
     @{ Profile = "C:\ChromeProfiles\Perfil7"; FilePath = "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\7. BarraINI.html" },
     @{ Profile = "C:\ChromeProfiles\Perfil8"; FilePath = "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\8. Tablero.html" }
+    @{ Profile = "C:\ChromeProfiles\Perfil9"; FilePath = "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\9. WIP DVD.html" }
 )
 
 # --- ABRIR HTMLS EN CHROME ---

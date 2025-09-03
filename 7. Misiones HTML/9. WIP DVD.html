@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>9. WIP DVD</title>
+  <style>
+    :root {
+      --bg1: #0f1220;
+      --bg2: #111827;
+      --txt: #ffffff;
+      --accent: #00e0ff;
+    }
+    html, body {
+      margin: 0; padding: 0;
+      background: #000;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, "Helvetica Neue", Arial;
+      overflow: hidden; user-select: none;
+      height: 100%;
+      display: flex; justify-content: center; align-items: center;
+    }
+    #container {
+      position: relative;
+      width: 1920px;
+      height: 1080px;
+      background: url("images/Fondo%20DVD.png") center center / cover no-repeat;
+      overflow: hidden;
+      border: 2px solid #444;
+    }
+
+    .dvd-item {
+      position: absolute;
+      width: 120px;
+      height: auto;
+      border-radius: 12px;
+      pointer-events: none;
+      will-change: transform, left, top;
+    }
+    #tip {
+      position: absolute;
+      max-width: min(60ch, 65vw);
+      padding: 14px 18px; line-height: 1.2; font-weight: 700;
+      font-size: clamp(16px, 3.2vw, 28px);
+      border-radius: 14px;
+      background: rgba(0,0,0,.45);
+      border: 2px solid currentColor;
+      box-shadow: 0 10px 30px rgba(0,0,0,.35), inset 0 0 30px rgba(255,255,255,.04);
+      text-shadow: 0 1px 2px rgba(0,0,0,.6);
+      color: var(--accent);
+    }
+    .hud { position: fixed; left: 12px; bottom: 12px; display: flex; gap: 8px; align-items: center; padding: 8px 10px; border-radius: 12px; font-size: 12px; background: rgba(0,0,0,.35); border: 1px solid rgba(255,255,255,.1); backdrop-filter: blur(6px); }
+    .hud label { opacity: .8; }
+    .hud input[type="range"] { width: 160px; }
+    .btn { appearance: none; cursor: pointer; padding: 6px 10px; border-radius: 10px; border: 1px solid rgba(255,255,255,.2); background: rgba(255,255,255,.06); color: #fff; font-weight: 600; }
+    .btn:hover { background: rgba(255,255,255,.12); }
+    .credits { position: fixed; right: 12px; bottom: 12px; opacity: .4; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <div id="container">
+    <!-- Frase rebotando -->
+    <div id="tip">Cargando consejos…</div>
+
+    <!-- GIFs rebotando -->
+  <img src="https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExejc1ZHl6djVzd3A4dHRhbHAwM21pMjcwdnkyOGRvdDNpNnN0YzllZyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/7Xov9qZ44Mq0qkCN9Q/giphy.gif" class="dvd-item">
+  <img src="https://i.gifer.com/LIeV.gif" class="dvd-item">
+  <img src="https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExcGU3YjlqN2Flc25xbGZxNWVobWIzaXVtNHdiZ3NqaDBlNmpicXI3eiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/9r75ILTJtiDACKOKoY/giphy.gif" class="dvd-item">
+  <img src="https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExOG12cDFwdHlwNWJocW12dnh1b2xkNmhya3F0bHNwdjJqbnpleG84cCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/FHqFssDjhXWF6mbTXB/giphy.gif" class="dvd-item">
+  <img src="https://i.imgur.com/EzMRtwP.gif" class="dvd-item">
+  <img src="https://i0.wp.com/shaneplays.com/wp-content/uploads/2016/10/dd-meme-stealth-is-optional-animated.gif?resize=500%2C375.gif" class="dvd-item">
+
+  </div>
+
+  <div class="hud">
+    <label>Velocidad<input id="speed" type="range" min="80" max="480" value="240"></label>
+    <button class="btn" id="next">Siguiente</button>
+    <button class="btn" id="shuffle">Aleatorio</button>
+  </div>
+  <div class="credits">DVD-like bounce • Consejos de rol con GIFs</div>
+
+  <script>
+    const tips = [
+      "Nunca te encariñes demasiado con tu personaje: el dado no tiene corazón.",
+      "Pregunta primero, ataca después… o no, pero que sepas que lo intentaste.",
+      "El plan más simple suele ser el único que funciona (y aún así fallará).",
+      "Si no sabes qué hacer, hazlo dramático: el rol es teatro improvisado.",
+      "Nunca subestimes el poder de un PNJ con nombre propio."
+    ];
+
+    const tipEl = document.getElementById('tip');
+    const container = document.getElementById('container');
+    const speedEl = document.getElementById('speed');
+    const nextBtn = document.getElementById('next');
+    const shuffleBtn = document.getElementById('shuffle');
+
+    const dvdElements = [
+      {el: tipEl, x: 100, y: 100, vx: 220, vy: 180},
+      ...Array.from(container.querySelectorAll('.dvd-item')).map(e => ({el: e, x: Math.random()*1800, y: Math.random()*900, vx: 180+Math.random()*120, vy: 180+Math.random()*120}))
+    ];
+
+    let idx = 0;
+    function pickColor() { const h=Math.floor(Math.random()*360); return `hsl(${h} 90% 60%)`; }
+    function setTip(newIdx=null){ if(newIdx!==null) idx=newIdx; tipEl.textContent = tips[idx%tips.length]; tipEl.style.color = pickColor(); }
+    function nextTip(){ setTip((idx+1)%tips.length); }
+    function randomTip(){ setTip(Math.floor(Math.random()*tips.length)); }
+
+    nextBtn.addEventListener('click', nextTip);
+    shuffleBtn.addEventListener('click', randomTip);
+
+    function loop(t){
+      const dt=0.016;
+      const speedFactor = Number(speedEl.value)/220;
+      dvdElements.forEach(obj=>{
+        obj.x += obj.vx*dt*speedFactor;
+        obj.y += obj.vy*dt*speedFactor;
+        const rect = obj.el.getBoundingClientRect();
+        const W = container.clientWidth;
+        const H = container.clientHeight;
+        let hitX=false, hitY=false;
+        if(obj.x<=0){obj.x=0; obj.vx=Math.abs(obj.vx); hitX=true;}
+        else if(obj.x+rect.width>=W){obj.x=W-rect.width; obj.vx=-Math.abs(obj.vx); hitX=true;}
+        if(obj.y<=0){obj.y=0; obj.vy=Math.abs(obj.vy); hitY=true;}
+        else if(obj.y+rect.height>=H){obj.y=H-rect.height; obj.vy=-Math.abs(obj.vy); hitY=true;}
+        obj.el.style.left=obj.x+'px';
+        obj.el.style.top=obj.y+'px';
+        if(obj.el===tipEl && (hitX||hitY)){ nextTip(); }
+      });
+      requestAnimationFrame(loop);
+    }
+
+    window.addEventListener('load',()=>{ requestAnimationFrame(loop); setTip(0); });
+  </script>
+</body>
+</html>
