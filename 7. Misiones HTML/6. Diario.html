@@ -706,17 +706,19 @@ imageFileInput.addEventListener('change', (e) => {
 
 // ---------------- botones y utilidades ----------------
 
-document.getElementById('btnAdd').addEventListener('click', () => openForm());
-document.getElementById('btnSave').addEventListener('click', () => saveIndexedDB(true));
-document.getElementById('btnPickImagesFolder').addEventListener('click', pickImagesFolder);
-
 document.getElementById('btnExport').addEventListener('click', () => {
   const blob = new Blob([JSON.stringify({missions}, null, 2)], {type: 'application/json'});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = filenameBase;
+
+  // Usar el título del documento como nombre del archivo
+  const fileName = document.title.replace(/[\\/:*?"<>|]/g, "_") + ".json";
+  a.download = fileName;
+
   a.click();
+  URL.revokeObjectURL(a.href);
 });
+
 
 document.getElementById('btnExportNow').addEventListener('click', () => document.getElementById('btnExport').click());
 

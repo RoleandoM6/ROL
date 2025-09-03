@@ -17,9 +17,6 @@ body {
   padding: 20px;
   gap: 40px;
   background: #f5e0c3;
-}
-
-body {
   margin: 0;
   height: 100vh;
   transition: background 1s linear;
@@ -428,22 +425,6 @@ function advanceTime({weeks = 0, days = 0, hours = 0, minutes = 0} = {}) {
   updateDisplay();
 }
 
-function updateLuz() {
-  const luzDiv = document.getElementById('luz');
-  const minutesTotal = currentHour*60 + currentMinute;
-  let texto = '', icono = '', color = '';
-
-  if(minutesTotal >= 300 && minutesTotal < 360){ texto='Amaneciendo'; icono='🌅'; color='#FFA500'; }
-  else if(minutesTotal >= 360 && minutesTotal < 480){ texto='Mañana'; icono='☀️'; color='#FFFF99'; }
-  else if(minutesTotal >= 480 && minutesTotal < 1080){ texto='Día'; icono='🌞'; color='#FFD700'; }
-  else if(minutesTotal >= 1080 && minutesTotal < 1200){ texto='Atardecer'; icono='🌇'; color='#FF4500'; }
-  else if(minutesTotal >= 1200 && minutesTotal < 1320){ texto='Crepúsculo'; icono='🌆'; color='#FF69B4'; }
-  else { texto='Noche'; icono='🌙'; color='#1E1E2F'; }
-
-  luzDiv.innerHTML = `${texto} <span class="luz-icon">${icono}</span>`;
-  luzDiv.style.backgroundColor = color;
-}
-
 function applyEvent() {
   const type = document.getElementById("eventType").value;
   const detail = document.getElementById("eventDetail").value.trim();
@@ -613,32 +594,6 @@ loadState().then(() => {
   updateDisplay();
   renderLog();
 });
-
-function actualizarLuz() {
-  const luz = document.querySelector('.luz');
-  const hora = new Date().getHours();
-
-  let color1, color2;
-
-  if (hora >= 6 && hora < 12) { // Mañana
-    color1 = '#FFD700';
-    color2 = '#FFA500';
-  } else if (hora >= 12 && hora < 18) { // Tarde
-    color1 = '#FF8C00';
-    color2 = '#FF4500';
-  } else { // Noche
-    color1 = '#1E90FF';
-    color2 = '#00008B';
-  }
-
-  luz.style.background = `linear-gradient(45deg, ${color1}, ${color2})`;
-  luz.style.backgroundSize = '200% 200%';
-}
-window.onload = function () {
-  actualizarLuz();
-  setInterval(actualizarLuz, 60000);
-};
-
 
 </script>
 

@@ -249,7 +249,7 @@ document.getElementById('guardar-btn').addEventListener('click', ()=>{
   setTimeout(()=>btn.style.transform="scale(1)",100);
 });
 
-// Exportar JSON
+// Exportar JSON con el nombre del título del HTML
 document.getElementById('exportar-btn').addEventListener('click', ()=>{
   const tx = db.transaction("tiendas","readonly");
   const store = tx.objectStore("tiendas");
@@ -258,7 +258,13 @@ document.getElementById('exportar-btn').addEventListener('click', ()=>{
     const blob = new Blob([dataStr],{type:"application/json"});
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url; a.download="tiendas.json"; a.click();
+    a.href = url;
+
+    // Usar el título del documento como nombre de archivo
+    const fileName = document.title.replace(/[\\/:*?"<>|]/g, "_") + ".json";
+    a.download = fileName;
+
+    a.click();
     URL.revokeObjectURL(url);
   };
 });
