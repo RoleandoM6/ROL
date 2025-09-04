@@ -6,154 +6,136 @@
 <title>3. Mapamundi</title>
 <style>
 :root{
---bg-screen: #0e1522;
---parchment: #b89368;
---parchment-2: #d2b48c;
---ink: #2a1f0f;
---shadow: rgba(0,0,0,.4);
+  --bg-screen: #0e1522;
+  --parchment: #b89368;
+  --parchment-2: #d2b48c;
+  --ink: #2a1f0f;
+  --shadow: rgba(0,0,0,.4);
 }
 html,body{
-margin:0; padding:0; height:100%; background: var(--bg-screen); color: #eee; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+  margin:0; padding:0; height:100%;
+  background: var(--bg-screen); color: #eee;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
 }
 .toolbar{
-position: sticky; top:0; z-index:1000; background: #0b101b; border-bottom: 1px solid #1e2a3d; padding: .5rem; display:flex; gap:.5rem; align-items:center; flex-wrap: wrap;
+  position: sticky; top:0; z-index:1000;
+  background: #0b101b; border-bottom: 1px solid #1e2a3d;
+  padding:.5rem; display:flex; gap:.5rem; align-items:center; flex-wrap: wrap;
 }
 .title-edit{ background:#0f1726; color:#e5e7eb; border:1px solid #22324d; padding:.35rem .5rem; border-radius:.5rem; width: min(420px, 60vw); }
 .btn{ cursor:pointer; background: #1a2538; color:#e5e7eb; border:1px solid #2b3d5f; padding:.45rem .7rem; border-radius:.6rem; box-shadow: 0 2px 6px var(--shadow); font-weight:600; user-select:none; }
 .hint{opacity:.8; font-size:.9rem;}
 
-
 .stage-wrap{ display:flex; justify-content:center; padding: 1rem; }
 .stage{ width: 1920px; height: 1080px; position: relative; border: 3px solid #2b3d5f; border-radius: 12px; overflow: hidden; background: #101826; box-shadow: 0 8px 20px var(--shadow); }
 .map-bg{ width:100%; height:100%; object-fit: cover; display:block; }
 
-
 .overlay{ position:absolute; inset:0; pointer-events:none; }
 
+.marker{
+  position:absolute; width:22px; height:22px; border-radius:50%;
+  background: radial-gradient(circle at 30% 30%, #ffd08a, #e09a3f 60%, #804b00 100%);
+  border:1px solid #3a250e; box-shadow: 0 2px 8px var(--shadow);
+  transform: translate(-50%, -50%);
+  cursor: grab; pointer-events:auto;
+}
+.marker[data-title]::before{
+  content: attr(data-title);
+  position:absolute; bottom: 120%; left:50%;
+  transform: translateX(-50%);
+  background: rgba(16,24,38,.9); color:#f3e7d3;
+  padding:.2rem .35rem; border:1px solid #3a2a17; border-radius:.35rem;
+  font-size:.75rem; white-space: nowrap; pointer-events:none;
+}
 
-.marker{ position:absolute; width:22px; height:22px; border-radius:50%; background: radial-gradient(circle at 30% 30%, #ffd08a, #e09a3f 60%, #804b00 100%); border:1px solid #3a250e; box-shadow: 0 2px 8px var(--shadow); transform: translate(-50%, -50%); cursor: grab; pointer-events:auto; }
-.marker[data-title]::before{ content: attr(data-title); position:absolute; bottom: 120%; left:50%; transform: translateX(-50%); background: rgba(16,24,38,.9); color:#f3e7d3; padding:.2rem .35rem; border:1px solid #3a2a17; border-radius:.35rem; font-size:.75rem; white-space: nowrap; pointer-events:none; }
-
-
-.modal-backdrop{ position:fixed; inset:0; background: rgba(0,0,0,.55); display:none; align-items:center; justify-content:center; padding:1rem; z-index:2000; }
+.modal-backdrop{
+  position:fixed; inset:0; background: rgba(0,0,0,.55);
+  display:none; align-items:center; justify-content:center; padding:1rem; z-index:2000;
+}
 .modal{
-width: 80%;
-height: 80%;
-max-width: 80%;
-max-height: 80%;
-border-radius: 12px;
-overflow: hidden;
-display: flex;
-flex-direction: column;
-padding: 1rem;
-background: #0f1726;
-box-shadow: 0 8px 20px var(--shadow);
+  width: 80%; height: 80%; max-width: 80%; max-height: 80%;
+  border-radius: 12px; overflow: hidden;
+  display: flex; flex-direction: column;
+  padding: 1rem; background: #0f1726; box-shadow: 0 8px 20px var(--shadow);
 }
 .modal h3{ margin:.2rem 0 .6rem; font-size:1.4rem; text-align:center; }
-.modal .row {
-display: flex;
-flex: 1;
-gap: 1rem;
+.modal .row { display: flex; flex: 1; gap: 1rem; }
+.modal .row > div:first-child { flex: 0.25; max-width: 25%; }
+.modal .row > div:last-child  { flex: 0.75; }
+.modal .row > div { display: flex; flex-direction: column; justify-content: center; }
+.modal input[type="text"], .modal textarea{
+  width:100%; background: #f3e7d3; color:#2a1f0f; border:1px solid #6e4d2d;
+  border-radius:.5rem; padding:.5rem .6rem; margin:.3rem 0;
 }
-/* columna texto más estrecha, columna imagen más grande */
-.modal .row > div:first-child { flex: 0.35; }
-.modal .row > div:last-child  { flex: 0.65; }
-
-.modal .row > div {
-display: flex;
-flex-direction: column;
-justify-content: center;
+.modal .img-frame{
+  flex: 1; display: flex; align-items: center; justify-content: center;
+  background: #f6ebd6; overflow: hidden;
 }
-.modal input[type="text"], .modal textarea{ width:100%; background: #f3e7d3; color:#2a1f0f; border:1px solid #6e4d2d; border-radius:.5rem; padding:.5rem .6rem; }
-.modal .img-frame {
-flex: 1;
-display: flex;
-align-items: center;
-justify-content: center;
-padding: 0;
-border: none;
-border-radius: 0;
-background: #f6ebd6;
-overflow: hidden;
+.modal .img-frame img{
+  width: 80%; height: 80%; object-fit: contain; border-radius: 8px;
+  transition: transform .28s ease; will-change: transform;
 }
-.modal .img-frame img {
-width: 80%;
-height: 80%;
-object-fit: contain;
-border-radius: 8px;
-transition: transform .28s ease, width .28s ease, height .28s ease, left .28s ease, top .28s ease;
-will-change: transform, width, height, left, top;
-}
-.modal input, .modal textarea {
-flex: none;
-width: 100%;
-margin: .3rem 0;
-}
-
 .popup-card{ opacity:0; transform:scale(.96); transition:opacity .35s, transform .35s; pointer-events:none; }
 .popup-card.show{ opacity:1; transform:scale(1); pointer-events:auto; }
-
 
 .actions{ display:flex; justify-content: space-between; gap:.5rem; margin-top:.8rem; }
 .modal .btn{ background:#8b5e34; border-color:#6e4d2d; color:#fdf5e6; }
 .modal .btn.secondary{ background:#3c2a1a; }
 .modal .btn.danger{ background:#5b2b20; }
 
-
 .hidden { display: none !important; }
 
+.zoom-overlay{
+  position: fixed; inset: 0; z-index: 2900; background: rgba(0,0,0,0.55);
+}
+.zoom-clone{
+  position: fixed; object-fit: cover; z-index: 3000;
+  box-shadow: 0 20px 60px rgba(0,0,0,.6);
+  transition: all .32s cubic-bezier(.2,.9,.2,1); cursor: zoom-out;
+}
 
-/* zoom a 1080p para clone (se aplica dinámicamente desde JS) */
-.zoom-overlay {
-position: fixed;
-inset: 0;
-z-index: 2900;
-background: rgba(0,0,0,0.55);
+.marker span {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: bold;
+  color: #000;
+  text-shadow: 0 0 2px #fff, 0 0 4px #fff;
+  pointer-events: none; /* 👈 evita que bloquee el arrastre */
 }
-.zoom-clone {
-position: fixed;
-object-fit: cover;
-z-index: 3000;
-border-radius: 0;
-box-shadow: 0 20px 60px rgba(0,0,0,.6);
-transition: all .32s cubic-bezier(.2,.9,.2,1);
-cursor: zoom-out;
-}
+
 </style>
 </head>
-
 <body>
-<!-- ... toolbar y stage se mantienen igual ... -->
-
 
 <header class="toolbar">
-<input id="docTitle" class="title-edit" value="3. Mapamundi" />
-<button class="btn" id="btnToggleMode">Modo: Edición</button>
-<span class="mode-indicator" id="modeIndicator">Edición</span>
+  <input id="docTitle" class="title-edit" value="3. Mapamundi" />
+  <button class="btn" id="btnToggleMode">Modo: Interactivo</button>
+  <span id="modeIndicator">Interactivo</span>
 
+  <button class="btn" id="btnLoadBG">Cargar mapamundi</button>
+  <input type="file" id="fileBG" accept="image/*" class="hidden" />
 
-<button class="btn" id="btnLoadBG">Cargar mapamundi</button>
-<input type="file" id="fileBG" accept="image/*" class="hidden" />
+  <button class="btn" id="btnAddMarker">Añadir punto</button>
 
+  <button class="btn" id="btnSave">Guardar</button>
+  <button class="btn" id="btnExport">Exportar JSON</button>
+  <label class="btn" for="fileImport">Importar JSON</label>
+  <input type="file" id="fileImport" accept="application/json" class="hidden" />
 
-<button class="btn" id="btnAddMarker">Añadir punto</button>
-
-
-<button class="btn" id="btnSave">Guardar</button>
-<button class="btn" id="btnExport">Exportar JSON</button>
-<label class="btn" for="fileImport">Importar JSON</label>
-<input type="file" id="fileImport" accept="application/json" class="hidden" />
-
-
-<div class="legend hint">Click en el mapa para añadir. Arrastra para mover. Click para editar. Secundario para borrar.</div>
+  <div class="legend hint">Click en el mapa para añadir. Arrastra para mover. Click para editar. Secundario para borrar.</div>
 </header>
 
 <main class="stage-wrap">
-<section class="stage" id="stage">
-<canvas id="mapCanvas" class="map-bg"></canvas>
-<div id="markerLayer" class="overlay"></div>
-</section>
+  <section class="stage" id="stage">
+    <canvas id="mapCanvas" class="map-bg"></canvas>
+    <div id="markerLayer" class="overlay"></div>
+  </section>
 </main>
+
+<!-- ... resto del código idéntico (JS + modal) ... -->
+
+</body>
+</html>
 
 
 <div class="modal-backdrop" id="modalBackdrop">
@@ -161,6 +143,8 @@ cursor: zoom-out;
 <h3>Editar lugar</h3>
 <div class="row">
 <div>
+<label for="locNum">Número</label>
+<input type="number" id="locNum" min="1" />
 <label for="locTitle">Título</label>
 <input type="text" id="locTitle" placeholder="Nombre del lugar" />
 <label for="locDesc">Descripción</label>
@@ -187,50 +171,75 @@ cursor: zoom-out;
 </div>
 
 <script>
-/* Versión limpia y coherente: un solo canvas, una sola capa de marcadores y un modal grande */
-const mapCanvas = document.getElementById('mapCanvas');
+
+const $ = (s, p=document) => p.querySelector(s);
+const $$ = (s, p=document) => Array.from(p.querySelectorAll(s));
+
+/* ---------- Referencias ---------- */
+const locNum = $('#locNum');
+const mapCanvas = $('#mapCanvas');
 const ctx = mapCanvas.getContext('2d');
-const markerLayer = document.getElementById('markerLayer');
-const stageEl = document.getElementById('stage');
+const markerLayer = $('#markerLayer');
+const stageEl = $('#stage');
 
 mapCanvas.width = 1920;
 mapCanvas.height = 1080;
 
-let mapScale = 1;
-let mapOffsetX = 0;
-let mapOffsetY = 0;
-let isPanningMap = false;
-let startPanX = 0;
-let startPanY = 0;
-
+let mapScale = 1, mapOffsetX = 0, mapOffsetY = 0;
+let isPanningMap = false, startPanX = 0, startPanY = 0;
 let bgImage = null;
-let state = { title: document.getElementById('docTitle').value.trim(), background: '', markers: [] };
-let autosaveTimer = null;
-const $ = (s,p=document) => p.querySelector(s);
-const $$ = (s,p=document) => Array.from(p.querySelectorAll(s));
 
-function scheduleAutosave(){ clearTimeout(autosaveTimer); autosaveTimer = setTimeout(saveNow, 600); }
+let state = {
+  title: document.getElementById('docTitle').value.trim(),
+  background: '',
+  markers: []
+};
+
+let autosaveTimer = null;
+
+/* ---------- Guardado ---------- */
+function scheduleAutosave(){
+  clearTimeout(autosaveTimer);
+  autosaveTimer = setTimeout(saveNow, 600);
+}
 async function saveNow(){
   state.title = $('#docTitle').value.trim() || 'Mapa Interactivo';
   document.title = state.title;
   state.updatedAt = new Date().toISOString();
-  try{ const db = await openDB(); const tx = db.transaction('maps','readwrite'); tx.objectStore('maps').put(structuredClone(state)); }catch(e){ console.warn(e); }
+  try{
+    const db = await openDB();
+    db.transaction('maps','readwrite')
+      .objectStore('maps')
+      .put(structuredClone(state));
+  }catch(e){ console.warn(e); }
   try{ localStorage.setItem('mapa:'+state.title, JSON.stringify(state)); }catch(e){}
 }
 
-/* IndexedDB helper */
 const DB_NAME='MapaInteractivoDB', DB_STORE='maps';
 function openDB(){
   return new Promise((res, rej) => {
     const req = indexedDB.open(DB_NAME, 1);
-    req.onupgradeneeded = e => { const db = e.target.result; if(!db.objectStoreNames.contains(DB_STORE)) db.createObjectStore(DB_STORE,{ keyPath:'title' }); };
+    req.onupgradeneeded = e => {
+      const db = e.target.result;
+      if(!db.objectStoreNames.contains(DB_STORE))
+        db.createObjectStore(DB_STORE,{ keyPath:'title' });
+    };
     req.onsuccess = ()=> res(req.result);
     req.onerror = ()=> rej(req.error);
   });
 }
-async function idbGet(title){ try{ const db = await openDB(); return new Promise((res,rej)=>{ const tx=db.transaction(DB_STORE,'readonly'); const rq=tx.objectStore(DB_STORE).get(title); rq.onsuccess=()=>res(rq.result||null); rq.onerror=()=>rej(rq.error); }); }catch(e){ return null; }}
+async function idbGet(title){
+  try{
+    const db = await openDB();
+    return new Promise((res,rej)=>{
+      const rq=db.transaction(DB_STORE,'readonly').objectStore(DB_STORE).get(title);
+      rq.onsuccess=()=>res(rq.result||null);
+      rq.onerror=()=>rej(rq.error);
+    });
+  }catch(e){ return null; }
+}
 
-/* RENDER */
+/* ---------- Render ---------- */
 function render(){
   ctx.clearRect(0,0,mapCanvas.width,mapCanvas.height);
   if(bgImage){
@@ -240,7 +249,6 @@ function render(){
     ctx.drawImage(bgImage,0,0,mapCanvas.width,mapCanvas.height);
     ctx.restore();
   }
-  // sincronizar capa DOM de marcadores con transform
   markerLayer.style.transformOrigin = '0 0';
   markerLayer.style.transform = `translate(${mapOffsetX}px, ${mapOffsetY}px) scale(${mapScale})`;
   renderMarkers();
@@ -248,322 +256,405 @@ function render(){
 
 function renderMarkers(){
   $$('.marker', markerLayer).forEach(n=>n.remove());
+
   for(const m of state.markers){
     const el = document.createElement('div');
     el.className = 'marker';
-    // usamos porcentajes para posicionar relativo al tamaño del stage
     el.style.left = (m.x*100) + '%';
     el.style.top  = (m.y*100) + '%';
     el.dataset.id = m.id;
     if(m.title) el.dataset.title = m.title;
+
+    const numSpan = document.createElement('span');
+    numSpan.textContent = m.num;
+    el.appendChild(numSpan);
+
     attachMarkerEvents(el);
     markerLayer.appendChild(el);
   }
 }
 
-/* MARcADORES */
+/* ---------- Marcadores ---------- */
 function newMarker(px,py){
-  const rect = document.getElementById('stage').getBoundingClientRect();
+  const rect = stageEl.getBoundingClientRect();
   const x = (px - rect.left) / rect.width;
   const y = (py - rect.top) / rect.height;
   const id = crypto.randomUUID();
-  const marker = { id, x, y, title:'', desc:'', notes:'', regionImg:'' };
+  const marker = { id, x, y, title:'', desc:'', notes:'', regionImg:'', num: state.markers.length + 1 };
   state.markers.push(marker);
   scheduleAutosave();
   render();
   if(editMode) openEditor(id);
 }
+
 function deleteMarker(id){
   state.markers = state.markers.filter(m=>m.id!==id);
+  state.markers.forEach((m, i)=> m.num = i+1);
   scheduleAutosave();
   render();
   closePopup(modal);
 }
-function attachMarkerEvents(el){
-  let clickCount = 0, clickTimer;
-  el.addEventListener('click', e=>{
-    e.stopPropagation();
-    const id = el.dataset.id;
-    const m = state.markers.find(mm=>mm.id===id);
-    if(editMode){ openEditor(id); return; }
-    clickCount++; clearTimeout(clickTimer);
-    clickTimer = setTimeout(()=>{ clickCount=0; },350);
-    if(clickCount===1) showMiniInfo(el,m);
-    else if(clickCount===2){ removeMiniInfo(); openRegionView(id); clickCount=0; }
-  });
-  el.addEventListener('contextmenu', e=>{ e.preventDefault(); if(editMode) deleteMarker(el.dataset.id); });
 
-  // drag en modo edición (actualiza porcentaje)
-  let dragging=false;
-  function onMove(ev){
-    if(!dragging) return;
-    const rect = document.getElementById('stage').getBoundingClientRect();
-    state.markers = state.markers.map(mk=>{
-      if(mk.id===el.dataset.id){
-        mk.x = Math.min(1, Math.max(0, (ev.clientX - rect.left)/rect.width));
-        mk.y = Math.min(1, Math.max(0, (ev.clientY - rect.top)/rect.height));
+function attachMarkerEvents(el){
+  let dragging = false;
+  const id = el.dataset.id;
+
+  // 👉 Arrastrar solo en edición
+  el.addEventListener('mousedown', ev=>{
+    if(!editMode) return; // nada de arrastre en interactivo
+    if(ev.button !== 0) return;
+    dragging = true;
+    const rect = stageEl.getBoundingClientRect();
+
+    function onMove(moveEv){
+      if(!dragging) return;
+      const mk = state.markers.find(mk => mk.id === id);
+      if(mk){
+        mk.x = Math.min(1, Math.max(0, (moveEv.clientX - rect.left) / rect.width));
+        mk.y = Math.min(1, Math.max(0, (moveEv.clientY - rect.top) / rect.height));
         el.style.left = (mk.x*100)+'%';
         el.style.top  = (mk.y*100)+'%';
       }
-      return mk;
-    });
-  }
-  let draggingMarker = null;
-el.addEventListener('mousedown', ev=>{
-  if(!editMode) return;
-  draggingMarker = el;
-  document.addEventListener('mousemove', onMove);
-});
-window.addEventListener('mouseup', ()=>{ 
-  if(draggingMarker){
-    draggingMarker = null;
-    document.removeEventListener('mousemove', onMove);
-    scheduleAutosave();
-  }
-});
+    }
+    function onUp(){
+      if(dragging){
+        dragging = false;
+        scheduleAutosave();
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onUp);
+      }
+    }
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+  });
+
+  // 👉 Clic: mini ficha solo en interactivo
+  el.addEventListener('click', e=>{
+    if(editMode) return; // no abrir nada en edición
+    e.stopPropagation();
+    const m = state.markers.find(mm=>mm.id===id);
+    showMiniInfo(el,m);
+  });
+
+  // 👉 Doble clic: abrir editor solo en edición
+  el.addEventListener('dblclick', e=>{
+    if(!editMode) return;
+    e.stopPropagation();
+    openEditor(id);
+  });
+
+  // 👉 Click derecho (borrar) solo en edición
+  el.addEventListener('contextmenu', e=>{
+    e.preventDefault();
+    if(editMode) deleteMarker(id);
+  });
 }
 
-/* Mini-info */
+/* ---------- Mini info ---------- */
 let miniInfoEl = null;
 function showMiniInfo(el,m){
   removeMiniInfo();
   miniInfoEl = document.createElement('div');
   miniInfoEl.className = 'mini-info';
-  miniInfoEl.style.position = 'absolute'; miniInfoEl.style.zIndex = 2100;
-  miniInfoEl.style.background = 'rgba(16,24,38,0.95)'; miniInfoEl.style.color = '#f3e7d3';
-  miniInfoEl.style.padding = '8px'; miniInfoEl.style.border = '1px solid #3a2a17'; miniInfoEl.style.borderRadius = '6px';
-  miniInfoEl.style.maxWidth = '320px'; miniInfoEl.style.fontSize = '.9rem';
-  miniInfoEl.innerHTML = `<strong>${m.title||'Sin título'}</strong><div style="margin-top:.3rem; max-height:6rem; overflow:hidden;">${(m.desc||'').substring(0,300)}</div>`;
-  const rect = document.getElementById('stage').getBoundingClientRect();
+  Object.assign(miniInfoEl.style,{
+    position:'absolute', zIndex:2100, background:'rgba(16,24,38,0.95)', color:'#f3e7d3',
+    padding:'8px', border:'1px solid #3a2a17', borderRadius:'6px',
+    maxWidth:'320px', fontSize:'.9rem'
+  });
+  miniInfoEl.innerHTML = `<strong>${m.title||'Sin título'}</strong>
+    <div style="margin-top:.3rem; max-height:6rem; overflow:hidden;">${(m.desc||'').substring(0,300)}</div>`;
+  const rect = stageEl.getBoundingClientRect();
   const elRect = el.getBoundingClientRect();
   let left = elRect.left - rect.left + 24;
   let top  = elRect.top  - rect.top  - 8;
   if(left + 340 > rect.width) left = rect.width - 360;
   if(top < 0) top = elRect.top - rect.top + 28;
-  miniInfoEl.style.left = left+'px'; miniInfoEl.style.top = top+'px';
-  document.getElementById('stage').appendChild(miniInfoEl);
+  miniInfoEl.style.left = left+'px';
+  miniInfoEl.style.top = top+'px';
+  stageEl.appendChild(miniInfoEl);
 
-  const onClickOutside = (ev)=>{
+  const onClickOutside = ev=>{
     if(!miniInfoEl.contains(ev.target)) removeMiniInfo();
     document.removeEventListener('click', onClickOutside);
   };
   document.addEventListener('click', onClickOutside);
 }
+function removeMiniInfo(){
+  if(miniInfoEl){ miniInfoEl.remove(); miniInfoEl=null; }
+}
 
-function removeMiniInfo(){ if(miniInfoEl && miniInfoEl.parentNode){ miniInfoEl.remove(); miniInfoEl=null; } }
-
-/* Modal / editor (pergamino) */
+/* ---------- Modal ---------- */
 const modalBackdrop = $('#modalBackdrop'), modal = $('#modal');
 const locTitle = $('#locTitle'), locDesc = $('#locDesc'), locNotes = $('#locNotes');
 const regionFrame = $('#regionFrame'), fileRegion = $('#fileRegion');
 const btnDeleteMarker = $('#btnDeleteMarker'), btnApply = $('#btnApply'), btnLoadRegion = $('#btnLoadRegion');
-
 let currentId = null;
-function setModalMode(editable){
-  locTitle.readOnly = !editable; locDesc.readOnly = !editable; locNotes.readOnly = !editable;
-  btnLoadRegion.style.display = editable ? '' : 'none';
-  btnDeleteMarker.style.display = editable ? '' : 'none';
-  btnApply.style.display = editable ? '' : 'none';
-}
-function openPopup(popup){ modalBackdrop.style.display='flex'; requestAnimationFrame(()=> popup.classList.add('show')); }
-function closePopup(popup){ popup.classList.remove('show'); setTimeout(()=>{ if(!modal.classList.contains('show')) modalBackdrop.style.display='none'; },420); }
-modalBackdrop.addEventListener('click', (e)=>{ if(e.target===modalBackdrop) closePopup(modal); });
 
-let zoomClone = null;
-let zoomOverlay = null;
-function createZoomOverlay(){ 
+function setModalMode(editable){
+  [locTitle, locDesc, locNotes].forEach(el => el.readOnly = !editable);
+  [btnLoadRegion, btnDeleteMarker, btnApply].forEach(btn => btn.style.display = editable ? '' : 'none');
+}
+function openPopup(popup){
+  modalBackdrop.style.display='flex';
+  requestAnimationFrame(()=> popup.classList.add('show'));
+}
+function closePopup(popup){
+  popup.classList.remove('show');
+  setTimeout(()=>{ if(!modal.classList.contains('show')) modalBackdrop.style.display='none'; },420);
+}
+modalBackdrop.addEventListener('click', e=>{ if(e.target===modalBackdrop) closePopup(modal); });
+
+/* ---------- Zoom imagen ---------- */
+let zoomClone = null, zoomOverlay = null;
+function createZoomOverlay(){
   zoomOverlay = document.createElement('div');
   zoomOverlay.className = 'zoom-overlay';
   document.body.appendChild(zoomOverlay);
 }
-function removeZoomOverlay(){
-  if(zoomOverlay && zoomOverlay.parentNode) zoomOverlay.remove();
-  zoomOverlay = null;
-}
+function removeZoomOverlay(){ if(zoomOverlay) zoomOverlay.remove(); zoomOverlay = null; }
 function zoomImageFromElem(img){
-  // si ya hay zoom, cerrar
   if(zoomClone) return unzoomImage();
   const rect = img.getBoundingClientRect();
-  // crear overlay y clone
   createZoomOverlay();
   const clone = img.cloneNode(true);
   clone.className = 'zoom-clone';
-  // iniciar en el mismo rect que la imagen original
-  clone.style.left = rect.left + 'px';
-  clone.style.top  = rect.top  + 'px';
-  clone.style.width = rect.width + 'px';
-  clone.style.height = rect.height + 'px';
-  clone.style.objectFit = 'cover';
-  clone.style.borderRadius = '8px';
-  clone.style.transition = 'all .32s cubic-bezier(.2,.9,.2,1)';
+  Object.assign(clone.style,{
+    left: rect.left+'px', top: rect.top+'px',
+    width: rect.width+'px', height: rect.height+'px',
+    borderRadius:'8px', objectFit:'contain', maxWidth:'90vw', maxHeight:'90vh'
+  });
   document.body.appendChild(clone);
-  // forzar reflow y animar a 1920x1080 centrado en viewport
+
   requestAnimationFrame(()=>{
-    const targetW = Math.min(1080, window.innerWidth);
+    const targetW = Math.min(1920, window.innerWidth);
     const targetH = Math.min(1080, window.innerHeight);
-    const left = Math.round((window.innerWidth - targetW)/2);
-    const top  = Math.round((window.innerHeight - targetH)/2);
-    clone.style.left = left + 'px';
-    clone.style.top  = top  + 'px';
+    clone.style.left = ((window.innerWidth - targetW)/2) + 'px';
+    clone.style.top  = ((window.innerHeight - targetH)/2) + 'px';
     clone.style.width = targetW + 'px';
     clone.style.height = targetH + 'px';
     clone.style.borderRadius = '0px';
   });
 
-  // cerrar al doble click o click overlay o escape
   clone.addEventListener('dblclick', unzoomImage);
-  (zoomOverlay).addEventListener('click', unzoomImage);
+  zoomOverlay.addEventListener('click', unzoomImage);
   window.addEventListener('keydown', escHandler);
   zoomClone = { node: clone, originalRect: rect };
 }
 function unzoomImage(){
   if(!zoomClone) return;
   const { node, originalRect } = zoomClone;
-  // animar de regreso
-  node.style.left = originalRect.left + 'px';
-  node.style.top  = originalRect.top  + 'px';
-  node.style.width = originalRect.width + 'px';
-  node.style.height = originalRect.height + 'px';
-  node.style.borderRadius = '8px';
-  // limpiar después de la transición
-  const cleanup = ()=>{
-    try{ if(node && node.parentNode) node.parentNode.removeChild(node); }catch(e){}
-    removeZoomOverlay();
+  Object.assign(node.style,{
+    left: originalRect.left+'px', top: originalRect.top+'px',
+    width: originalRect.width+'px', height: originalRect.height+'px',
+    borderRadius:'8px'
+  });
+  node.addEventListener('transitionend', function te(){
+    node.removeEventListener('transitionend', te);
+    node.remove(); removeZoomOverlay();
     window.removeEventListener('keydown', escHandler);
     zoomClone = null;
-  };
-  node.addEventListener('transitionend', function te(){ node.removeEventListener('transitionend', te); cleanup(); });
+  });
 }
 function escHandler(e){ if(e.key === 'Escape') unzoomImage(); }
 
+/* ---------- Edición región ---------- */
 function drawRegion(dataURL){
-regionFrame.innerHTML = '';
-if(dataURL){
-const img = new Image(); img.src = dataURL;
-img.style.maxWidth='100%'; img.style.maxHeight='100%';
-img.style.borderRadius='10px'; img.style.cursor='zoom-in';
-img.addEventListener('dblclick', ev=>{
-ev.stopPropagation();
-if(!editMode){
-  zoomImageFromElem(img);
-}
-});
-regionFrame.appendChild(img);
-} else regionFrame.innerHTML = '<span class="hint">Sin imagen</span>';
+  regionFrame.innerHTML = dataURL
+    ? `<img src="${dataURL}" style="max-width:100%;max-height:100%;border-radius:10px;cursor:zoom-in">`
+    : '<span class="hint">Sin imagen</span>';
+  const img = regionFrame.querySelector('img');
+  if(img){
+    img.addEventListener('dblclick', ev=>{
+      ev.stopPropagation();
+      if(!editMode) zoomImageFromElem(img);
+    });
+  }
 }
 
+/* ---------- Abrir modal ---------- */
 function openEditor(id){
-  currentId = id; const m = state.markers.find(x=>x.id===id); if(!m) return;
-  setModalMode(true); locTitle.value = m.title||''; locDesc.value = m.desc||''; locNotes.value = m.notes||'';
-  drawRegion(m.regionImg); openPopup(modal);
-}
-function openRegionView(id){
-  currentId = id; const m = state.markers.find(x=>x.id===id); if(!m) return;
-  setModalMode(false); locTitle.value = m.title||''; locDesc.value = m.desc||''; locNotes.value = m.notes||'';
-  drawRegion(m.regionImg); openPopup(modal);
+  currentId = id;
+  const m = state.markers.find(x=>x.id===id);
+  if(!m) return;
+  setModalMode(true);
+  locNum.value = m.num;
+  locTitle.value = m.title||'';
+  locDesc.value = m.desc||'';
+  locNotes.value = m.notes||'';
+  drawRegion(m.regionImg);
+  openPopup(modal);
 }
 
+function openRegionView(id){
+  currentId = id;
+  const m = state.markers.find(x=>x.id===id);
+  if(!m) return;
+  setModalMode(false);
+  locNum.value = m.num;
+  locTitle.value = m.title||'';
+  locDesc.value = m.desc||'';
+  locNotes.value = m.notes||'';
+  drawRegion(m.regionImg);
+  openPopup(modal);
+}
+
+/* ---------- Listeners modal ---------- */
 $('#btnApply').addEventListener('click', ()=>{
   if(!currentId) return closePopup(modal);
-  const m = state.markers.find(x=>x.id===currentId); if(!m) return closePopup(modal);
-  m.title = locTitle.value.trim(); m.desc = locDesc.value; m.notes = locNotes.value;
-  scheduleAutosave(); render(); closePopup(modal);
+  const m = state.markers.find(x=>x.id===currentId);
+  if(!m) return closePopup(modal);
+
+  m.num   = parseInt(locNum.value) || m.num;
+  m.title = locTitle.value.trim();
+  m.desc  = locDesc.value;
+  m.notes = locNotes.value;
+
+  scheduleAutosave();
+  render();
+  closePopup(modal);
 });
+
 $('#btnCancel').addEventListener('click', ()=> closePopup(modal));
 btnDeleteMarker.addEventListener('click', ()=> { if(currentId) deleteMarker(currentId); });
-
 btnLoadRegion.addEventListener('click', ()=> fileRegion.click());
-fileRegion.addEventListener('change', async (e)=>{
+fileRegion.addEventListener('change', async e=>{
   const file = e.target.files?.[0]; if(!file || !currentId) return;
-  const dataURL = await new Promise((res,rej)=>{ const fr=new FileReader(); fr.onload=()=>res(fr.result); fr.onerror=rej; fr.readAsDataURL(file); });
-  const m = state.markers.find(x=>x.id===currentId); if(!m) return;
-  m.regionImg = dataURL; drawRegion(dataURL); scheduleAutosave();
+  const dataURL = await fileToDataURL(file);
+  const m = state.markers.find(x=>x.id===currentId);
+  if(m){ m.regionImg = dataURL; drawRegion(dataURL); scheduleAutosave(); }
 });
 
-/* Controles generales (barra superior) */
+/* ---------- Util ---------- */
+function fileToDataURL(file){
+  return new Promise((res,rej)=>{
+    const fr=new FileReader();
+    fr.onload=()=>res(fr.result);
+    fr.onerror=rej;
+    fr.readAsDataURL(file);
+  });
+}
+
+/* ---------- Toolbar ---------- */
 $('#btnAddMarker').addEventListener('click', ()=>{
-  const stage = document.getElementById('stage');
-  stage.style.cursor = 'crosshair';
+  stageEl.style.cursor = 'crosshair';
   function onClick(ev){
     newMarker(ev.clientX, ev.clientY);
-    stage.removeEventListener('click', onClick);
-    stage.style.cursor = '';
+    stageEl.removeEventListener('click', onClick);
+    stageEl.style.cursor = '';
   }
-  stage.addEventListener('click', onClick);
+  stageEl.addEventListener('click', onClick);
 });
-
 $('#btnLoadBG').addEventListener('click', ()=> $('#fileBG').click());
-$('#fileBG').addEventListener('change', async (e)=>{
+$('#fileBG').addEventListener('change', async e=>{
   const file = e.target.files?.[0]; if(!file) return;
-  const dataURL = await new Promise((res,rej)=>{ const fr=new FileReader(); fr.onload=()=>res(fr.result); fr.onerror=rej; fr.readAsDataURL(file); });
-  state.background = dataURL; bgImage = new Image(); bgImage.onload = ()=> render(); bgImage.src = dataURL; scheduleAutosave();
+  const dataURL = await fileToDataURL(file);
+  state.background = dataURL;
+  bgImage = new Image(); bgImage.onload = ()=> render(); bgImage.src = dataURL;
+  scheduleAutosave();
 });
 $('#btnSave').addEventListener('click', saveNow);
-$('#btnExport').addEventListener('click', ()=>{ state.title = $('#docTitle').value.trim() || 'Mapa Interactivo'; const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`${state.title}.json`; a.click(); URL.revokeObjectURL(a.href); });
-$('#fileImport').addEventListener('change', async (e)=>{ const file=e.target.files?.[0]; if(!file) return; const text=await file.text(); try{ const obj=JSON.parse(text); if(!obj||!obj.markers) throw new Error('JSON inválido'); state=obj; document.title=state.title||'Mapa Interactivo'; $('#docTitle').value=document.title; if(state.background){ bgImage=new Image(); bgImage.onload=()=>render(); bgImage.src=state.background; } else bgImage=null; render(); scheduleAutosave(); }catch(err){ alert('No se pudo importar el JSON.'); console.error(err); } });
+$('#btnExport').addEventListener('click', ()=>{
+  state.title = $('#docTitle').value.trim() || 'Mapa Interactivo';
+  const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`${state.title}.json`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+});
+$('#fileImport').addEventListener('change', async e=>{
+  const file=e.target.files?.[0]; if(!file) return;
+  try{
+    const obj=JSON.parse(await file.text());
+    if(!obj||!obj.markers) throw new Error('JSON inválido');
+    state=obj;
+    document.title=state.title||'Mapa Interactivo';
+    $('#docTitle').value=document.title;
+    if(state.background){
+      bgImage=new Image(); bgImage.onload=()=>render(); bgImage.src=state.background;
+    } else bgImage=null;
+    render(); scheduleAutosave();
+  }catch(err){ alert('No se pudo importar el JSON.'); console.error(err); }
+});
 
-/* Cambio de título (recupera mapa guardado si existe) */
+/* ---------- Título / auto-load ---------- */
 let titleTimer=null;
-$('#docTitle').addEventListener('input', ()=>{ clearTimeout(titleTimer); titleTimer=setTimeout(async ()=>{ const t=$('#docTitle').value.trim(); if(!t) return; const saved = await idbGet(t); if(saved) state=saved; else { state.title=t; document.title=t; } if(state.background){ bgImage=new Image(); bgImage.onload=()=>render(); bgImage.src=state.background; } render(); scheduleAutosave(); },500); });
+$('#docTitle').addEventListener('input', ()=>{
+  clearTimeout(titleTimer);
+  titleTimer=setTimeout(async ()=>{
+    const t=$('#docTitle').value.trim(); if(!t) return;
+    const saved = await idbGet(t);
+    if(saved) state=saved;
+    else { state.title=t; document.title=t; }
+    if(state.background){
+      bgImage=new Image(); bgImage.onload=()=>render(); bgImage.src=state.background;
+    }
+    render(); scheduleAutosave();
+  },500);
+});
 
-/* Zoom y paneo del mapa (solo en interacción)
-   - ahora se escuchan eventos en el contenedor .stage para no bloquear por overlays.
-   - se ignoran eventos si se hace click sobre un marcador o sobre un modal.
-*/
-let editMode = true;
+/* ---------- Modo edición ---------- */
+let editMode = false;
 $('#btnToggleMode').addEventListener('click', ()=>{
   editMode = !editMode;
   $('#btnToggleMode').textContent = 'Modo: ' + (editMode ? 'Edición' : 'Interacción');
   $('#modeIndicator').textContent = editMode ? 'Edición' : 'Interacción';
 });
 
-// rueda para zoom en stage (captura también si el cursor está sobre marcadores)
-stageEl.addEventListener('wheel', (e)=>{
-  // si estamos con modal abierto no hacemos nada
+/* ---------- Zoom y Pan ---------- */
+stageEl.addEventListener('wheel', e=>{
   if(modalBackdrop.style.display === 'flex') return;
   if(!editMode){
     e.preventDefault();
-    const factor = 1 + (e.deltaY * -0.0015); // factor un poco más reactivo
+    const factor = 1 + (e.deltaY * -0.0015);
     const prevScale = mapScale;
     const newScale = Math.min(Math.max(1, mapScale * factor), 3);
-    // para zoom centrado en cursor, ajustar offsets
     const rect = stageEl.getBoundingClientRect();
-    const cx = e.clientX - rect.left; // cursor relativo al stage
-    const cy = e.clientY - rect.top;
+    const cx = e.clientX - rect.left, cy = e.clientY - rect.top;
     const worldX = (cx - mapOffsetX) / prevScale;
     const worldY = (cy - mapOffsetY) / prevScale;
     mapScale = newScale;
-    // recalcular offset para mantener el punto bajo el cursor
     mapOffsetX = cx - worldX * mapScale;
     mapOffsetY = cy - worldY * mapScale;
     render();
   }
-}, {passive:false});
+},{passive:false});
 
-stageEl.addEventListener('mousedown', (e)=>{
-  // solo panning con botón izquierdo
-  if(e.button !== 0) return;
-  // no panning si en modo edición
-  if(editMode) return;
-  // evitar pan si clic en marcador o modal o en controles de UI
-  if(e.target.closest('.marker') || e.target.closest('.modal') || e.target.closest('.toolbar')) return;
+stageEl.addEventListener('mousedown', e=>{
+  if(e.button !== 0 || editMode) return;
+  if(e.target.closest('.marker,.modal,.toolbar')) return;
   if(mapScale > 1){
     isPanningMap=true;
     startPanX = e.clientX - mapOffsetX;
     startPanY = e.clientY - mapOffsetY;
-    // evitar selección de texto
-    document.body.style.userSelect = 'none';
+    document.body.style.cursor='grabbing';
   }
 });
-window.addEventListener('mousemove', (e)=>{ if(isPanningMap){ mapOffsetX = e.clientX - startPanX; mapOffsetY = e.clientY - startPanY; render(); }});
-window.addEventListener('mouseup', ()=>{ isPanningMap=false; document.body.style.userSelect = ''; });
+window.addEventListener('mousemove', e=>{
+  if(isPanningMap){
+    mapOffsetX = e.clientX - startPanX;
+    mapOffsetY = e.clientY - startPanY;
+    render();
+  }
+});
+window.addEventListener('mouseup', ()=>{ isPanningMap=false; document.body.style.cursor=''; });
 
-/* Inicio */
+/* ---------- Inicio ---------- */
 (async function init(){
-  try{ const db = await openDB(); const initial = await idbGet(state.title); if(initial) state = initial; }catch(err){ console.warn('IndexedDB no disponible', err); }
-  document.title = state.title;
-  if(state.background){ bgImage = new Image(); bgImage.onload = ()=> render(); bgImage.src = state.background; } else render();
+  const saved = await idbGet(state.title);
+  if(saved) state=saved;
+  else {
+    const ls=localStorage.getItem('mapa:'+state.title);
+    if(ls) state=JSON.parse(ls);
+  }
+  document.title=state.title||'Mapa Interactivo';
+  $('#docTitle').value=document.title;
+  if(state.background){
+    bgImage=new Image(); bgImage.onload=()=>render(); bgImage.src=state.background;
+  }
+  render();
 })();
+
 </script>
 </body>
 </html>

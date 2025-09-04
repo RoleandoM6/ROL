@@ -5,7 +5,7 @@
 <title>7. BarraINI</title>
 <style>
   body {
-    background-color: #163475; /* fondo marrón oscuro */ /* background-color:  #00ff00; /* verde croma */ /* Magenta (#FF00FF) o un azul eléctrico (#00FFFF).*/ /*#00ff00; /* verde croma */ /*  #34393d;*/
+    background-color: #163475;
     background-image: url('Textura Pergamino.png');
     background-size: cover;
     background-repeat: no-repeat;
@@ -35,7 +35,6 @@
     border-radius: 12px;
   }
 
-  /* Marco/realce cuando Modo Condiciones está activo */
   #grid-wrapper.conditions-mode {
     box-shadow: inset 0 0 0 4px #22c55e, 0 0 24px #22c55e;
   }
@@ -56,7 +55,6 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    /* ANTES: overflow: hidden */
     overflow: visible;
     user-select: none;
     transition: transform 0.3s ease, opacity 0.3s ease, border 0.2s;
@@ -78,8 +76,6 @@
     pointer-events: none;
     transition: transform 0.3s;
   }
-
-  .celda { position: relative; }
 
   .info-lateral {
     position: absolute;
@@ -170,14 +166,10 @@
   @keyframes cellIn { 0% { opacity: 0; transform: scale(0.5); } 100% { opacity: 1; transform: scale(1); } }
   @keyframes cellOut { 0% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(0.5); } }
 
-  @keyframes pulseRonda { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
-  .ronda-pulse { animation: pulseRonda 0.3s ease; }
-
   .cell.added { animation: cellIn 0.3s ease forwards; }
   .cell.removed { animation: cellOut 0.3s ease forwards; }
 
-  /* Menú de condiciones */
-  #conditions-menu {
+   #conditions-menu {
     display: none;
     position: absolute;
     background: rgba(0,0,0,0.92);
@@ -185,7 +177,6 @@
     border: 2px solid gold;
     padding: 10px;
     z-index: 50;
-    max-height: auto;
     overflow-y: auto;
     min-width: 220px;
     border-radius: 8px;
@@ -195,7 +186,6 @@
 
   #conditions-menu h4 { margin: 0 0 8px 0; }
 
-  /* Posicionar condiciones */
   .conditions {
     position: absolute;
     top: 3px;
@@ -212,7 +202,6 @@
     overflow-y: auto;
   }
 
-  /* Cada condición */
   .conditions span {
     margin: 1px 0;
     display: inline-block;
@@ -229,7 +218,6 @@
   @keyframes removeMove { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-20px); } }
   @keyframes addMove { 0% { opacity: 0; transform: translateY(-20px); } 100% { opacity: 1; transform: translateY(0); } }
 
-  /* ---------------- Ronda flotante ---------------- */
   .ronda-floating {
     position: fixed;
     top: 20px;
@@ -249,11 +237,35 @@
   .ronda-floating .label { font-size: 22px; opacity: 0.9; }
   .ronda-floating .num { font-size: 22px; line-height: 1; margin-top: 4px; }
   .ronda-floating:active { cursor: grabbing; }
+
+#cell-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+}
+
+#cell-overlay .cell-preview {
+  background: #222;
+  padding: 20px;
+  border-radius: 15px;
+  transform: scale(1.5);
+  box-shadow: 0 0 20px rgba(0,0,0,0.7);
+  animation: zoomIn 0.3s ease;
+}
+
+@keyframes zoomIn {
+  from { transform: scale(0.8); opacity: 0; }
+  to   { transform: scale(1.5); opacity: 1; }
+}
+
 </style>
 </head>
 <body>
 
-<!-- Ronda flotante (fuera del overlay para evitar solapes) -->
 <div id="ronda-display" class="ronda-floating" title="Arrastra para mover">
   <span class="label">Ronda</span> <span id="ronda-num" class="num">1</span>
 </div>
@@ -266,8 +278,6 @@
     <button onclick="saveGrid()">Guardar Estado</button>
     <button id="toggle-conditions">Modo Condiciones</button>
     <button onclick="clearGrid()">Vaciar Barra</button>
-
-    <!-- Exportar / Importar JSON -->
     <button id="export-json">Exportar JSON</button>
     <input type="file" id="import-json" style="display:none;" accept=".json">
     <button onclick="document.getElementById('import-json').click()">Importar JSON</button>
@@ -282,8 +292,11 @@
   <button id="close-conditions">Cerrar</button>
 </div>
 
+<div id="cell-overlay">
+  <div class="cell-preview"></div>
+</div>
+
 <script>
-/* ==================== Estado & Referencias ==================== */
 const grid = document.getElementById("grid");
 const gridWrapper = document.getElementById("grid-wrapper");
 const addCell = document.getElementById("add-cell");
@@ -300,7 +313,6 @@ const specialConditions = [
   {name: "PD", key: "dano", min: 0, max: 999}
 ];
 
-/* ==================== IndexedDB (BarraINI_DB) ==================== */
 let db;
 const DB_NAME = "BarraINI_DB";
 const DB_VERSION = 1;
@@ -312,7 +324,7 @@ function openDB(callback) {
   request.onupgradeneeded = e => {
     db = e.target.result;
     if (!db.objectStoreNames.contains(STORE_NAME)) {
-      db.createObjectStore(STORE_NAME); // sin keyPath, usaremos put(value, key)
+      db.createObjectStore(STORE_NAME);
     }
   };
   request.onsuccess = e => {
@@ -339,9 +351,8 @@ function loadFromDB(key, callback) {
   request.onerror = () => callback(null);
 }
 
-/* ==================== Ronda: estado y UI ==================== */
 let currentRonda = 1;
-let rondaPos = null; // {left:number, top:number}
+let rondaPos = null;
 
 function actualizarRondaUI(){
   rondaNumDiv.textContent = currentRonda;
@@ -356,7 +367,6 @@ function saveRondaMeta(callback){
   });
 }
 
-/* Hacer draggable la ronda y editable el número */
 (function makeRondaDraggable(){
   let dragging = false, offsetX = 0, offsetY = 0;
   rondaDisplay.addEventListener("pointerdown", (e) => {
@@ -398,7 +408,6 @@ function saveRondaMeta(callback){
     span.addEventListener("keydown", handleKey);
   });
 
-  // Drag
   document.addEventListener("pointermove", (e) => {
     if (!dragging) return;
     let left = e.clientX - offsetX;
@@ -421,7 +430,6 @@ function saveRondaMeta(callback){
   });
 })();
 
-// Doble clic reset
 rondaDisplay.addEventListener("dblclick", () => {
   currentRonda = 1;
   actualizarRondaUI();
@@ -429,7 +437,6 @@ rondaDisplay.addEventListener("dblclick", () => {
   saveGrid();
 });
 
-/* ==================== Condiciones ==================== */
 const conditions = [
   {name:"Envenenado", icon:"☠️", defaultTurns:1, desc:"Envenenado: 1D4 daño; Desventaja FUE y CON"},
   {name:"Quemado", icon:"🔥", defaultTurns:1, desc:"Quemado: 1D6 daño al inicio del turno; no puede ocultarse"},
@@ -470,7 +477,6 @@ function buildConditionsMenu() {
 }
 buildConditionsMenu();
 
-/* ==================== UI: Modo Condiciones ==================== */
 let currentIndex = -1;
 let selectedCells = new Set();
 let conditionsMode = false;
@@ -487,27 +493,23 @@ function setConditionsMode(on){
 
     const specialBtns = [...condDiv.querySelectorAll(".special-btn")];
 
-    // mostrar/ocultar botones
     specialBtns.forEach(btn=>{
       btn.style.display = on ? "inline-block" : "none";
-      if(!on) btn.classList.remove("active"); // <- resetea el estado
+      if(!on) btn.classList.remove("active");
     });
 
-    // cerrar panel abierto si hay
     if(!on){
       const panel = condDiv.querySelector(".panel-condiciones");
       if(panel) panel.style.display = "none";
     }
 
-    // ⚡ Forzar actualización visual de PV/PD
 if(!on){
   const pvBtn = condDiv.querySelector(".special-btn");
   if(pvBtn){
     renderCellConditions(cell);
 
-    // forzar re-render como con display:none
     cell.style.display = 'none';
-    cell.offsetHeight; // fuerza recalculo
+    cell.offsetHeight;
     cell.style.display = '';
   }
 }
@@ -535,7 +537,7 @@ document.addEventListener("click", (e) => {
 
 function positionConditionsMenuForCell(cell) {
   const rect = cell.getBoundingClientRect();
-  conditionsMenu.style.display = "block"; // para medir
+  conditionsMenu.style.display = "block";
   const menuW = conditionsMenu.offsetWidth;
   const menuH = conditionsMenu.offsetHeight;
 
@@ -562,7 +564,6 @@ function ensureConditionsDiv(cell) {
 }
 
 function renderCellConditions(cell) {
-  // asegurar datasets
   if (!cell.dataset.pv) cell.dataset.pv = String(cell.pv ?? 10);
   if (!cell.dataset.dano) cell.dataset.dano = String(cell.dano ?? 0);
   if (!cell.dataset.conditions) cell.dataset.conditions = JSON.stringify(cell.conditions || []);
@@ -576,7 +577,6 @@ function renderCellConditions(cell) {
   const condDiv = ensureConditionsDiv(cell);
   condDiv.innerHTML = "";
 
-  // especiales PV y Daño (❤️ / 💥)
   specialConditions.forEach(sc => {
     const wrap = document.createElement("div");
     wrap.style.display = "flex";
@@ -648,7 +648,6 @@ function renderCellConditions(cell) {
     condDiv.appendChild(wrap);
   });
 
-  // condiciones normales
   cell.conditions.forEach((c, index) => {
     const row = document.createElement("div");
     row.style.display = "flex";
@@ -657,7 +656,7 @@ function renderCellConditions(cell) {
     row.style.gap = "6px";
 
     const left = document.createElement("div");
-    left.textContent = c.icon; // solo el emoji
+    left.textContent = c.icon;
 
     const turnsSpan = document.createElement("span");
     turnsSpan.textContent = String(c.turns ?? 1);
@@ -732,7 +731,6 @@ function addConditionToCell(cell, cond) {
   saveGrid();
 }
 
-/* ==================== Utilidades de Grid ==================== */
 function ensureCells(count) {
   while (grid.children.length < count) {
     const cell = document.createElement("div");
@@ -751,7 +749,6 @@ grid.addEventListener("click", e => {
   if (conditionsMode) positionConditionsMenuForCell(cell);
 });
 
-/* ==================== Números & Selección ==================== */
 function updateNumbers() {
   [...grid.children].forEach((cell, i) => {
     let num = cell.querySelector('.number');
@@ -766,7 +763,6 @@ function updateHighlight() {
   });
 }
 
-/* ==================== Guardado / Carga ==================== */
 function buildExportData() {
   const gridData = [...grid.children].map(c => ({
     img: c.querySelector("img")?.src || null,
@@ -782,7 +778,6 @@ function saveGrid() {
   saveToDB("gridData", exportData, () => { saveRondaMeta(); });
 }
 
-/* ==================== Autoguardado en LocalStorage ==================== */
 function saveToLocalStorage() {
   loadFromDB("gridData", (data) => {
     if (!data) return;
@@ -839,7 +834,6 @@ function loadGrid() {
   });
 }
 
-// ================= Exportar / Importar JSON =================
 const exportBtn = document.getElementById("export-json");
 const importInput = document.getElementById("import-json");
 
@@ -893,8 +887,6 @@ cell.dataset.pv = String(pv);
 function insertCellAt(fromIndex, toIndex) {
   animateGridChange(() => {
     const cells = [...grid.children];
-
-    // 1) Guardamos datos de TODAS las celdas
     const data = cells.map(c => ({
       img: c.querySelector("img")?.outerHTML || "",
       conditions: JSON.parse(JSON.stringify(c.conditions || [])),
@@ -902,12 +894,10 @@ function insertCellAt(fromIndex, toIndex) {
       dano: Number(c.dataset.dano ?? 0)
     }));
 
-    // 2) Extraemos la celda a mover
     const moving = data.splice(fromIndex, 1)[0];
-    // 3) Insertamos en nueva posición
+
     data.splice(toIndex, 0, moving);
 
-    // 4) Reescribimos DOM con los datos
     cells.forEach((c, i) => {
       c.innerHTML = data[i].img;
       c.conditions = JSON.parse(JSON.stringify(data[i].conditions || []));
@@ -917,12 +907,10 @@ function insertCellAt(fromIndex, toIndex) {
       renderCellConditions(c);
     });
 
-    // 5) Ajustar currentIndex
     if (currentIndex === fromIndex) currentIndex = toIndex;
     else if (fromIndex < currentIndex && currentIndex <= toIndex) currentIndex--;
     else if (toIndex <= currentIndex && currentIndex < fromIndex) currentIndex++;
 
-    // 6) Ajustar selectedCells
     if (selectedCells.size) {
       const newSet = new Set();
       [...selectedCells].forEach(idx => {
@@ -941,7 +929,6 @@ function insertCellAt(fromIndex, toIndex) {
   saveGrid();
 }
 
-/* ==================== Turnos ==================== */
 function decrementConditions(cell) {
   if (!cell || !cell.conditions || !cell.conditions.length) return;
   cell.conditions.forEach(c => c.turns = Math.max(0, (c.turns || 0) - 1));
@@ -1000,7 +987,6 @@ function prevTurn() {
   saveGrid();
 }
 
-/* ==================== Eliminación ==================== */
 function deleteAt(index) {
   const cell = grid.children[index];
   if (!cell.querySelector("img")) return;
@@ -1066,7 +1052,6 @@ function addCellEvents() {
   });
 }
 
-// Hacer draggable el botón de añadir celdas
 (function makeAddCellDraggable(){
   let dragging = false, offsetX = 0, offsetY = 0;
   const storedPos = JSON.parse(localStorage.getItem("addCellPos"));
@@ -1122,6 +1107,34 @@ addCell.addEventListener("drop", e => {
     reader.readAsDataURL(files[i]);
   };
   loadNext(0);
+});
+
+const overlay = document.getElementById("cell-overlay");
+const cellPreview = overlay.querySelector(".cell-preview");
+
+grid.addEventListener("dblclick", (e) => {
+  const cell = e.target.closest(".cell");
+  if (!cell) return;
+
+  if (conditionsMode) return;
+
+  cellPreview.innerHTML = cell.innerHTML;
+
+  overlay.style.display = "flex";
+});
+
+overlay.addEventListener("click", (e) => {
+  if (e.target === overlay) {
+    overlay.style.display = "none";
+    cellPreview.innerHTML = "";
+  }
+});
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") {
+    overlay.style.display = "none";
+    cellPreview.innerHTML = "";
+  }
 });
 
 openDB(() => { loadGrid(); });
