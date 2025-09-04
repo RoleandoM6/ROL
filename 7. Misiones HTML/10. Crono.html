@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>10. Crono</title>
+  <style>
+    :root {
+      --bg: #412b0b; /* slate-900 */
+      --card: #0300cf; /* gray-900 */
+      --text: #e5e7eb; /* gray-200 */
+      --muted: #9ca3af; /* gray-400 */
+      --accent: #22c55e; /* green-500 */
+      --warning: #f59e0b; /* amber-500 */
+      --danger: #ef4444; /* red-500 */
+      --ring: rgba(34, 197, 94, .45);
+    }
+
+    html, body {
+      height: 100%;
+    }
+    body {
+      margin: 0;
+      display: grid;
+      place-items: center;
+      background: radial-gradient(1200px 800px at 50% 0%, #0b1222, var(--bg));
+      
+      color: var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica Neue, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+    }
+    .card {
+      width: min(92vw, 560px);
+      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02)),
+      url("images/Fondo Crono.png") center / cover no-repeat;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 24px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.35);
+      padding: 28px 24px;
+      backdrop-filter: blur(6px);
+    }
+    h1 {
+      margin: 0 0 12px;
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: .02em;
+    }
+    .display {
+      display: flex;
+      align-items: baseline;
+      justify-content: center;
+      gap: 12px;
+      padding: 12px 0 18px;
+    }
+    .time {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: clamp(40px, 8vw, 80px);
+      line-height: 1;
+      letter-spacing: 0.04em;
+      text-shadow: 0 1px 0 rgba(255,255,255,0.05), 0 6px 24px rgba(34,197,94,0.15);
+    }
+    .millis {
+      font-size: clamp(18px, 3.5vw, 28px);
+      color: var(--muted);
+      margin-left: 6px;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+  button {
+  appearance: none;
+  border: none;
+  color: rgb(0, 0, 0);
+  padding: 8px 14px; /* más pequeño */
+  border-radius: 10px; /* menos redondeado que el pill gigante */
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: .02em;
+  cursor: pointer;
+  transition: transform .06s ease, filter .2s ease;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+}
+
+button:hover { filter: brightness(1.1); }
+button:active { transform: translateY(1px) scale(0.97); }
+    button:focus-visible { outline: 0; box-shadow: 0 0 0 6px var(--ring); }
+
+    .start { border-color: rgba(34,197,94,.35); }
+    .pause { border-color: rgba(245,158,11,.35); }
+    .reset { border-color: rgba(239,68,68,.35); }
+
+    button[disabled] {
+      opacity: .5;
+      cursor: not-allowed;
+      filter: none;
+    }
+
+    .hint {
+      margin-top: 16px;
+      font-size: 12px;
+      color: var(--muted);
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <main class="card" aria-labelledby="title">
+    
+    <section class="display" aria-live="polite" aria-atomic="true">
+      <div class="time" id="hhmmss">00:00:00</div>
+      <div class="millis" id="millis">.000</div>
+    </section>
+
+    <section class="controls">
+      <button class="start" id="btnStart" type="button">Iniciar</button>
+      <button class="pause" id="btnPause" type="button" disabled>Pausar</button>
+      <button class="reset" id="btnReset" type="button" disabled>Resetear</button>
+    </section>
+
+    <p class="hint">Espacio: iniciar/pausar · R: resetear</p>
+  </main>
+
+  <script>
+    (function() {
+      let startTime = 0;      // referencia (performance.now()) al arrancar
+      let elapsed = 0;        // milisegundos acumulados cuando no está corriendo
+      let rafId = null;       // id de requestAnimationFrame
+      let running = false;
+
+      const $hhmmss = document.getElementById('hhmmss');
+      const $millis = document.getElementById('millis');
+      const $btnStart = document.getElementById('btnStart');
+      const $btnPause = document.getElementById('btnPause');
+      const $btnReset = document.getElementById('btnReset');
+
+      function pad(n, len = 2) {
+        return String(n).padStart(len, '0');
+      }
+
+      function format(msTotal) {
+        const totalSeconds = Math.floor(msTotal / 1000);
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+        const millis = Math.floor(msTotal % 1000);
+        return {
+          hhmmss: `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`,
+          millis: `.${pad(millis, 3)}`
+        };
+      }
+
+      function render(ms) {
+        const { hhmmss, millis } = format(ms);
+        $hhmmss.textContent = hhmmss;
+        $millis.textContent = millis;
+      }
+
+      function updateUI() {
+        $btnStart.disabled = running;
+        $btnPause.disabled = !running;
+        $btnReset.disabled = running || elapsed === 0;
+        $btnStart.textContent = running ? 'Iniciar' : (elapsed > 0 ? 'Reanudar' : 'Iniciar');
+      }
+
+      function tick() {
+        const now = performance.now();
+        const ms = now - startTime + elapsed; // elapsed almacena tiempo congelado al pausar
+        render(ms);
+        rafId = requestAnimationFrame(tick);
+      }
+
+      function start() {
+        if (running) return;
+        running = true;
+        startTime = performance.now();
+        rafId = requestAnimationFrame(tick);
+        updateUI();
+      }
+
+      function pause() {
+        if (!running) return;
+        running = false;
+        cancelAnimationFrame(rafId);
+        rafId = null;
+        // Acumula lo transcurrido desde el último start
+        elapsed += performance.now() - startTime;
+        updateUI();
+      }
+
+      function reset() {
+        if (running) {
+          cancelAnimationFrame(rafId);
+          rafId = null;
+          running = false;
+        }
+        startTime = 0;
+        elapsed = 0;
+        render(0);
+        updateUI();
+      }
+
+      // Eventos
+      $btnStart.addEventListener('click', start);
+      $btnPause.addEventListener('click', pause);
+      $btnReset.addEventListener('click', reset);
+
+      // Atajos: espacio = start/pause, R = reset
+      window.addEventListener('keydown', (e) => {
+        if (e.key === ' ' || e.code === 'Space') {
+          e.preventDefault();
+          running ? pause() : start();
+        } else if (e.key.toLowerCase() === 'r') {
+          reset();
+        }
+      });
+
+      // Estado inicial
+      render(0);
+      updateUI();
+    })();
+  </script>
+</body>
+</html>
