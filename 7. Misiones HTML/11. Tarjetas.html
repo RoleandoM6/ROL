@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>11. Tarjetas</title>
+<style>
+  body {
+    font-family: 'Garamond', 'Georgia', serif;
+    background-color:  #3a2a1a;
+    color: #fdf5e6;
+    margin: 0;
+    padding: 20px;
+  }
+  h1 { text-align: center; border-bottom:3px solid #7b4f2f; padding-bottom:10px; margin-bottom:20px; }
+  
+  .botones { text-align:center; margin-bottom:20px; }
+  button {
+    margin:5px; padding:10px 20px; font-size:16px; cursor:pointer;
+    background-color:#f5ecd9; border:2px solid #7b4f2f; border-radius:8px; color:#3b2f2f;
+    transition:0.2s;
+  }
+  button.activo { background-color:#d6bfa6; border-color:#5a3320; }
+  button:hover { background-color:#e5dcc8; }
+
+  #tarjeta-container {
+    display:flex; gap:20px; max-width:1800px; margin:0 auto; max-height:1000px;
+    padding:20px; overflow-y:auto;
+  }
+  #editor, #vista {
+    flex:1; min-height:200px; max-height:1000px; overflow-y:auto; box-sizing:border-box;
+  }
+  #vista {
+    background-color:#fff8e1; border:3px solid #7b4f2f; border-radius:12px; padding:20px;
+    box-shadow:0 0 15px rgba(0,0,0,0.15); min-width:500px; color:#3b2f2f; font-weight:bold;
+    font-size: 16px;
+  }
+
+  #guardar-btn, #exportar-btn, #importar-btn {
+    background-color:#c1d8c1; border-color:#5a7d5a; color:#1f2f1f;
+  }
+  #guardar-btn:hover, #exportar-btn:hover, #importar-btn:hover { background-color:#a3c3a3; }
+
+#vista table {
+  border-collapse: collapse;
+  width: 100%;
+  border: 1.5px solid #7b4f2f;
+  margin: 18px 0;
+  background-color: #fff8e1;
+}
+#vista th, #vista td {
+  border: 1.5px solid #7b4f2f;
+  padding: 6px 10px;
+  text-align: left;
+}
+#vista th {
+  background-color: #f5ecd9;
+  font-weight: bold;
+}
+#vista table tr:nth-child(even) td {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+.tarjeta {
+  border: 3px solid #7b4f2f;
+  border-radius: 12px;
+  padding: 16px;
+  background-color: #fff8e1;
+  box-shadow: 0 0 12px rgba(0,0,0,0.2);
+  margin-bottom: 24px;
+}
+.tarjeta img {
+  display: block;
+  margin: 0 auto 12px;
+  mix-blend-mode: multiply;
+}
+.tarjeta h3 {
+  text-align: center;
+  margin-top: 0;
+}
+
+</style>
+<script src="https://cdn.jsdelivr.net/npm/markdown-it/dist/markdown-it.min.js"></script>
+</head>
+<body>
+
+<button id="guardar-btn">Guardar</button>
+<button id="exportar-btn">Exportar JSON</button>
+<button id="importar-btn">Importar JSON</button>
+<input type="file" id="import-file" style="display:none;">
+
+<div class="botones">
+  <div id="botones-dinamicos" style="display:inline-block;"></div>
+  <button id="nueva-tarjeta-btn">+ Nueva Tarjeta</button>
+</div>
+
+<div id="tarjeta-container">
+  <textarea id="editor" style="flex:1; padding:10px; border:2px solid #7b4f2f; border-radius:8px; background-color:#fff8e1; font-family:monospace;"></textarea>
+  <div id="vista"></div>
+</div>
+
+<script>
+const md = window.markdownit({ html:true, breaks:true, linkify:true });
+let db;
+let tarjetas = {};
+
+// IndexedDB
+const request = indexedDB.open("TarjetaDB", 1);
+request.onupgradeneeded = e => {
+  db = e.target.result;
+  if(!db.objectStoreNames.contains("tarjetas")) db.createObjectStore("tarjetas",{ keyPath:"nombre" });
+};
+request.onsuccess = e => {
+  db = e.target.result;
+  const tx = db.transaction("tarjetas","readonly");
+  const store = tx.objectStore("tarjetas");
+  store.getAll().onsuccess = ev => {
+    ev.target.result.forEach(item => tarjetas[item.nombre]=item.contenido);
+    cargarBotones();
+    const ultima = localStorage.getItem('ultimaTarjeta');
+    if(ultima && tarjetas[ultima]) cargarTarjeta(ultima);
+  };
+};
+
+// Cargar tarjeta
+function cargarTarjeta(nombre) {
+  const contenido = tarjetas[nombre] || "# Nueva Tarjeta\n";
+  document.getElementById('editor').value = contenido;
+  document.getElementById('vista').innerHTML = md.render(contenido);
+  localStorage.setItem('ultimaTarjeta', nombre);
+  document.querySelectorAll('.botones button').forEach(b=>b.classList.remove('activo'));
+  const boton = Array.from(document.querySelectorAll('.botones button')).find(b=>b.dataset.tarjeta===nombre);
+  if(boton) boton.classList.add('activo');
+}
+
+// Guardar tarjeta
+function guardarTarjeta(nombre){
+  const contenido = document.getElementById('editor').value;
+  const tx = db.transaction("tarjetas","readwrite");
+  tx.objectStore("tarjetas").put({nombre:nombre,contenido:contenido});
+  tarjetas[nombre] = contenido;
+}
+
+// Crear botón
+function crearBotonTarjeta(nombre){
+  const btn = document.createElement('button');
+  btn.textContent = nombre;
+  btn.dataset.tarjeta = nombre;
+
+  const eliminar = document.createElement('span');
+  eliminar.textContent = " ✖";
+  eliminar.style.cursor = "pointer";
+  eliminar.style.marginLeft="6px";
+  eliminar.style.color="#900";
+  eliminar.onclick = e => {
+    e.stopPropagation();
+    if(confirm(`¿Eliminar "${nombre}"?`)){
+      const tx = db.transaction("tarjetas","readwrite");
+      const store = tx.objectStore("tarjetas");
+      store.delete(nombre).onsuccess = () => {
+        delete tarjetas[nombre];
+        btn.remove();
+        guardarOrdenBotones();
+        const ultima = localStorage.getItem('ultimaTarjeta');
+        if(ultima === nombre) {
+          document.getElementById('editor').value = '';
+          document.getElementById('vista').innerHTML = '';
+          localStorage.removeItem('ultimaTarjeta');
+        }
+      };
+    }
+  };
+  btn.appendChild(eliminar);
+
+  btn.onclick = () => cargarTarjeta(nombre);
+
+  btn.draggable = true;
+  btn.addEventListener('dragstart', e=> e.dataTransfer.setData('text/plain', nombre));
+  btn.addEventListener('dragover', e=> e.preventDefault());
+  btn.addEventListener('drop', e=>{
+    e.preventDefault();
+    const dragged = e.dataTransfer.getData('text/plain');
+    const draggedBtn = Array.from(document.querySelectorAll('.botones button')).find(b=>b.dataset.tarjeta===dragged);
+    document.getElementById('botones-dinamicos').insertBefore(draggedBtn, btn);
+    guardarOrdenBotones();
+  });
+
+  document.getElementById('botones-dinamicos').appendChild(btn);
+}
+
+// Guardar orden botones
+function guardarOrdenBotones(){
+  const orden = Array.from(document.querySelectorAll('#botones-dinamicos button')).map(b=>b.dataset.tarjeta);
+  localStorage.setItem('ordenBotones', JSON.stringify(orden));
+}
+
+// Cargar orden botones
+function cargarOrdenBotones(){
+  const orden = JSON.parse(localStorage.getItem('ordenBotones')||'[]');
+  orden.forEach(key=>{
+    const btn = Array.from(document.querySelectorAll('#botones-dinamicos button')).find(b=>b.dataset.tarjeta===key);
+    if(btn) document.getElementById('botones-dinamicos').appendChild(btn);
+  });
+}
+
+// Cargar botones iniciales
+function cargarBotones(){
+  document.getElementById('botones-dinamicos').innerHTML = "";
+  Object.keys(tarjetas).forEach(nombre=>crearBotonTarjeta(nombre));
+  cargarOrdenBotones();
+}
+
+// Crear nueva tarjeta
+document.getElementById('nueva-tarjeta-btn').addEventListener('click', ()=>{
+  const nombre = prompt("Nombre de la nueva tarjeta:");
+  if(!nombre) return;
+  if(tarjetas[nombre]){
+    alert("Ya existe esa tarjeta!");
+    return;
+  }
+  tarjetas[nombre] = `# ${nombre}\nContenido inicial...`;
+  crearBotonTarjeta(nombre);
+  guardarTarjeta(nombre);
+  cargarTarjeta(nombre);
+});
+
+const editor = document.getElementById('editor');
+editor.addEventListener('input', () => {
+  const contenido = editor.value;
+  const ultima = localStorage.getItem('ultimaTarjeta');
+  if (ultima) tarjetas[ultima] = contenido;
+  document.getElementById('vista').innerHTML = md.render(contenido);
+  if (ultima) guardarTarjeta(ultima);
+});
+
+// Guardar al escribir
+document.getElementById('editor').addEventListener('input', ()=>{
+  const ultima = localStorage.getItem('ultimaTarjeta');
+  if(ultima) guardarTarjeta(ultima);
+});
+
+// Botón Guardar
+document.getElementById('guardar-btn').addEventListener('click', ()=>{
+  const ultima = localStorage.getItem('ultimaTarjeta');
+  if(ultima) guardarTarjeta(ultima);
+  const btn = document.getElementById('guardar-btn');
+  btn.style.transform = "scale(0.95)";
+  setTimeout(()=>btn.style.transform="scale(1)",100);
+});
+
+// Exportar JSON
+document.getElementById('exportar-btn').addEventListener('click', ()=>{
+  const tx = db.transaction("tarjetas","readonly");
+  const store = tx.objectStore("tarjetas");
+  store.getAll().onsuccess = e=>{
+    const dataStr = JSON.stringify(e.target.result,null,2);
+    const blob = new Blob([dataStr],{type:"application/json"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const fileName = document.title.replace(/[\\/:*?"<>|]/g, "_") + ".json";
+    a.download = fileName;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+});
+
+// Importar JSON
+document.getElementById('importar-btn').addEventListener('click', ()=>{
+  document.getElementById('import-file').click();
+});
+document.getElementById('import-file').addEventListener('change', (e)=>{
+  const file = e.target.files[0];
+  const reader = new FileReader();
+  reader.onload = function(evt){
+    const data = JSON.parse(evt.target.result);
+    const tx = db.transaction("tarjetas","readwrite");
+    const store = tx.objectStore("tarjetas");
+    data.forEach(item=>store.put(item));
+    data.forEach(item=>tarjetas[item.nombre]=item.contenido);
+    alert("Importación completada!");
+    cargarBotones();
+  };
+  reader.readAsText(file);
+});
+
+window.onload = ()=> cargarBotones();
+</script>
+
+</body>
+</html>

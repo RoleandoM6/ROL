@@ -35,6 +35,56 @@ const container=document.getElementById("mapContainer");
 const notesArea=document.getElementById("notesArea");
 const fileLoader=document.getElementById("fileLoader");
 
+tabsDiv.addEventListener("dragover", e=>{
+  e.preventDefault(); // necesario para que funcione drop
+  const dragging = document.querySelector(".tab.dragging");
+  const afterElement = getDragAfterElement(tabsDiv, e.clientX);
+  if(afterElement == null){
+    tabsDiv.appendChild(dragging);
+  }else{
+    tabsDiv.insertBefore(dragging, afterElement);
+  }
+});
+
+tabsDiv.addEventListener("drop", e=>{
+  e.preventDefault();
+  const id = e.dataTransfer.getData("text/plain");
+  
+  // ⚡ Recalcular el orden real según el DOM actual
+  reorderMaps();
+});
+
+// función auxiliar para calcular dónde soltar
+function getDragAfterElement(container, x){
+  const draggableElements = [...container.querySelectorAll(".tab:not(.dragging)")];
+  return draggableElements.reduce((closest, child)=>{
+    const box = child.getBoundingClientRect();
+    const offset = x - box.left - box.width/2;
+    if(offset < 0 && offset > closest.offset){
+      return {offset: offset, element: child};
+    }else{
+      return closest;
+    }
+  }, {offset: Number.NEGATIVE_INFINITY}).element;
+}
+
+function reorderMaps(){
+  const newOrder = [];
+  const tabElements = [...tabsDiv.children];
+  
+  tabElements.forEach((tabEl, index)=>{
+    const mapObj = maps.find(m=>m.tab===tabEl);
+    if(mapObj){
+      newOrder.push(mapObj);
+      // ⚡ actualizar también el campo order inmediatamente
+      mapObj.order = index;
+      saveMap(mapObj);
+    }
+  });
+
+  maps = newOrder;
+}
+
 // --- IndexedDB ---
 const request=indexedDB.open("MapsDB_v1",1);
 request.onerror=e=>console.error("DB error",e);
@@ -155,6 +205,7 @@ function createMap(savedData=null, fromDB=false){
 function addTab(mapObj){
   const tab=document.createElement("div");
   tab.className="tab";
+  tab.draggable = true;
   
   const nameSpan=document.createElement("span");
   nameSpan.textContent=mapObj.tabName;
@@ -176,6 +227,16 @@ function addTab(mapObj){
     e.stopPropagation();
     deleteMap(mapObj);
   };
+
+  // Eventos de drag
+tab.addEventListener("dragstart", e=>{
+  e.dataTransfer.setData("text/plain", mapObj.id);
+  tab.classList.add("dragging");
+});
+
+tab.addEventListener("dragend", ()=>{
+  tab.classList.remove("dragging");
+});
 
   tab.appendChild(nameSpan);
   tab.appendChild(renameBtn);
@@ -284,30 +345,34 @@ function draw(mapObj){
   }
 }
 
-// --- Guardar mapa ---
 function saveMap(mapObj){
   const tx=db.transaction("maps","readwrite");
   const store=tx.objectStore("maps");
   store.put({
     id:mapObj.id,
-    tabName: mapObj.tabName, // guardamos también el nombre
+    tabName: mapObj.tabName,
     zoom:mapObj.zoom,
     offsetX:mapObj.offsetX,
     offsetY:mapObj.offsetY,
     bgData:mapObj.bgData,
-    notes:mapObj.notes
+    notes:mapObj.notes,
+    order: mapObj.order ?? maps.indexOf(mapObj) // 👈
   });
 }
 
-// --- Cargar desde DB ---
 function loadMapsFromDB(){
   const tx=db.transaction("maps","readonly");
   const store=tx.objectStore("maps");
+  const loaded = [];
   store.openCursor().onsuccess=e=>{
     const cursor=e.target.result;
     if(cursor){
-      createMap(cursor.value, true); // ⚡ cargado desde DB
+      loaded.push(cursor.value);
       cursor.continue();
+    }else{
+      // ordenamos por `order` (si no existe, lo ponemos al final)
+      loaded.sort((a,b)=>(a.order ?? 9999) - (b.order ?? 9999));
+      loaded.forEach(data=>createMap(data, true));
     }
   };
 }
