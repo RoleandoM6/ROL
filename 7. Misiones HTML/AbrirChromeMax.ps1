@@ -42,13 +42,13 @@ foreach ($v in $ventanas) {
 }
 
 # --- ABRIR ACCESOS DIRECTOS ---
-$links = @(
-    "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\1. Hoja PJ 01.lnk",
-    "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\1. Hoja PJ 02.lnk",
-    "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\1. Hoja PJ 03.lnk",
-    "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\1. Hoja PJ 04.lnk",
-    "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\1. Hoja PJ 05.lnk"
-)
+#$links = @(
+ #   "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\1. Hoja PJ 01.lnk",
+  #  "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\1. Hoja PJ 02.lnk",
+   # "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\1. Hoja PJ 03.lnk",
+    #"C:\Users\monsi\Desktop\ROL\7. Misiones HTML\1. Hoja PJ 04.lnk",
+    #"C:\Users\monsi\Desktop\ROL\7. Misiones HTML\1. Hoja PJ 05.lnk"
+#)
 
 foreach ($link in $links) {
     Start-Process -FilePath $link
