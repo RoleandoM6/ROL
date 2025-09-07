@@ -41,56 +41,6 @@
       "order": 0
     },
     {
-      "id": "m_mezhp5kq_txrn2b",
-      "title": "Misión Secreta",
-      "category": "ocultas",
-      "description": "dsdasd",
-      "reward": "400",
-      "notes": "pito",
-      "imagePath": "images/fondo-madera-grunge-borde-decorativo_1048-14281.avif",
-      "order": 0
-    },
-    {
-      "id": "m_mezkycej_4g96md",
-      "title": "asdas",
-      "category": "ocultas",
-      "description": "dasdas",
-      "reward": "dasd",
-      "notes": "dasdasd",
-      "imagePath": "images/1756645630615_max1.png",
-      "order": 2
-    },
-    {
-      "id": "m_mezmsfir_090ekg",
-      "title": "dfsf",
-      "category": "ocultas",
-      "description": "fdsf",
-      "reward": "fsdf",
-      "notes": "fsdf",
-      "imagePath": "images/1756645111352_max.jpg",
-      "order": 4
-    },
-    {
-      "id": "m_mezo6ft5_ko84ah",
-      "title": "fsdfsf",
-      "category": "ocultas",
-      "description": "",
-      "reward": "",
-      "notes": "",
-      "imagePath": "images/1756645137929_Icono%20Diario%20de%20Misiones.png",
-      "order": 3
-    },
-    {
-      "id": "m_mezoqtku_15luwn",
-      "title": "Prueba de Persistencia Jackson",
-      "category": "ocultas",
-      "description": "",
-      "reward": "",
-      "notes": "",
-      "imagePath": "images/1756645854924_Carteles.png",
-      "order": 5
-    },
-    {
       "id": "m_mezpn6ee_hj3zgu",
       "title": "fdfsdfds",
       "category": "ocultas",
@@ -111,14 +61,24 @@
       "order": 1756650957178
     },
     {
-      "id": "m_mezsrrcq_fay0sf",
-      "title": "dasdad",
-      "category": "completada",
-      "description": "dsdasdsadasd",
-      "reward": "250",
-      "notes": "dsadsad",
-      "imagePath": "images/Icono%20Diario%20de%20Misiones.png",
-      "order": 1756651203386
+      "id": "m_mf99eg3a_vd9vq7",
+      "title": "El Mercader de enseres",
+      "category": "rumor",
+      "description": "...",
+      "reward": "400",
+      "notes": "...",
+      "imagePath": "images/Banner%20El%20Mercader%20de%20Enseres.png",
+      "order": 1757223331318
+    },
+    {
+      "id": "m_mf99ftzo_fnispv",
+      "title": "La Cripta del Recaudador",
+      "category": "rumor",
+      "description": "...",
+      "reward": "500",
+      "notes": "...",
+      "imagePath": "images/Banner%20La%20Cripta%20del%20Recaudador.png",
+      "order": 1757223395988
     }
   ]
 }

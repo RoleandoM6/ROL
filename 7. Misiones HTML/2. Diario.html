@@ -719,6 +719,10 @@ document.getElementById('btnExport').addEventListener('click', () => {
   URL.revokeObjectURL(a.href);
 });
 
+// Botón "Añadir Misión"
+document.getElementById('btnAdd').addEventListener('click', () => {
+  openForm(); // sin id = crear nueva
+});
 
 document.getElementById('btnExportNow').addEventListener('click', () => document.getElementById('btnExport').click());
 
@@ -951,9 +955,6 @@ contentDiv.appendChild(img);
   card.appendChild(contentDiv);
   return card;
 }
-
-
-
 
 
 
