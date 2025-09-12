@@ -1,5 +1,9 @@
 [
   {
+    "nombre": "Amuleto de Joy",
+    "contenido": "<div class=\"monster frame wide\" style=\"display:flex; gap:20px; flex-wrap:wrap;\">\n\n  <div style=\"flex:1; min-width:200px;\">\n  <h1>Amuleto de Joy</h1>\n  <h5>Objeto Errante, Amuleto, Curativo</h5>\n\n<div style=\"text-align:center;\">\n<img src=\"https://github.com/RoleandoM6/ROL/blob/main/05.%20Objetos/Objeto%20Errante%20Amuleto%20de%20Joy.png?raw=true\" style=\"width:300px; mix-blend-mode:multiply;\" />\n</div>\n\n---\n#### Amuleto curativo que emite una cálida luz y huele a fresa.\n#### Emite un aura de sanación pasiva al portador.\n#### Perteneció a la legendaria Sacerdotisa Errante Joy Joy III.\n\n\\column\n\n<div style=\"flex:1; min-width:200px;\">\n  \n  # Modo de uso  \n\n- 1 vez por Descanso Corto\n  - Agarra el amuleto con tu mano marcada y grita \"¡Joy, te elijo a ti!\"\n\n  - Cura 4d4 + 4 + Nivel.\n\n  # Aura Reparadora\n\n - Cada turno, sin hacer nada:\n\n   - Recupera 1 herida si superas una tirada de CON CD13.\n\n   - Elimina 1 acumulación de Condición Negativa si superas una tirada de CON CD14.\n\n"
+  },
+  {
     "nombre": "Anillo del Ardor Errante",
     "contenido": "<div class=\"monster frame wide\" style=\"display:flex; gap:20px; flex-wrap:wrap;\">\n\n  <div style=\"flex:1; min-width:200px;\">\n  <h1>Anillo del Ardor Errante</h1>\n  <h5>Objeto Errante, Anillo</h5>\n\n\n\n\n\n   <div style=\"text-align:center;\">\n<img src=\"https://github.com/RoleandoM6/ROL/blob/main/05.%20Objetos/Objeto%20Errante%20Anillo%20del%20Ardor%20Errante.png?raw=true\" style=\"width:300px; mix-blend-mode:multiply;\" />\n</div>\n</div>\n\n\n\n\n\n  <div style=\"flex:1; min-width:200px;\">\n  \n  # Modo de uso  \n\n  - Gasta tu movimiento para activar este anillo.\n  - Obtienes Ventaja para 1 Tirada de Ataque.  \n\n  # Recarga  \n  - Al inicio de tu turno, haz una Tirada de Salvación de CON CD13 para volver a usarlo.\n  - Cada uso aumenta el CD en +1.\n  - Al fallar, se desactiva hasta hacer un descanso largo.  \n  </div>\n\n \n\n\n"
   },
@@ -14,6 +18,10 @@
   {
     "nombre": "Espada Larga de Shiseido",
     "contenido": "<div class=\"monster frame wide\" style=\"display:flex; gap:20px; flex-wrap:wrap;\">\n\n  <div style=\"flex:1; min-width:200px;\">\n  <h1>Espada Larga de Shiseido</h1>\n  <h5>Objeto Errante, Espada Larga, Versátil</h5>\n\n<div style=\"text-align:center;\">\n<img src=\"https://github.com/RoleandoM6/ROL/blob/main/05.%20Objetos/Objeto%20Errante%20Espada%20Larga%20de%20Shiseido.png?raw=true\" style=\"width:300px; mix-blend-mode:multiply;\" />\n</div>\n\n---\n#### Espada Larga brillante que deja tu piel tersa y suave.\n#### Parece que nada afecta al filo y la hoja.\n\n\\column\n\n  <div style=\"flex:1; min-width:200px;\">\n  \n  # Modo de uso  \n\n  - A todos los efectos es una Espada Larga normal: 1D8/1D10 + FUE Cortante.\n \n\n  # Características Especiales  \n - Su filo y brillo, aparentemente, no se dañan ni desgastan, por lo que no necesita mantenimiento ni reparación.\n\n</div>"
+  },
+  {
+    "nombre": "Guantelete de Billy 6 Dedos",
+    "contenido": "<div class=\"monster frame wide\" style=\"display:flex; gap:20px; flex-wrap:wrap;\">\n\n  <div style=\"flex:1; min-width:200px;\">\n  <h1>Guantelete de Billy 6 Dedos</h1>\n  <h5>Objeto Errante, Guantelete (Armadura Pesada)</h5>\n\n<div style=\"text-align:center;\">\n<img src=\"https://github.com/RoleandoM6/ROL/blob/main/05.%20Objetos/Objeto%20Errante%20Amuleto%20de%20Joy.png?raw=true\" style=\"width:300px; mix-blend-mode:multiply;\" />\n</div>\n\n---\n#### Pieza de Armadura Pesada que mejora tanto la defensa como el poder de combate del portador.\n#### El portador siente su vigor aumentado.\n#### Perteneció al legendario Guerrero Errante Billy 6 Dedos.\n\n\\column\n\n<div style=\"flex:1; min-width:200px;\">\n  \n \n\n  # El espíritu de Billy\n\n- Cada vez que comienza el turno del portador, debe activar el poder del guantelete gritando \"¡Billyyyyyyy! \n\n - Aumenta la CA en +1.\n\n- Permite usar Armas a 2 manos en 1 sola.\n\n- Permite usar Armas a 1 mano con +2 de FUE."
   },
   {
     "nombre": "Lanza Retornable",
