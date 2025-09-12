@@ -15,6 +15,8 @@ $ventanas = @(
     @{ Profile = "C:\ChromeProfiles\Perfil10"; FilePath = "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\10. Crono.html" }
     @{ Profile = "C:\ChromeProfiles\Perfil11"; FilePath = "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\11. Objetos.html" }
     @{ Profile = "C:\ChromeProfiles\Perfil12"; FilePath = "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\12. Hojas PJ.html" }
+    @{ Profile = "C:\ChromeProfiles\Perfil13"; FilePath = "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\13. Majunji.html" }
+    @{ Profile = "C:\ChromeProfiles\Perfil14"; FilePath = "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\14. Ajedrez.html" }
 
 
 )
