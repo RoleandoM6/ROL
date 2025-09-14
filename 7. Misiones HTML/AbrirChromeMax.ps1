@@ -3,21 +3,25 @@ $chrome = "C:\Program Files\Google\Chrome\Application\chrome.exe"
 
 # Lista de ventanas (cada una con su perfil y archivo local)
 $ventanas = @(
-    @{ Profile = "C:\ChromeProfiles\Perfil1"; FilePath = "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\1. Condiciones.html" },
-    @{ Profile = "C:\ChromeProfiles\Perfil2"; FilePath = "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\2. Diario.html" },
-    @{ Profile = "C:\ChromeProfiles\Perfil3"; FilePath = "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\3. Mapamundi.html" },
-    @{ Profile = "C:\ChromeProfiles\Perfil4"; FilePath = "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\4. Calendario.html" },
-    @{ Profile = "C:\ChromeProfiles\Perfil5"; FilePath = "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\5. Tienda.html" },
-    @{ Profile = "C:\ChromeProfiles\Perfil6"; FilePath = "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\6. ListaINI.html" },
-    @{ Profile = "C:\ChromeProfiles\Perfil7"; FilePath = "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\7. BarraINI.html" },
-    @{ Profile = "C:\ChromeProfiles\Perfil8"; FilePath = "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\8. Tablero.html" }
- #  @{ Profile = "C:\ChromeProfiles\Perfil9"; FilePath = "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\9. WIP DVD.html" }
-    @{ Profile = "C:\ChromeProfiles\Perfil10"; FilePath = "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\10. Crono.html" }
-    @{ Profile = "C:\ChromeProfiles\Perfil11"; FilePath = "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\11. Objetos.html" }
-    @{ Profile = "C:\ChromeProfiles\Perfil12"; FilePath = "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\12. Hojas PJ.html" }
-    @{ Profile = "C:\ChromeProfiles\Perfil13"; FilePath = "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\13. Majunji.html" }
-    @{ Profile = "C:\ChromeProfiles\Perfil14"; FilePath = "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\14. Ajedrez.html" }
-    @{ Profile = "C:\ChromeProfiles\Perfil15"; FilePath = "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\15. Bestiario.html" }
+ #  @{ Profile = "C:\ChromeProfiles\Perfil0"; FilePath = "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\0.WIP-DVD.html" 
+    @{ Profile = "C:\ChromeProfiles\Perfil1"; FilePath = "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\1.Crono.html" }
+ #                                  Perfil2 DADOS 
+ #  @{ Profile = "C:\ChromeProfiles\Perfil3"; FilePath = "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\3.Condiciones.html" },
+    @{ Profile = "C:\ChromeProfiles\Perfil4"; FilePath = "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\4.Bestiario.html" }
+    @{ Profile = "C:\ChromeProfiles\Perfil5"; FilePath = "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\5.Hojas PJ.html" }
+    @{ Profile = "C:\ChromeProfiles\Perfil6"; FilePath = "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\6.Diario.html" },
+    @{ Profile = "C:\ChromeProfiles\Perfil7"; FilePath = "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\7.Calendario.html" },
+    @{ Profile = "C:\ChromeProfiles\Perfil8"; FilePath = "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\8.Objetos Errantes.html" }
+    @{ Profile = "C:\ChromeProfiles\Perfil9"; FilePath = "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\9.Tiendas.html" },
+    @{ Profile = "C:\ChromeProfiles\Perfil10"; FilePath = "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\10.Mapamundi.html" },
+    @{ Profile = "C:\ChromeProfiles\Perfil11"; FilePath = "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\11.Listado de Iniciativa.html" },
+    @{ Profile = "C:\ChromeProfiles\Perfil12"; FilePath = "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\12.Barra de Iniciativa.html" },
+    @{ Profile = "C:\ChromeProfiles\Perfil13"; FilePath = "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\13.Ajedrez.html" }
+    @{ Profile = "C:\ChromeProfiles\Perfil14"; FilePath = "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\14.Majunji.html" }
+    @{ Profile = "C:\ChromeProfiles\Perfil15"; FilePath = "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\15.Tablero.html" }
+
+
+
 
 
 )

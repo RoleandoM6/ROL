@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>13. Majunji</title>
+<title>13.Ajedrez</title>
 <style>
   body { margin: 0; padding: 20px; background-color: #3a2a1a; /* fondo marrón oscuro */ display: flex; flex-direction: column; align-items: center; font-family: Arial, sans-serif; }
   .controls { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; position: relative; }
@@ -453,7 +453,7 @@ mapDrop.addEventListener('drop', e=>{
     const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
     if(files.length === 0){ alert("Arrastra imágenes válidas"); return; }
     const file = files[0]; // solo un mapa
-    const localPath = `http://localhost:8000/05. Objetos/Majunji/${file.name}`; // <-- ruta relativa a la carpeta raíz del servidor
+    const localPath = `http://localhost:8000/05. Objetos/Ajedrez/${file.name}`; // <-- ruta relativa a la carpeta raíz del servidor
     clearMap();
     loadMap(localPath, area.clientWidth/2, area.clientHeight/2);
     pushHistory();

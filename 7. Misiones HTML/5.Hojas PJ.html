@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>11. Objetos</title>
+<title>5.Hojas PJ</title>
 <style>
   body {
     font-family: 'Garamond', 'Georgia', serif;
@@ -120,7 +120,7 @@ table.stats tr td:nth-child(even) {
 
 <div class="botones">
   <div id="botones-dinamicos" style="display:inline-block;"></div>
-  <button id="nueva-tarjeta-btn">+ Nuevo Objeto</button>
+  <button id="nueva-tarjeta-btn">+ Nueva Hoja de PJ</button>
 </div>
 
 <div id="tarjeta-container">
@@ -161,7 +161,7 @@ request.onsuccess = e => {
 
 // Cargar tarjeta
 function cargarTarjeta(nombre) {
-  const contenido = tarjetas[nombre] || "# Nuevo Objeto\n";
+  const contenido = tarjetas[nombre] || "# Nueva Hoja de PJ\n";
   document.getElementById('editor').value = contenido;
   renderVista();
   localStorage.setItem('ultimaTarjeta', nombre);
@@ -178,7 +178,6 @@ function guardarTarjeta(nombre){
   tarjetas[nombre] = contenido;
 }
 
-// Crear botón
 // Crear botón
 function crearBotonTarjeta(nombre){
   const btn = document.createElement('button');
@@ -313,12 +312,12 @@ function cargarBotones(){
   cargarOrdenBotones();
 }
 
-// Crear nuevo objeto
+// Crear nueva tarjeta
 document.getElementById('nueva-tarjeta-btn').addEventListener('click', ()=>{
-  const nombre = prompt("Nombre del nuevo objeto:");
+  const nombre = prompt("Nombre de la nueva hoja de PJ:");
   if(!nombre) return;
   if(tarjetas[nombre]){
-    alert("Ya existe esa objeto!");
+    alert("Ya existe esa hoja de PJ!");
     return;
   }
   tarjetas[nombre] = `# ${nombre}\nContenido inicial...`;

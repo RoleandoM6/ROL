@@ -1,16 +1,21 @@
 
-WIP-DVD
-Crono
-0. Dados
-Condiciones
-Objetos
-Hojas de PJ
-Diario
-Mapamundi
-Calendario
-Tiendas
-Listado de Iniciativa
-Barra de Iniciativa
-Tablero
+0.WIP-DVD
+1.Crono
+2.Dados
+3.Condiciones
+4.Bestiario
+5.Hojas PJ
+6.Diario
+7.Calendario
+8.Objetos
+9.Tiendas
+10.Mapamundi
+11.Listado de Iniciativa
+12.Barra de Iniciativa
+13.Ajedrez
+14.Majunji
+15.Tablero
+
+
 OST
 X. Fondo
