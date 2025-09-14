@@ -26,78 +26,139 @@
 <textarea id="notesArea" class="notes" placeholder="Notas del mapa..."></textarea>
 
 <script>
+/* ------------------ Estado y elementos ------------------ */
 let db;
 let maps=[];
 let activeMap=null;
-let mapCounter = 0; // contador global de mapas creados (solo nuevos)
+let mapCounter = 0;
 const tabsDiv=document.getElementById("tabs");
 const container=document.getElementById("mapContainer");
 const notesArea=document.getElementById("notesArea");
 const fileLoader=document.getElementById("fileLoader");
 
+/* ------------------ Helpers de arrastrar pestañas ------------------ */
 tabsDiv.addEventListener("dragover", e=>{
-  e.preventDefault(); // necesario para que funcione drop
+  e.preventDefault();
   const dragging = document.querySelector(".tab.dragging");
   const afterElement = getDragAfterElement(tabsDiv, e.clientX);
-  if(afterElement == null){
-    tabsDiv.appendChild(dragging);
-  }else{
-    tabsDiv.insertBefore(dragging, afterElement);
-  }
+  if(afterElement == null) tabsDiv.appendChild(dragging);
+  else tabsDiv.insertBefore(dragging, afterElement);
 });
-
 tabsDiv.addEventListener("drop", e=>{
   e.preventDefault();
-  const id = e.dataTransfer.getData("text/plain");
-  
-  // ⚡ Recalcular el orden real según el DOM actual
   reorderMaps();
 });
-
-// función auxiliar para calcular dónde soltar
 function getDragAfterElement(container, x){
   const draggableElements = [...container.querySelectorAll(".tab:not(.dragging)")];
   return draggableElements.reduce((closest, child)=>{
     const box = child.getBoundingClientRect();
     const offset = x - box.left - box.width/2;
-    if(offset < 0 && offset > closest.offset){
-      return {offset: offset, element: child};
-    }else{
-      return closest;
-    }
+    if(offset < 0 && offset > closest.offset) return {offset: offset, element: child};
+    else return closest;
   }, {offset: Number.NEGATIVE_INFINITY}).element;
 }
-
 function reorderMaps(){
   const newOrder = [];
   const tabElements = [...tabsDiv.children];
-  
   tabElements.forEach((tabEl, index)=>{
     const mapObj = maps.find(m=>m.tab===tabEl);
     if(mapObj){
       newOrder.push(mapObj);
-      // ⚡ actualizar también el campo order inmediatamente
       mapObj.order = index;
       saveMap(mapObj);
     }
   });
-
   maps = newOrder;
 }
 
-// --- IndexedDB ---
-const request=indexedDB.open("MapsDB_v1",1);
+/* ------------------ IndexedDB ------------------ */
+const request=indexedDB.open("MapsDB_v2",1); // version nueva para evitar restos anteriores
 request.onerror=e=>console.error("DB error",e);
 request.onupgradeneeded=e=>{
   db=e.target.result;
-  db.createObjectStore("maps",{keyPath:"id"});
+  if(!db.objectStoreNames.contains('maps')) db.createObjectStore("maps",{keyPath:"id"});
 };
 request.onsuccess=e=>{
   db=e.target.result;
+  console.log("IndexedDB lista");
   loadMapsFromDB();
 };
 
-// --- Controles ---
+/* ------------------ Conversión y carga de imágenes ------------------ */
+function loadImageFromSrc(mapObj, src){
+  if(!src){
+    console.warn("loadImageFromSrc: src vacío para", mapObj.id);
+    draw(mapObj);
+    return;
+  }
+  const img = new Image();
+  img.onload = ()=>{
+    mapObj.background = img;
+    console.log("Imagen cargada para", mapObj.id, "src-len:", String(src).length);
+    draw(mapObj);
+  };
+  img.onerror = ()=> {
+    console.error("Error cargando imagen (img.onerror). Intentando prefijos para:", mapObj.id);
+    // si no tiene prefijo, intentamos añadir data:image/png;base64,
+    if(typeof src === "string" && !src.startsWith("data:") && /^[A-Za-z0-9+/=\s]+$/.test(src.replace(/\s/g,''))){
+      const trial = "data:image/png;base64," + src.replace(/\s/g,'');
+      console.log("Probando con prefijo base64...");
+      loadImageFromSrc(mapObj, trial);
+      return;
+    }
+    // si falla, dibujamos placeholder
+    draw(mapObj);
+  };
+  img.src = src;
+}
+
+/* ------------------ saveMap: asegura que bgData se guarde como dataURL/string ------------------ */
+function saveMap(mapObj){
+  if(!db){
+    console.warn("saveMap: IndexedDB no lista, omitiendo guardado.");
+    return;
+  }
+  const doPut = (bgString) => {
+    try{
+      const tx = db.transaction("maps","readwrite");
+      const store = tx.objectStore("maps");
+      const req = store.put({
+        id: mapObj.id,
+        tabName: mapObj.tabName,
+        zoom: mapObj.zoom,
+        offsetX: mapObj.offsetX,
+        offsetY: mapObj.offsetY,
+        bgData: bgString ?? null,
+        notes: mapObj.notes,
+        order: mapObj.order ?? maps.indexOf(mapObj)
+      });
+      req.onsuccess = ()=> console.log("Guardado:", mapObj.id);
+      req.onerror = (e)=> console.error("Error guardando map:", mapObj.id, e);
+    }catch(err){
+      console.error("saveMap excepción:", err);
+    }
+  };
+
+  // Si bgData es Blob, convertir a dataURL
+  if(mapObj.bgData instanceof Blob){
+    const fr = new FileReader();
+    fr.onload = ()=> doPut(fr.result);
+    fr.onerror = ()=> { console.error("Error convirtiendo Blob a dataURL", fr.error); doPut(null); };
+    fr.readAsDataURL(mapObj.bgData);
+  } else if (typeof mapObj.bgData !== "string" && mapObj.bgData != null){
+    // objeto raro: intentar normalizar (por ejemplo {type,data})
+    if(mapObj.bgData.data && typeof mapObj.bgData.data === "string"){
+      const type = mapObj.bgData.type || "image/png";
+      doPut(`data:${type};base64,${mapObj.bgData.data}`);
+    }else{
+      doPut(String(mapObj.bgData));
+    }
+  } else {
+    doPut(mapObj.bgData); // string o null
+  }
+}
+
+/* ------------------ Controles UI ------------------ */
 document.getElementById("newMapBtn").onclick=()=>createMap();
 fileLoader.onchange=e=>{
   if(!activeMap) return;
@@ -105,20 +166,29 @@ fileLoader.onchange=e=>{
   if(!file) return;
   const reader=new FileReader();
   reader.onload=ev=>{
+    const dataURL = ev.target.result;
     const img=new Image();
     img.onload=()=>{
       activeMap.background=img;
-      activeMap.bgData=ev.target.result;
+      activeMap.bgData=dataURL; // guardar dataURL
       draw(activeMap);
       saveMap(activeMap);
     };
-    img.src=ev.target.result;
+    img.onerror = ()=>{
+      console.error("fileLoader: imagen no válida");
+      activeMap.bgData=null;
+      draw(activeMap);
+      saveMap(activeMap);
+    };
+    img.src=dataURL;
   };
   reader.readAsDataURL(file);
   fileLoader.value="";
 };
 
+/* ------------------ Exportar ------------------ */
 document.getElementById("exportBtn").onclick=()=>{
+  if(!db){ alert("IndexedDB no está lista."); return; }
   const tx=db.transaction("maps","readonly");
   const store=tx.objectStore("maps");
   const allData=[];
@@ -128,6 +198,8 @@ document.getElementById("exportBtn").onclick=()=>{
       allData.push(cursor.value);
       cursor.continue();
     }else{
+      const vacios = allData.filter(m => !m.bgData).length;
+      if(vacios>0) console.warn(`${vacios} mapas no tienen fondo (bgData=null).`);
       const blob=new Blob([JSON.stringify(allData,null,2)],{type:"application/json"});
       const url=URL.createObjectURL(blob);
       const a=document.createElement("a");
@@ -135,23 +207,82 @@ document.getElementById("exportBtn").onclick=()=>{
       a.download = document.title.replace(/\s+/g, "_") + ".json";
       a.click();
       URL.revokeObjectURL(url);
+      console.log("Exportado", allData.length, "mapas.");
     }
   };
 };
 
-document.getElementById("importLoader").onchange=e=>{
-  const file=e.target.files[0];
-  if(!file) return;
-  const reader=new FileReader();
-  reader.onload=ev=>{
-    const imported=JSON.parse(ev.target.result);
-    imported.forEach(data=>createMap(data));
+/* ------------------ Importar (robusta) ------------------ */
+document.getElementById("importLoader").onchange = function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    try {
+      let imported = JSON.parse(ev.target.result);
+      if (!Array.isArray(imported)) {
+        if (Array.isArray(imported.maps)) imported = imported.maps;
+        else if (imported && typeof imported === "object") imported = Object.values(imported);
+        else throw new Error("Formato JSON no reconocido (se esperaba un array de mapas).");
+      }
+      if (imported.length === 0) { console.warn("JSON importado vacío."); return; }
+      console.log("Importando", imported.length, "mapas...");
+
+      if(!db){
+        console.warn("IndexedDB no lista: creando UI sin persistir.");
+        imported.forEach(data=>createMap(data,true));
+        return;
+      }
+
+      // Limpiar DB en una transacción, luego en otra transacción insertar los items
+      const txClear = db.transaction("maps","readwrite");
+      const storeClear = txClear.objectStore("maps");
+      const clearReq = storeClear.clear();
+      clearReq.onsuccess = () => {
+        console.log("ObjectStore limpiada, insertando importados...");
+        const txPut = db.transaction("maps","readwrite");
+        const storePut = txPut.objectStore("maps");
+        imported.forEach((raw, idx) => {
+          const item = { ...raw };
+          if (!item.id || typeof item.id !== "string") item.id = "map" + Date.now() + "-" + idx;
+          item.zoom   = item.zoom   ?? 1;
+          item.offsetX= item.offsetX?? 0;
+          item.offsetY= item.offsetY?? 0;
+          item.bgData = item.bgData ?? null;
+          item.notes  = item.notes  ?? "";
+          item.order  = item.order  ?? idx;
+          try {
+            storePut.put(item);
+          } catch(err) {
+            console.error("Error al putear item importado", item.id, err);
+          }
+        });
+        txPut.oncomplete = ()=>{
+          console.log("Importación persistida en DB.");
+          // recargar UI desde DB
+          loadMapsFromDB();
+        };
+        txPut.onerror = (err)=> {
+          console.error("Error en transacción de inserción durante import:", err);
+          alert("Error al insertar mapas importados. Mira la consola.");
+        };
+      };
+      clearReq.onerror = (err)=> {
+        console.error("Error limpiando objectStore en import:", err);
+        alert("Error al limpiar DB antes de importar. Mira la consola.");
+      };
+
+    } catch (err) {
+      console.error("Error parseando/importando JSON:", err);
+      alert("Error al importar JSON: " + err.message);
+    } finally {
+      e.target.value = "";
+    }
   };
   reader.readAsText(file);
-  e.target.value="";
 };
 
-// --- Crear mapa ---
+/* ------------------ Crear mapa ------------------ */
 function createMap(savedData=null, fromDB=false){
   let id, tabName;
   if(savedData && savedData.id){ 
@@ -180,33 +311,46 @@ function createMap(savedData=null, fromDB=false){
     dragStartX:0,
     dragStartY:0,
     background:null,
-    bgData:savedData?.bgData||null,
-    notes:savedData?.notes||""
+    bgData:savedData?.bgData??null,
+    notes:savedData?.notes||"",
+    order:savedData?.order ?? maps.length
   };
 
+  // Manejar distintos tipos de bgData
   if(mapObj.bgData){
-    const img=new Image();
-    img.onload=()=>{ mapObj.background=img; draw(mapObj); };
-    img.src=mapObj.bgData;
+    // Blob
+    if (typeof Blob !== "undefined" && mapObj.bgData instanceof Blob){
+      const fr = new FileReader();
+      fr.onload = ()=> loadImageFromSrc(mapObj, fr.result);
+      fr.onerror = ()=> { console.error("Error leyendo Blob de bgData para", mapObj.id); draw(mapObj); };
+      fr.readAsDataURL(mapObj.bgData);
+    } else if (typeof mapObj.bgData === "object" && mapObj.bgData.data && typeof mapObj.bgData.data === "string"){
+      // formato {type, data}
+      const dataUrl = `data:${mapObj.bgData.type || "image/png"};base64,${mapObj.bgData.data}`;
+      loadImageFromSrc(mapObj, dataUrl);
+    } else if (typeof mapObj.bgData === "string"){
+      loadImageFromSrc(mapObj, mapObj.bgData);
+    } else {
+      // fallback: intentar convertir a string
+      try { loadImageFromSrc(mapObj, String(mapObj.bgData)); }
+      catch(e){ console.error("bgData no procesable:", e); draw(mapObj); }
+    }
   }
 
   maps.push(mapObj);
   addTab(mapObj);
   switchMap(mapObj);
   setupCanvasEvents(mapObj);
-
   draw(mapObj);
 
-  // 🚫 solo guardamos si es nuevo, no cuando viene del DB
   if(!fromDB) saveMap(mapObj);
 }
 
-
+/* ------------------ Pestañas, renombrar, borrar ------------------ */
 function addTab(mapObj){
   const tab=document.createElement("div");
   tab.className="tab";
   tab.draggable = true;
-  
   const nameSpan=document.createElement("span");
   nameSpan.textContent=mapObj.tabName;
   nameSpan.style.marginRight="5px";
@@ -216,7 +360,7 @@ function addTab(mapObj){
   renameBtn.textContent="✏️";
   renameBtn.style.marginLeft="5px";
   renameBtn.onclick=(e)=>{
-    e.stopPropagation(); // no cambiar de mapa al hacer clic
+    e.stopPropagation();
     renameMap(mapObj);
   };
 
@@ -228,15 +372,11 @@ function addTab(mapObj){
     deleteMap(mapObj);
   };
 
-  // Eventos de drag
-tab.addEventListener("dragstart", e=>{
-  e.dataTransfer.setData("text/plain", mapObj.id);
-  tab.classList.add("dragging");
-});
-
-tab.addEventListener("dragend", ()=>{
-  tab.classList.remove("dragging");
-});
+  tab.addEventListener("dragstart", e=>{
+    e.dataTransfer.setData("text/plain", mapObj.id);
+    tab.classList.add("dragging");
+  });
+  tab.addEventListener("dragend", ()=>{ tab.classList.remove("dragging"); });
 
   tab.appendChild(nameSpan);
   tab.appendChild(renameBtn);
@@ -258,29 +398,19 @@ function renameMap(mapObj){
 
 function deleteMap(mapObj){
   if(!confirm(`¿Seguro que quieres borrar "${mapObj.tabName}"?`)) return;
-
-  // quitar de la lista
   maps = maps.filter(m=>m.id!==mapObj.id);
-
-  // quitar de la interfaz
-  mapObj.canvas.remove();
-  mapObj.tab.remove();
-
-  // quitar de IndexedDB
-  const tx=db.transaction("maps","readwrite");
-  tx.objectStore("maps").delete(mapObj.id);
-
-  // si era el activo, activar otro (si existe)
+  try { mapObj.canvas.remove(); mapObj.tab.remove(); } catch(e){}
+  if(db){
+    const tx=db.transaction("maps","readwrite");
+    tx.objectStore("maps").delete(mapObj.id);
+  }
   if(activeMap===mapObj){
-    if(maps.length>0){
-      switchMap(maps[0]);
-    }else{
-      activeMap=null;
-      notesArea.value="";
-    }
+    if(maps.length>0) switchMap(maps[0]);
+    else { activeMap=null; notesArea.value=""; }
   }
 }
 
+/* ------------------ Switch, notes ------------------ */
 function switchMap(mapObj){
   maps.forEach(m=>{ m.canvas.style.display="none"; m.tab.classList.remove("active"); });
   mapObj.canvas.style.display="block";
@@ -288,11 +418,9 @@ function switchMap(mapObj){
   activeMap=mapObj;
   notesArea.value=activeMap.notes;
 }
+notesArea.oninput=()=>{ if(activeMap){ activeMap.notes=notesArea.value; saveMap(activeMap); } };
 
-notesArea.oninput=()=>{
-  if(activeMap){ activeMap.notes=notesArea.value; saveMap(activeMap); }
-}
-
+/* ------------------ Eventos canvas (zoom/drag/dblclick) ------------------ */
 function setupCanvasEvents(mapObj){
   const c=mapObj.canvas;
   c.addEventListener("wheel", e=>{
@@ -331,6 +459,7 @@ function setupCanvasEvents(mapObj){
   });
 }
 
+/* ------------------ Dibujado ------------------ */
 function draw(mapObj){
   const ctx=mapObj.ctx;
   ctx.setTransform(1,0,0,1,0,0);
@@ -345,22 +474,17 @@ function draw(mapObj){
   }
 }
 
-function saveMap(mapObj){
-  const tx=db.transaction("maps","readwrite");
-  const store=tx.objectStore("maps");
-  store.put({
-    id:mapObj.id,
-    tabName: mapObj.tabName,
-    zoom:mapObj.zoom,
-    offsetX:mapObj.offsetX,
-    offsetY:mapObj.offsetY,
-    bgData:mapObj.bgData,
-    notes:mapObj.notes,
-    order: mapObj.order ?? maps.indexOf(mapObj) // 👈
-  });
-}
-
+/* ------------------ Cargar desde DB ------------------ */
 function loadMapsFromDB(){
+  if(!db){
+    console.warn("loadMapsFromDB: IndexedDB no lista");
+    return;
+  }
+  // limpiar UI actual
+  maps.forEach(m => { try{ m.canvas.remove(); m.tab.remove(); }catch(_){} });
+  maps = [];
+  activeMap = null;
+
   const tx=db.transaction("maps","readonly");
   const store=tx.objectStore("maps");
   const loaded = [];
@@ -370,13 +494,12 @@ function loadMapsFromDB(){
       loaded.push(cursor.value);
       cursor.continue();
     }else{
-      // ordenamos por `order` (si no existe, lo ponemos al final)
       loaded.sort((a,b)=>(a.order ?? 9999) - (b.order ?? 9999));
+      console.log("Cargando desde DB:", loaded.length, "mapas");
       loaded.forEach(data=>createMap(data, true));
     }
   };
 }
-
 </script>
 </body>
 </html>
