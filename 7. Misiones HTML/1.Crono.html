@@ -6,28 +6,26 @@
   <title>1.Crono</title>
   <style>
     :root {
-      --bg: #412b0b; /* slate-900 */
-      --card: #0300cf; /* gray-900 */
-      --text: #e5e7eb; /* gray-200 */
-      --muted: #9ca3af; /* gray-400 */
-      --accent: #22c55e; /* green-500 */
-      --warning: #f59e0b; /* amber-500 */
-      --danger: #ef4444; /* red-500 */
+      --bg: #412b0b;
+      --card: #0300cf;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --accent: #22c55e;
+      --warning: #f59e0b;
+      --danger: #ef4444;
       --ring: rgba(34, 197, 94, .45);
     }
 
-    html, body {
-      height: 100%;
-    }
+    html, body { height: 100%; }
     body {
       margin: 0;
       display: grid;
       place-items: center;
       background: radial-gradient(1200px 800px at 50% 0%, #0b1222, var(--bg));
-      
       color: var(--text);
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica Neue, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica Neue, Arial;
     }
+
     .card {
       width: min(92vw, 560px);
       background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02)),
@@ -38,6 +36,7 @@
       padding: 28px 24px;
       backdrop-filter: blur(6px);
     }
+
     h1 {
       margin: 0 0 12px;
       font-size: 20px;
@@ -45,6 +44,7 @@
       color: var(--muted);
       letter-spacing: .02em;
     }
+
     .display {
       display: flex;
       align-items: baseline;
@@ -52,13 +52,15 @@
       gap: 12px;
       padding: 12px 0 18px;
     }
+
     .time {
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
       font-size: clamp(40px, 8vw, 80px);
       line-height: 1;
       letter-spacing: 0.04em;
       text-shadow: 0 1px 0 rgba(255,255,255,0.05), 0 6px 24px rgba(34,197,94,0.15);
     }
+
     .millis {
       font-size: clamp(18px, 3.5vw, 28px);
       color: var(--muted);
@@ -67,37 +69,56 @@
 
     .controls {
       display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
       gap: 12px;
       margin-top: 14px;
     }
 
-  button {
-  appearance: none;
-  border: none;
-  color: rgb(0, 0, 0);
-  padding: 8px 14px; /* más pequeño */
-  border-radius: 10px; /* menos redondeado que el pill gigante */
-  font-weight: 700;
-  font-size: 14px;
-  letter-spacing: .02em;
-  cursor: pointer;
-  transition: transform .06s ease, filter .2s ease;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
-}
+    button {
+      appearance: none;
+      border: none;
+      color: rgb(0, 0, 0);
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 14px;
+      letter-spacing: .02em;
+      cursor: pointer;
+      transition: transform .06s ease, filter .2s ease;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+    }
 
-button:hover { filter: brightness(1.1); }
-button:active { transform: translateY(1px) scale(0.97); }
+    button:hover { filter: brightness(1.1); }
+    button:active { transform: translateY(1px) scale(0.97); }
     button:focus-visible { outline: 0; box-shadow: 0 0 0 6px var(--ring); }
 
-    .start { border-color: rgba(34,197,94,.35); }
-    .pause { border-color: rgba(245,158,11,.35); }
-    .reset { border-color: rgba(239,68,68,.35); }
+    .start { background: var(--accent); }
+    .pause { background: var(--warning); }
+    .reset { background: var(--danger); }
+    .lap { background: var(--muted); color: black; }
 
     button[disabled] {
       opacity: .5;
       cursor: not-allowed;
       filter: none;
+    }
+
+    .laps {
+      margin-top: 20px;
+      font-size: 14px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .laps ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .laps li {
+      padding: 4px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
     }
 
     .hint {
@@ -110,8 +131,7 @@ button:active { transform: translateY(1px) scale(0.97); }
 </head>
 <body>
   <main class="card" aria-labelledby="title">
-    
-    <section class="display" aria-live="polite" aria-atomic="true">
+    <section class="display" role="timer" aria-live="polite" aria-atomic="true">
       <div class="time" id="hhmmss">00:00:00</div>
       <div class="millis" id="millis">.000</div>
     </section>
@@ -120,23 +140,32 @@ button:active { transform: translateY(1px) scale(0.97); }
       <button class="start" id="btnStart" type="button">Iniciar</button>
       <button class="pause" id="btnPause" type="button" disabled>Pausar</button>
       <button class="reset" id="btnReset" type="button" disabled>Resetear</button>
+      <button class="lap" id="btnLap" type="button" disabled>Vuelta</button>
     </section>
 
-    <p class="hint">Espacio: iniciar/pausar · R: resetear</p>
+    <section class="laps" id="laps">
+      <h2 style="font-size:14px; color:var(--muted); margin-bottom:6px;">Vueltas</h2>
+      <ul id="lapsList"></ul>
+    </section>
+
+    <p class="hint">Espacio: iniciar/pausar · R: resetear · L: vuelta</p>
   </main>
 
   <script>
     (function() {
-      let startTime = 0;      // referencia (performance.now()) al arrancar
-      let elapsed = 0;        // milisegundos acumulados cuando no está corriendo
-      let rafId = null;       // id de requestAnimationFrame
+      let startTime = 0;
+      let elapsed = 0;
+      let rafId = null;
       let running = false;
+      let laps = [];
 
       const $hhmmss = document.getElementById('hhmmss');
       const $millis = document.getElementById('millis');
       const $btnStart = document.getElementById('btnStart');
       const $btnPause = document.getElementById('btnPause');
       const $btnReset = document.getElementById('btnReset');
+      const $btnLap = document.getElementById('btnLap');
+      const $lapsList = document.getElementById('lapsList');
 
       function pad(n, len = 2) {
         return String(n).padStart(len, '0');
@@ -164,12 +193,26 @@ button:active { transform: translateY(1px) scale(0.97); }
         $btnStart.disabled = running;
         $btnPause.disabled = !running;
         $btnReset.disabled = running || elapsed === 0;
+        $btnLap.disabled = !running;
         $btnStart.textContent = running ? 'Iniciar' : (elapsed > 0 ? 'Reanudar' : 'Iniciar');
+        render(running ? performance.now() - startTime + elapsed : elapsed);
+        renderLaps();
+        saveState();
+      }
+
+      function renderLaps() {
+        $lapsList.innerHTML = '';
+        laps.forEach((lap, i) => {
+          const li = document.createElement('li');
+          const { hhmmss, millis } = format(lap);
+          li.textContent = `#${i+1} → ${hhmmss}${millis}`;
+          $lapsList.appendChild(li);
+        });
       }
 
       function tick() {
         const now = performance.now();
-        const ms = now - startTime + elapsed; // elapsed almacena tiempo congelado al pausar
+        const ms = now - startTime + elapsed;
         render(ms);
         rafId = requestAnimationFrame(tick);
       }
@@ -178,7 +221,7 @@ button:active { transform: translateY(1px) scale(0.97); }
         if (running) return;
         running = true;
         startTime = performance.now();
-        rafId = requestAnimationFrame(tick);
+        if (!rafId) rafId = requestAnimationFrame(tick);
         updateUI();
       }
 
@@ -187,7 +230,6 @@ button:active { transform: translateY(1px) scale(0.97); }
         running = false;
         cancelAnimationFrame(rafId);
         rafId = null;
-        // Acumula lo transcurrido desde el último start
         elapsed += performance.now() - startTime;
         updateUI();
       }
@@ -200,28 +242,58 @@ button:active { transform: translateY(1px) scale(0.97); }
         }
         startTime = 0;
         elapsed = 0;
+        laps = [];
         render(0);
         updateUI();
       }
+
+      function lap() {
+        if (!running) return;
+        const now = performance.now();
+        const ms = now - startTime + elapsed;
+        laps.push(ms);
+        updateUI();
+      }
+
+      function saveState() {
+        const state = { startTime, elapsed, running, laps };
+        localStorage.setItem('cronoState', JSON.stringify(state));
+      }
+
+      function loadState() {
+  const state = JSON.parse(localStorage.getItem('cronoState'));
+  if (!state) return;
+  ({ elapsed, running, laps } = state);
+
+  // aunque guarde running, al recargar siempre lo dejamos en pausa
+  running = false;
+  rafId = null;
+
+  render(elapsed);
+  updateUI();
+}
+
 
       // Eventos
       $btnStart.addEventListener('click', start);
       $btnPause.addEventListener('click', pause);
       $btnReset.addEventListener('click', reset);
+      $btnLap.addEventListener('click', lap);
 
-      // Atajos: espacio = start/pause, R = reset
       window.addEventListener('keydown', (e) => {
         if (e.key === ' ' || e.code === 'Space') {
           e.preventDefault();
           running ? pause() : start();
         } else if (e.key.toLowerCase() === 'r') {
           reset();
+        } else if (e.key.toLowerCase() === 'l') {
+          lap();
         }
       });
 
       // Estado inicial
       render(0);
-      updateUI();
+      loadState();
     })();
   </script>
 </body>
