@@ -1,3 +1,3 @@
 @echo off
-powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp010. Crono.ps1"
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp01. Crono.ps1"
 exit

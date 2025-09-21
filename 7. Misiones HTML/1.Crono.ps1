@@ -3,7 +3,7 @@ $chrome = "C:\Program Files\Google\Chrome\Application\chrome.exe"
 
 # Lista de ventanas (cada una con su perfil y archivo local)
 $ventanas = @(
-    @{ Profile = "C:\ChromeProfiles\Perfil10"; FilePath = "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\10. Crono.html" }
+    @{ Profile = "C:\ChromeProfiles\Perfil1"; FilePath = "C:\Users\monsi\Desktop\ROL\7. Misiones HTML\1. Crono.html" }
 )
 
 # --- ABRIR HTMLS EN CHROME ---
